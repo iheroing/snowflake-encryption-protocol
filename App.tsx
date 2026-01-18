@@ -17,6 +17,7 @@ enum View {
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.LANDING);
   const [message, setMessage] = useState<string>("");
+  const [ttl, setTtl] = useState<number>(60); // 时间限制
 
   return (
     <div className="relative w-full h-screen bg-background-dark overflow-hidden select-none">
@@ -32,8 +33,9 @@ const App: React.FC = () => {
 
       {currentView === View.ENCRYPT && (
         <EncryptView 
-          onCrystallized={(msg, encrypted, hasPassword) => {
+          onCrystallized={(msg, time) => {
             setMessage(msg);
+            setTtl(time);
             setCurrentView(View.DECRYPT);
           }}
           onBack={() => setCurrentView(View.LANDING)}
@@ -42,7 +44,8 @@ const App: React.FC = () => {
 
       {currentView === View.DECRYPT && (
         <DecryptView 
-          message={message} 
+          message={message}
+          ttl={ttl}
           onClose={() => setCurrentView(View.LANDING)}
           onExport={() => setCurrentView(View.AFTERGLOW)}
         />

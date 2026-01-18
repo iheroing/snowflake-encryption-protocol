@@ -4,12 +4,13 @@ import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 
 interface Props {
   message: string;
+  ttl: number; // 自定义时间（秒）
   onClose: () => void;
   onExport: () => void;
 }
 
-const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
-  const [timeLeft, setTimeLeft] = useState(60);
+const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
+  const [timeLeft, setTimeLeft] = useState(ttl);
   const [rotation, setRotation] = useState(0);
   const [isMelting, setIsMelting] = useState(false);
   const snowflakeRef = useRef<HTMLDivElement>(null);
@@ -198,8 +199,8 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-red-400 text-3xl animate-pulse">warning</span>
           <div className="flex-1">
-            <h3 className="text-red-400 font-bold text-lg mb-1">随风而逝</h3>
-            <p className="text-white/60 text-sm">这片雪花将在 {timeLeft} 秒后融化消散，心语将随风而逝。请及时保存这一刻的美好。</p>
+            <h3 className="text-red-400 font-bold text-lg mb-1">⚠️ 阅后即焚</h3>
+            <p className="text-white/60 text-sm">这片雪花将在 <span className="text-red-400 font-bold">{timeLeft}</span> 秒后融化消散，心语将随风而逝，永不复现。</p>
           </div>
         </div>
       </div>
@@ -248,7 +249,7 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
             <div className="w-full h-1 bg-white/10 mt-6 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-primary to-aurora-purple transition-all duration-1000"
-                style={{ width: `${(timeLeft / 60) * 100}%` }}
+                style={{ width: `${(timeLeft / ttl) * 100}%` }}
               ></div>
             </div>
             <span className="mt-4 text-[9px] tracking-widest text-primary/30 group-hover:text-primary transition-colors uppercase">Capture Afterglow</span>

@@ -1,11 +1,8 @@
-
 import React, { useState } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
-import { saveSnowflake } from '../utils/storage';
-import { encrypt } from '../utils/encryption';
 
 interface Props {
-  onCrystallized: (msg: string, encrypted?: string, hasPassword?: boolean) => void;
+  onCrystallized: (msg: string, ttl: number) => void;
   onBack: () => void;
 }
 
@@ -13,45 +10,17 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   const [text, setText] = useState("");
   const [essence, setEssence] = useState<'aurora' | 'stardust'>('aurora');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [usePassword, setUsePassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [ttl, setTtl] = useState(60); // 默认60秒
 
   const handleCrystallize = async () => {
     if (!text.trim()) return;
     
-    // 如果使用密码，验证密码
-    if (usePassword) {
-      if (!password) {
-        alert('请输入密码');
-        return;
-      }
-      if (password !== confirmPassword) {
-        alert('两次输入的密码不一致');
-        return;
-      }
-      if (password.length < 6) {
-        alert('密码长度至少为 6 位');
-        return;
-      }
-    }
-    
     setIsGenerating(true);
     
     try {
-      let encryptedMessage: string | undefined;
-      
-      // 如果使用密码，加密消息
-      if (usePassword && password) {
-        encryptedMessage = await encrypt(text.trim(), password);
-      }
-      
-      // 保存到本地存储
-      saveSnowflake(text.trim(), essence, encryptedMessage, usePassword);
-      
       // 模拟生成过程
       setTimeout(() => {
-        onCrystallized(text, encryptedMessage, usePassword);
+        onCrystallized(text, ttl);
       }, 1500);
     } catch (error) {
       console.error('Crystallization failed:', error);
@@ -109,56 +78,49 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         </div>
 
-        {/* 密码保护选项 */}
-        <div className="mt-8 w-full max-w-md">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <button
-              onClick={() => setUsePassword(!usePassword)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                usePassword 
-                  ? 'bg-primary/20 border-primary/40 text-primary' 
-                  : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
-              }`}
-            >
-              <span className="material-symbols-outlined text-lg">
-                {usePassword ? 'lock' : 'lock_open'}
-              </span>
-              <span className="text-xs font-medium">密码保护</span>
-            </button>
+        {/* 时间选择器 */}
+        <div className="mt-8 w-full max-w-2xl">
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-[10px] tracking-widest text-white/30 uppercase flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">schedule</span>
+              Time Limit
+            </span>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {[
+                { label: '30秒', value: 30 },
+                { label: '60秒', value: 60 },
+                { label: '5分钟', value: 300 },
+                { label: '10分钟', value: 600 },
+                { label: '30分钟', value: 1800 },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setTtl(option.value)}
+                  className={`px-6 py-3 rounded-xl text-sm font-medium transition-all ${
+                    ttl === option.value
+                      ? 'bg-red-500/20 border-2 border-red-500/60 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                      : 'bg-white/5 border border-white/10 text-white/50 hover:text-white/80 hover:border-white/30'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
+        </div>
 
-          {usePassword && (
-            <div className="space-y-3 animate-[fadeIn_0.3s_ease-in-out]">
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="设置密码（至少6位）"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30 text-lg">
-                  key
-                </span>
-              </div>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="确认密码"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30 text-lg">
-                  check_circle
-                </span>
-              </div>
-              <p className="text-xs text-white/40 text-center">
-                <span className="material-symbols-outlined text-xs align-middle mr-1">info</span>
-                使用 AES-256 加密，密码不会被保存
+        {/* 阅后即焚警告 */}
+        <div className="mt-8 w-full max-w-2xl bg-red-500/10 border border-red-500/30 rounded-2xl p-6 backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <span className="material-symbols-outlined text-red-400 text-2xl animate-pulse">warning</span>
+            <div className="flex-1">
+              <h3 className="text-red-400 font-bold text-base mb-2">⚠️ 阅后即焚</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                时间到期后，雪花将自动融化消散，心语将永远消失。<br/>
+                <span className="text-red-400/80">不会保存到画廊，请珍惜这短暂的美好时光。</span>
               </p>
             </div>
-          )}
+          </div>
         </div>
 
         <button 
