@@ -124,9 +124,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   };
 
   return (
-    <>
+    <div className="relative h-full w-full">
       {/* 滚动内容区域 */}
-      <div className="relative z-10 h-full w-full overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-32">
+      <div className="absolute inset-0 z-10 overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-32">
         <header className="sticky top-0 z-50 flex items-center justify-between px-12 py-8 bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
@@ -305,38 +305,50 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       )}
       </div>
 
-      {/* Floating HUD - 固定在视口底部 */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-background-dark/60 backdrop-blur-xl border border-white/10 p-2 rounded-2xl">
+      {/* Floating HUD - 绝对定位在父容器底部 */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 bg-background-dark/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl">
         <div className="flex gap-1 border-r border-white/10 pr-2">
           <button 
             title="刷新画廊"
             onClick={loadRecords}
-            className="p-3 hover:text-primary transition-colors rounded-xl"
+            className="group relative p-3 hover:text-primary transition-colors rounded-xl"
           >
             <span className="material-symbols-outlined text-[20px]">refresh</span>
+            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              刷新
+            </span>
           </button>
           <button 
             title="搜索心语"
             onClick={() => setShowSearch(!showSearch)}
-            className={`p-3 transition-colors rounded-xl ${showSearch ? 'text-primary' : 'hover:text-primary'}`}
+            className={`group relative p-3 transition-colors rounded-xl ${showSearch ? 'text-primary' : 'hover:text-primary'}`}
           >
             <span className="material-symbols-outlined text-[20px]">search</span>
+            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              搜索
+            </span>
           </button>
           <button 
             title={sortBy === 'newest' ? '最新优先' : '最旧优先'}
             onClick={() => setSortBy(sortBy === 'newest' ? 'oldest' : 'newest')}
-            className="p-3 hover:text-primary transition-colors rounded-xl"
+            className="group relative p-3 hover:text-primary transition-colors rounded-xl"
           >
             <span className="material-symbols-outlined text-[20px]">
               {sortBy === 'newest' ? 'arrow_downward' : 'arrow_upward'}
+            </span>
+            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              {sortBy === 'newest' ? '最新优先' : '最旧优先'}
             </span>
           </button>
           <button 
             title="加载预设心语"
             onClick={handleLoadPresets}
-            className="p-3 hover:text-primary transition-colors rounded-xl"
+            className="group relative p-3 hover:text-primary transition-colors rounded-xl"
           >
             <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
+            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              加载预设
+            </span>
           </button>
         </div>
         <button onClick={onExit} className="bg-primary text-background-dark font-bold py-3 px-8 rounded-xl flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all">
@@ -345,9 +357,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
         </button>
       </div>
 
-      {/* 搜索框 - 固定在视口底部 */}
+      {/* 搜索框 - 绝对定位在父容器底部 */}
       {showSearch && (
-        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
           <div className="relative">
             <input
               type="text"
@@ -448,7 +460,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
