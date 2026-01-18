@@ -15,6 +15,9 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
   const [isMelting, setIsMelting] = useState(false);
   const snowflakeRef = useRef<HTMLDivElement>(null);
   
+  // 是否永久保存
+  const isPermanent = ttl === -1;
+  
   // 生成独特的雪花
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 800), [message]);
   
@@ -156,6 +159,8 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
   };
 
   useEffect(() => {
+    if (isPermanent) return; // 永久保存不需要倒计时
+    
     if (timeLeft <= 0) {
       setIsMelting(true);
       setTimeout(() => onClose(), 2000);
@@ -163,7 +168,7 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
     }
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, onClose]);
+  }, [timeLeft, onClose, isPermanent]);
 
   // 雪花旋转动画
   useEffect(() => {
@@ -195,15 +200,30 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
       </header>
 
       {/* 阅后即焚警告 */}
-      <div className="w-full max-w-2xl mb-8 bg-red-500/10 border border-red-500/30 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-red-400 text-3xl animate-pulse">warning</span>
-          <div className="flex-1">
-            <h3 className="text-red-400 font-bold text-lg mb-1">⚠️ 阅后即焚</h3>
-            <p className="text-white/60 text-sm">这片雪花将在 <span className="text-red-400 font-bold">{timeLeft}</span> 秒后融化消散，心语将随风而逝，永不复现。</p>
+      {!isPermanent && (
+        <div className="w-full max-w-2xl mb-8 bg-red-500/10 border border-red-500/30 rounded-2xl p-6 backdrop-blur-sm">
+          <div className="flex items-center gap-4">
+            <span className="material-symbols-outlined text-red-400 text-3xl animate-pulse">warning</span>
+            <div className="flex-1">
+              <h3 className="text-red-400 font-bold text-lg mb-1">⚠️ 阅后即焚</h3>
+              <p className="text-white/60 text-sm">这片雪花将在 <span className="text-red-400 font-bold">{timeLeft}</span> 秒后融化消散，心语将随风而逝，永不复现。</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* 永久保存提示 */}
+      {isPermanent && (
+        <div className="w-full max-w-2xl mb-8 bg-green-500/10 border border-green-500/30 rounded-2xl p-6 backdrop-blur-sm">
+          <div className="flex items-center gap-4">
+            <span className="material-symbols-outlined text-green-400 text-3xl">bookmark</span>
+            <div className="flex-1">
+              <h3 className="text-green-400 font-bold text-lg mb-1">💚 永久保存</h3>
+              <p className="text-white/60 text-sm">这片雪花已保存到画廊，你可以随时在画廊中查看和管理。</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Fractal Display */}
       <div ref={snowflakeRef} className="relative flex flex-col items-center justify-center text-center max-w-4xl w-full mb-8">
@@ -239,22 +259,38 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
       {/* Footer Interface */}
       <div className="flex flex-col items-center gap-8 w-full max-w-4xl">
         {/* 倒计时 */}
-        <div className="relative group cursor-pointer" onClick={onExport}>
-          <div className="flex flex-col items-center justify-center gap-1 px-14 py-8 bg-background-dark/40 backdrop-blur-2xl rounded-2xl border border-primary/20 crystal-glow group-hover:border-primary/50 transition-colors">
-            <span className="text-[10px] tracking-widest font-bold text-primary/60 uppercase">Melting in</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-5xl font-bold text-white tabular-nums tracking-tighter">{timeLeft}</span>
-              <span className="text-lg font-medium text-primary/80">s</span>
+        {!isPermanent && (
+          <div className="relative group cursor-pointer" onClick={onExport}>
+            <div className="flex flex-col items-center justify-center gap-1 px-14 py-8 bg-background-dark/40 backdrop-blur-2xl rounded-2xl border border-primary/20 crystal-glow group-hover:border-primary/50 transition-colors">
+              <span className="text-[10px] tracking-widest font-bold text-primary/60 uppercase">Melting in</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-5xl font-bold text-white tabular-nums tracking-tighter">{timeLeft}</span>
+                <span className="text-lg font-medium text-primary/80">s</span>
+              </div>
+              <div className="w-full h-1 bg-white/10 mt-6 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-aurora-purple transition-all duration-1000"
+                  style={{ width: `${(timeLeft / ttl) * 100}%` }}
+                ></div>
+              </div>
+              <span className="mt-4 text-[9px] tracking-widest text-primary/30 group-hover:text-primary transition-colors uppercase">Capture Afterglow</span>
             </div>
-            <div className="w-full h-1 bg-white/10 mt-6 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-primary to-aurora-purple transition-all duration-1000"
-                style={{ width: `${(timeLeft / ttl) * 100}%` }}
-              ></div>
-            </div>
-            <span className="mt-4 text-[9px] tracking-widest text-primary/30 group-hover:text-primary transition-colors uppercase">Capture Afterglow</span>
           </div>
-        </div>
+        )}
+
+        {/* 永久保存提示 */}
+        {isPermanent && (
+          <div className="relative">
+            <div className="flex flex-col items-center justify-center gap-1 px-14 py-8 bg-background-dark/40 backdrop-blur-2xl rounded-2xl border border-green-500/20 shadow-[0_0_50px_10px_rgba(34,197,94,0.15)]">
+              <span className="text-[10px] tracking-widest font-bold text-green-400/60 uppercase">Permanently Saved</span>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="material-symbols-outlined text-green-400 text-4xl">bookmark</span>
+                <span className="text-2xl font-bold text-green-400">画廊</span>
+              </div>
+              <span className="mt-4 text-[9px] tracking-widest text-green-400/50 uppercase">Saved to Gallery</span>
+            </div>
+          </div>
+        )}
 
         {/* 操作按钮 */}
         <div className="flex flex-wrap gap-4 justify-center">

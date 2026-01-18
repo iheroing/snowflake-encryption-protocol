@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { saveSnowflake } from '../utils/storage';
 
 interface Props {
   onCrystallized: (msg: string, ttl: number) => void;
@@ -18,6 +19,11 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
     setIsGenerating(true);
     
     try {
+      // 如果选择永久，保存到画廊
+      if (ttl === -1) {
+        saveSnowflake(text.trim(), essence);
+      }
+      
       // 模拟生成过程
       setTimeout(() => {
         onCrystallized(text, ttl);
@@ -92,13 +98,16 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
                 { label: '5分钟', value: 300 },
                 { label: '10分钟', value: 600 },
                 { label: '30分钟', value: 1800 },
+                { label: '永久', value: -1 },
               ].map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setTtl(option.value)}
                   className={`px-6 py-3 rounded-xl text-sm font-medium transition-all ${
                     ttl === option.value
-                      ? 'bg-red-500/20 border-2 border-red-500/60 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                      ? option.value === -1
+                        ? 'bg-green-500/20 border-2 border-green-500/60 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                        : 'bg-red-500/20 border-2 border-red-500/60 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
                       : 'bg-white/5 border border-white/10 text-white/50 hover:text-white/80 hover:border-white/30'
                   }`}
                 >
@@ -110,15 +119,35 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         {/* 阅后即焚警告 */}
-        <div className="mt-8 w-full max-w-2xl bg-red-500/10 border border-red-500/30 rounded-2xl p-6 backdrop-blur-sm">
+        <div className={`mt-8 w-full max-w-2xl rounded-2xl p-6 backdrop-blur-sm ${
+          ttl === -1 
+            ? 'bg-green-500/10 border border-green-500/30'
+            : 'bg-red-500/10 border border-red-500/30'
+        }`}>
           <div className="flex items-start gap-4">
-            <span className="material-symbols-outlined text-red-400 text-2xl animate-pulse">warning</span>
+            <span className={`material-symbols-outlined text-2xl animate-pulse ${
+              ttl === -1 ? 'text-green-400' : 'text-red-400'
+            }`}>
+              {ttl === -1 ? 'bookmark' : 'warning'}
+            </span>
             <div className="flex-1">
-              <h3 className="text-red-400 font-bold text-base mb-2">⚠️ 阅后即焚</h3>
-              <p className="text-white/60 text-sm leading-relaxed">
-                时间到期后，雪花将自动融化消散，心语将永远消失。<br/>
-                <span className="text-red-400/80">不会保存到画廊，请珍惜这短暂的美好时光。</span>
-              </p>
+              {ttl === -1 ? (
+                <>
+                  <h3 className="text-green-400 font-bold text-base mb-2">💚 永久保存</h3>
+                  <p className="text-white/60 text-sm leading-relaxed">
+                    这片雪花将永久保存到画廊，你可以随时查看。<br/>
+                    <span className="text-green-400/80">适合珍贵的回忆和重要的心语。</span>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-red-400 font-bold text-base mb-2">⚠️ 阅后即焚</h3>
+                  <p className="text-white/60 text-sm leading-relaxed">
+                    时间到期后，雪花将自动融化消散，心语将永远消失。<br/>
+                    <span className="text-red-400/80">不会保存到画廊，请珍惜这短暂的美好时光。</span>
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
