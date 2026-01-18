@@ -8,7 +8,7 @@ interface Props {
 
 const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
   return (
-    <main className="relative z-10 h-full w-full flex flex-col items-center justify-center text-center px-6">
+    <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center text-center px-6">
       {/* Top Header */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 opacity-30 tracking-[0.3em] text-[10px] font-light uppercase">
         Snowflake Whisper

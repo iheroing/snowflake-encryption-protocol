@@ -30,7 +30,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   };
 
   return (
-    <main className="relative z-10 h-full w-full flex flex-col items-center justify-center px-6 py-20">
+    <main className="relative z-10 min-h-full w-full flex flex-col items-center justify-start px-6 py-20 overflow-y-auto">
       <header className="fixed top-0 w-full flex items-center justify-between px-12 py-8">
         <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>

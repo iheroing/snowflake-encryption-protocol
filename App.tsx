@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [ttl, setTtl] = useState<number>(60); // 时间限制
 
   return (
-    <div className="relative w-full h-screen bg-background-dark overflow-hidden select-none">
+    <div className="relative w-full min-h-screen bg-background-dark select-none">
       {/* Dynamic Background */}
       <div className="fixed inset-0 stardust-bg opacity-30 pointer-events-none z-0"></div>
       
