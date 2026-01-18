@@ -1,0 +1,7 @@
+{
+  "name": "Snowflake Encryption Protocol",
+  "description": "A high-end, ephemeral messaging and cryptographic visualization app inspired by the aesthetic of delicate crystal fractals and quantum-secure communication.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
