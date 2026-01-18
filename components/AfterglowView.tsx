@@ -15,16 +15,165 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 1200), [message]);
   
   const handleExport = async () => {
-    if (!canvasRef.current) return;
-    
     try {
-      // 使用html2canvas或直接下载SVG
-      const link = document.createElement('a');
-      link.download = `snowflake-${Date.now()}.svg`;
-      link.href = snowflakeURL;
-      link.click();
+      // 创建一个高分辨率的canvas
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      // 根据选择的画布类型设置尺寸
+      let width, height;
+      switch (selectedCanvas) {
+        case 'postcard':
+          width = 1600;
+          height = 1000;
+          break;
+        case 'desktop':
+          width = 2560;
+          height = 1440;
+          break;
+        case 'mobile':
+          width = 1080;
+          height = 1920;
+          break;
+        default:
+          width = 1600;
+          height = 1000;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // 绘制深色背景
+      const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/2);
+      gradient.addColorStop(0, '#0a0d15');
+      gradient.addColorStop(1, '#050608');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      
+      // 添加星尘背景效果
+      ctx.save();
+      ctx.globalAlpha = 0.05;
+      for (let i = 0; i < 100; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const size = Math.random() * 2;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      
+      // 添加光晕效果
+      ctx.save();
+      ctx.globalAlpha = 0.1;
+      const glowGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width * 0.4);
+      glowGradient.addColorStop(0, '#38dafa');
+      glowGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGradient;
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+      
+      // 加载并绘制雪花
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = snowflakeURL;
+      
+      img.onload = () => {
+        // 计算雪花大小和位置
+        const snowflakeSize = Math.min(width, height) * 0.5;
+        const snowflakeX = (width - snowflakeSize) / 2;
+        const snowflakeY = selectedCanvas === 'mobile' 
+          ? height * 0.25 
+          : (height - snowflakeSize) / 2 - 80;
+        
+        // 绘制雪花
+        ctx.drawImage(img, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
+        
+        // 绘制文字
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // 主文字
+        const textY = selectedCanvas === 'mobile'
+          ? snowflakeY + snowflakeSize + 150
+          : snowflakeY + snowflakeSize + 100;
+        
+        ctx.fillStyle = '#D1DCE3';
+        ctx.font = `italic 600 ${width * 0.035}px "Playfair Display", serif`;
+        ctx.shadowColor = 'rgba(56, 218, 250, 0.6)';
+        ctx.shadowBlur = 20;
+        
+        // 处理长文本换行
+        const maxWidth = width * 0.7;
+        const words = message.split('');
+        let line = '';
+        let y = textY;
+        const lineHeight = width * 0.05;
+        
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line + words[i];
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth && i > 0) {
+            ctx.fillText(line, width / 2, y);
+            line = words[i];
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, width / 2, y);
+        
+        // 重置阴影
+        ctx.shadowBlur = 0;
+        
+        // 添加顶部标题
+        ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
+        ctx.font = `300 ${width * 0.012}px "Space Grotesk", sans-serif`;
+        ctx.fillText('SNOWFLAKE WHISPER', width / 2, height * 0.05);
+        
+        // 添加底部时间戳
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.font = `300 ${width * 0.01}px "Space Grotesk", sans-serif`;
+        const timestamp = new Date().toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        ctx.fillText(`Captured at ${timestamp}`, width / 2, height * 0.95);
+        
+        // 添加底部装饰文字
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.font = `300 ${width * 0.008}px "Space Grotesk", sans-serif`;
+        ctx.fillText('FRACTAL ENGINE ONLINE', width * 0.2, height * 0.97);
+        ctx.fillText(`Render: ${width} x ${height}`, width * 0.8, height * 0.97);
+        
+        // 导出为 PNG
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const canvasType = selectedCanvas === 'postcard' ? 'postcard' : 
+                              selectedCanvas === 'desktop' ? 'wallpaper' : 'lockscreen';
+            link.download = `snowflake-whisper-${canvasType}-${Date.now()}.png`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+          }
+        }, 'image/png', 1.0);
+      };
+      
+      img.onerror = () => {
+        console.error('Failed to load snowflake image');
+        alert('导出失败，请重试');
+      };
     } catch (error) {
       console.error('Export failed:', error);
+      alert('导出失败，请重试');
     }
   };
 
@@ -42,7 +191,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
           <div className="h-4 w-px bg-white/10"></div>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-primary">ac_unit</span>
-            <h2 className="font-serif italic text-lg tracking-tight">雪花加密</h2>
+            <h2 className="font-serif italic text-lg tracking-tight">雪花密语</h2>
           </div>
         </div>
         <button onClick={onExit} className="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
@@ -75,16 +224,16 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         <aside className="w-[420px] h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col gap-10">
           <div>
             <h1 className="font-serif text-3xl font-bold mb-3">余晖</h1>
-            <p className="text-white/40 text-sm leading-relaxed">保存易逝之美。将你的加密秘密转化为永久的数字艺术品。</p>
+            <p className="text-white/40 text-sm leading-relaxed">将这一刻的美好，凝结成永恒的艺术品。</p>
           </div>
 
           <div className="space-y-4">
             <h3 className="text-[10px] font-bold tracking-widest text-white/40 uppercase">Canvas Selection</h3>
             <div className="flex flex-col gap-3">
               {[
-                { id: 'postcard', label: '极简明信片', icon: 'drafts' },
-                { id: 'desktop', label: '桌面壁纸', icon: 'desktop_windows' },
-                { id: 'mobile', label: '手机锁屏', icon: 'smartphone' }
+                { id: 'postcard', label: '明信片 (1600×1000)', icon: 'drafts' },
+                { id: 'desktop', label: '桌面壁纸 (2560×1440)', icon: 'desktop_windows' },
+                { id: 'mobile', label: '手机壁纸 (1080×1920)', icon: 'smartphone' }
               ].map(opt => (
                 <div 
                   key={opt.id}
@@ -104,7 +253,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
                 <span className="material-symbols-outlined">download</span>
                 导出艺术品
              </button>
-             <p className="text-[10px] text-center text-white/30 tracking-widest uppercase">High-Resolution SVG</p>
+             <p className="text-[10px] text-center text-white/30 tracking-widest uppercase">High-Resolution PNG</p>
           </div>
         </aside>
       </main>
