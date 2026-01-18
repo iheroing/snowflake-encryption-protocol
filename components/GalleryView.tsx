@@ -25,7 +25,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   }, []);
 
   const loadRecords = () => {
+    console.log('[Gallery] Loading records...');
     const loadedRecords = getSnowflakes();
+    console.log('[Gallery] Loaded records:', loadedRecords.length);
     setRecords(loadedRecords);
   };
 

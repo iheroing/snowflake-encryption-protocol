@@ -124,14 +124,18 @@ export function saveSnowflake(
 // 获取所有雪花记录
 export function getSnowflakes(): SnowflakeRecord[] {
   try {
+    console.log('[Storage] Getting snowflakes...');
     const data = localStorage.getItem(STORAGE_KEY);
     const records: SnowflakeRecord[] = data ? JSON.parse(data) : [];
+    console.log('[Storage] Current records:', records.length);
     
     // 检查是否有预设（通过 ID 前缀判断）
     const hasPresets = records.some(r => r.id.startsWith('preset_'));
+    console.log('[Storage] Has presets:', hasPresets);
     
     // 如果没有预设，自动加载
     if (!hasPresets && PRESET_WHISPERS.length > 0) {
+      console.log('[Storage] Loading presets...', PRESET_WHISPERS.length);
       const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000);
       const presetRecords: SnowflakeRecord[] = PRESET_WHISPERS.map((preset, index) => ({
         id: `preset_${index}_${Date.now()}`,
@@ -144,12 +148,14 @@ export function getSnowflakes(): SnowflakeRecord[] {
       // 合并预设和现有记录
       const allRecords = [...presetRecords, ...records];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+      console.log('[Storage] Presets loaded! Total records:', allRecords.length);
       return allRecords;
     }
     
+    console.log('[Storage] Returning existing records:', records.length);
     return records;
   } catch (error) {
-    console.error('Failed to load snowflakes:', error);
+    console.error('[Storage] Failed to load snowflakes:', error);
     return [];
   }
 }
