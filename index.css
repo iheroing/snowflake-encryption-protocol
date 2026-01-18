@@ -10,10 +10,9 @@ body {
   font-family: 'Space Grotesk', sans-serif;
   background: #090B11;
   color: white;
-  overflow: hidden;
 }
 
 #root {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh;
 }
