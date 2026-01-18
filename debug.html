@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雪花密语 - 调试工具</title>
+  <style>
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: #0a0d15;
+      color: white;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #38dafa;
+    }
+    button {
+      background: #38dafa;
+      color: #0a0d15;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 0.5rem;
+    }
+    button:hover {
+      opacity: 0.8;
+    }
+    .info {
+      background: rgba(56, 218, 250, 0.1);
+      border: 1px solid rgba(56, 218, 250, 0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+    }
+    .success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #22c55e;
+    }
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+    pre {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>❄️ 雪花密语 - 调试工具</h1>
+  
+  <div class="info">
+    <h3>当前状态</h3>
+    <p>画廊记录数量: <strong id="count">0</strong></p>
+    <p>预设状态: <strong id="preset-status">未检查</strong></p>
+  </div>
+
+  <div>
+    <button onclick="checkStorage()">🔍 检查存储</button>
+    <button onclick="clearStorage()">🗑️ 清空存储</button>
+    <button onclick="loadPresets()">✨ 加载预设</button>
+    <button onclick="window.location.href='/'">🏠 返回首页</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    const STORAGE_KEY = 'snowflake_whispers';
+
+    function checkStorage() {
+      const output = document.getElementById('output');
+      const data = localStorage.getItem(STORAGE_KEY);
+      
+      if (!data) {
+        output.innerHTML = '<div class="info error"><h3>❌ 存储为空</h3><p>localStorage 中没有数据</p></div>';
+        updateStatus(0, '无预设');
+        return;
+      }
+
+      try {
+        const records = JSON.parse(data);
+        const presetCount = records.filter(r => r.id.startsWith('preset_')).length;
+        const userCount = records.length - presetCount;
+        
+        output.innerHTML = `
+          <div class="info success">
+            <h3>✅ 存储状态</h3>
+            <p>总记录数: ${records.length}</p>
+            <p>预设数量: ${presetCount}</p>
+            <p>用户创建: ${userCount}</p>
+          </div>
+          <div class="info">
+            <h3>📝 数据详情</h3>
+            <pre>${JSON.stringify(records, null, 2)}</pre>
+          </div>
+        `;
+        
+        updateStatus(records.length, presetCount > 0 ? '已加载' : '未加载');
+      } catch (error) {
+        output.innerHTML = `<div class="info error"><h3>❌ 解析错误</h3><p>${error.message}</p></div>`;
+      }
+    }
+
+    function clearStorage() {
+      if (confirm('确定要清空所有存储吗？这将删除所有雪花记录（包括预设）。')) {
+        localStorage.removeItem(STORAGE_KEY);
+        document.getElementById('output').innerHTML = '<div class="info success"><h3>✅ 已清空</h3><p>localStorage 已清空，刷新页面后预设会自动加载。</p></div>';
+        updateStatus(0, '已清空');
+      }
+    }
+
+    function loadPresets() {
+      const PRESET_WHISPERS = [
+        { message: '在我们第一次看到星星的地方见面', essence: 'aurora' },
+        { message: 'Meet me where we first saw the stars', essence: 'stardust' },
+        { message: '时间冻结的瞬间，像掌心的雪花', essence: 'aurora' },
+        // ... 这里可以添加更多预设
+      ];
+
+      const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000);
+      const presetRecords = PRESET_WHISPERS.map((preset, index) => ({
+        id: `preset_${index}_${Date.now()}`,
+        message: preset.message,
+        hasPassword: false,
+        timestamp: baseTimestamp + (index * 3600000),
+        essence: preset.essence
+      }));
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(presetRecords));
+      
+      document.getElementById('output').innerHTML = `
+        <div class="info success">
+          <h3>✅ 预设已加载</h3>
+          <p>成功加载 ${presetRecords.length} 条预设心语</p>
+          <p>请返回首页查看画廊</p>
+        </div>
+      `;
+      
+      updateStatus(presetRecords.length, '已加载');
+    }
+
+    function updateStatus(count, presetStatus) {
+      document.getElementById('count').textContent = count;
+      document.getElementById('preset-status').textContent = presetStatus;
+    }
+
+    // 页面加载时自动检查
+    window.onload = checkStorage;
+  </script>
+</body>
+</html>
