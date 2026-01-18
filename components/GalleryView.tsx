@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
-import { getSnowflakes, type SnowflakeRecord } from '../utils/storage';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getSnowflakes, type SnowflakeRecord, deleteSnowflake } from '../utils/storage';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { decrypt } from '../utils/encryption';
 
 interface Props {
   onExit: () => void;
@@ -11,15 +12,82 @@ interface Props {
 const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   const [records, setRecords] = useState<SnowflakeRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<SnowflakeRecord | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [password, setPassword] = useState("");
+  const [decryptError, setDecryptError] = useState("");
 
   useEffect(() => {
     // 加载历史记录
-    const loadedRecords = getSnowflakes();
-    setRecords(loadedRecords);
+    loadRecords();
   }, []);
 
+  const loadRecords = () => {
+    const loadedRecords = getSnowflakes();
+    setRecords(loadedRecords);
+  };
+
+  // 过滤和排序记录
+  const filteredRecords = useMemo(() => {
+    let filtered = [...records];
+    
+    // 搜索过滤
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(record => 
+        record.message.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // 排序
+    if (sortBy === 'oldest') {
+      filtered.reverse();
+    }
+    
+    return filtered;
+  }, [records, searchQuery, sortBy]);
+
   const handleViewSnowflake = (record: SnowflakeRecord) => {
-    setSelectedRecord(record);
+    if (record.hasPassword && record.encryptedMessage) {
+      // 需要密码
+      setSelectedRecord(record);
+      setShowPasswordPrompt(true);
+      setPassword("");
+      setDecryptError("");
+    } else {
+      // 直接查看
+      setSelectedRecord(record);
+    }
+  };
+
+  const handleDecrypt = async () => {
+    if (!selectedRecord || !selectedRecord.encryptedMessage) return;
+    
+    try {
+      const decryptedMessage = await decrypt(selectedRecord.encryptedMessage, password);
+      // 解密成功，更新显示的消息
+      setSelectedRecord({
+        ...selectedRecord,
+        message: decryptedMessage
+      });
+      setShowPasswordPrompt(false);
+      setPassword("");
+      setDecryptError("");
+    } catch (error) {
+      setDecryptError("密码错误，请重试");
+    }
+  };
+
+  const handleDeleteSnowflake = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('确定要永久销毁这片雪花吗？此操作不可恢复。')) {
+      deleteSnowflake(id);
+      loadRecords();
+      if (selectedRecord?.id === id) {
+        setSelectedRecord(null);
+      }
+    }
   };
 
   const handleCloseModal = () => {
@@ -94,7 +162,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {records.map((record) => (
+            {filteredRecords.map((record) => (
               <div 
                 key={record.id} 
                 onClick={() => handleViewSnowflake(record)}
@@ -116,9 +184,23 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] tracking-widest uppercase">
                       {formatRelativeTime(record.timestamp)}
                     </span>
-                    <span className="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors">
-                      visibility
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {record.hasPassword && (
+                        <span className="material-symbols-outlined text-primary/60 text-sm" title="密码保护">
+                          lock
+                        </span>
+                      )}
+                      <button
+                        onClick={(e) => handleDeleteSnowflake(record.id, e)}
+                        className="material-symbols-outlined text-red-400/40 hover:text-red-400 transition-colors text-sm"
+                        title="销毁"
+                      >
+                        delete
+                      </button>
+                      <span className="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors">
+                        visibility
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <h4 className="font-serif text-2xl mb-4 italic leading-snug text-white/90 line-clamp-3">
@@ -151,7 +233,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       </main>
 
       {/* 雪花查看模态框 */}
-      {selectedRecord && (
+      {selectedRecord && !showPasswordPrompt && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           onClick={handleCloseModal}
@@ -207,15 +289,139 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       {/* Floating HUD */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-background-dark/60 backdrop-blur-xl border border-white/10 p-2 rounded-2xl">
         <div className="flex gap-1 border-r border-white/10 pr-2">
-          <button className="p-3 hover:text-primary transition-colors rounded-xl"><span className="material-symbols-outlined text-[20px]">orbit</span></button>
-          <button className="p-3 hover:text-primary transition-colors rounded-xl"><span className="material-symbols-outlined text-[20px]">near_me</span></button>
-          <button className="p-3 hover:text-primary transition-colors rounded-xl"><span className="material-symbols-outlined text-[20px]">zoom_in</span></button>
+          <button 
+            title="刷新画廊"
+            onClick={loadRecords}
+            className="p-3 hover:text-primary transition-colors rounded-xl"
+          >
+            <span className="material-symbols-outlined text-[20px]">refresh</span>
+          </button>
+          <button 
+            title="搜索心语"
+            onClick={() => setShowSearch(!showSearch)}
+            className={`p-3 transition-colors rounded-xl ${showSearch ? 'text-primary' : 'hover:text-primary'}`}
+          >
+            <span className="material-symbols-outlined text-[20px]">search</span>
+          </button>
+          <button 
+            title={sortBy === 'newest' ? '最新优先' : '最旧优先'}
+            onClick={() => setSortBy(sortBy === 'newest' ? 'oldest' : 'newest')}
+            className="p-3 hover:text-primary transition-colors rounded-xl"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {sortBy === 'newest' ? 'arrow_downward' : 'arrow_upward'}
+            </span>
+          </button>
         </div>
         <button onClick={onExit} className="bg-primary text-background-dark font-bold py-3 px-8 rounded-xl flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all">
           <span className="material-symbols-outlined text-[20px]">add_comment</span>
           创建雪花
         </button>
       </div>
+
+      {/* 搜索框 */}
+      {showSearch && (
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="搜索心语..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-background-dark/90 backdrop-blur-xl border border-primary/20 rounded-2xl px-6 py-4 pr-12 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+              autoFocus
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-primary/40">
+              search
+            </span>
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-center text-xs text-white/40">
+              找到 {filteredRecords.length} 条结果
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 密码输入模态框 */}
+      {showPasswordPrompt && selectedRecord && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => {
+            setShowPasswordPrompt(false);
+            setSelectedRecord(null);
+            setPassword("");
+            setDecryptError("");
+          }}
+        >
+          <div 
+            className="relative max-w-md w-full mx-8 bg-background-dark/90 border border-primary/20 rounded-3xl p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => {
+                setShowPasswordPrompt(false);
+                setSelectedRecord(null);
+                setPassword("");
+                setDecryptError("");
+              }}
+              className="absolute top-4 right-4 size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">close</span>
+            </button>
+
+            <div className="flex flex-col items-center gap-6">
+              <div className="size-16 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-3xl">lock</span>
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-2xl font-bold mb-2">密码保护的心语</h3>
+                <p className="text-white/50 text-sm">请输入密码以解密查看</p>
+              </div>
+
+              <div className="w-full space-y-4">
+                <div className="relative">
+                  <input
+                    type="password"
+                    placeholder="输入密码"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setDecryptError("");
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleDecrypt();
+                      }
+                    }}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+                    autoFocus
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30 text-lg">
+                    key
+                  </span>
+                </div>
+
+                {decryptError && (
+                  <div className="flex items-center gap-2 text-red-400 text-sm">
+                    <span className="material-symbols-outlined text-sm">error</span>
+                    {decryptError}
+                  </div>
+                )}
+
+                <button
+                  onClick={handleDecrypt}
+                  disabled={!password}
+                  className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                >
+                  解密查看
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

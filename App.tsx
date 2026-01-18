@@ -32,7 +32,7 @@ const App: React.FC = () => {
 
       {currentView === View.ENCRYPT && (
         <EncryptView 
-          onCrystallized={(msg) => {
+          onCrystallized={(msg, encrypted, hasPassword) => {
             setMessage(msg);
             setCurrentView(View.DECRYPT);
           }}
@@ -49,7 +49,13 @@ const App: React.FC = () => {
       )}
 
       {currentView === View.GALLERY && (
-        <GalleryView onExit={() => setCurrentView(View.LANDING)} />
+        <GalleryView 
+          onExit={() => setCurrentView(View.LANDING)}
+          onViewSnowflake={(msg) => {
+            setMessage(msg);
+            setCurrentView(View.DECRYPT);
+          }}
+        />
       )}
 
       {currentView === View.AFTERGLOW && (

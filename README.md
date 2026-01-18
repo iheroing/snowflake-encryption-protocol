@@ -1,17 +1,18 @@
-# ❄️ 雪花加密协议 | Snowflake Encryption Protocol
+# ❄️ 雪花密语 | Snowflake Whisper
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![React](https://img.shields.io/badge/React-19-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6)
+![Encryption](https://img.shields.io/badge/Encryption-AES--256-red)
 
 **极致的浪漫 × 极致的加密**
 
-*A poetic encryption experience inspired by the uniqueness of snowflakes*
+*A poetic encryption experience with military-grade security*
 
-[快速开始](#-快速开始) • [在线演示](#) • [文档](#-文档) • [部署](#-部署)
+[快速开始](#-快速开始) • [在线演示](https://snowflake-encryption-protocol.vercel.app) • [文档](#-文档) • [部署](#-部署)
 
 </div>
 
@@ -19,18 +20,57 @@
 
 ## ✨ 核心概念 | Core Concept
 
-利用"世上没有两片相同的雪花"这个自然界定律，将文字信息编码在独一无二的3D雪花晶体结构里。
+利用"世上没有两片相同的雪花"这个自然界定律，将文字信息编码在独一无二的3D雪花晶体结构里。现在支持**真实的 AES-256 加密**，让你的秘密真正安全。
 
-*Leveraging nature's law that "no two snowflakes are alike," this app encodes text into unique 3D snowflake crystal structures.*
+*Leveraging nature's law that "no two snowflakes are alike," this app encodes text into unique 3D snowflake crystal structures with real AES-256 encryption.*
 
-### 🎯 四大特性 | Four Key Features
+### 🎯 核心特性 | Key Features
 
 | 特性 | 说明 | Feature | Description |
 |------|------|---------|-------------|
 | ❄️ **独特性** | 基于Hash值通过分形算法生成独一无二的雪花 | **Uniqueness** | Each text generates a unique snowflake via fractal algorithms |
-| ⏱️ **易逝性** | 60秒倒计时后雪花融化，信息永远销毁 | **Ephemerality** | Snowflakes melt after 60 seconds, data destroyed forever |
+| 🔐 **真实加密** | AES-256-GCM 军事级加密，密码保护 | **Real Encryption** | Military-grade AES-256-GCM encryption with password protection |
+| ⏱️ **易逝性** | 60秒倒计时后雪花融化，信息随风而逝 | **Ephemerality** | Snowflakes melt after 60 seconds, data destroyed forever |
+| 🗑️ **安全销毁** | 多次覆写后永久删除，无法恢复 | **Secure Deletion** | Multiple overwrites before deletion, unrecoverable |
 | 🎨 **艺术性** | 生成的雪花极致美丽，可导出保存 | **Artistry** | Beautiful snowflakes that can be exported as art |
-| 💕 **浪漫性** | 完美的情话传递方式 | **Romance** | Perfect for sharing secret messages |
+| 🔍 **智能管理** | 搜索、排序、画廊管理 | **Smart Management** | Search, sort, and gallery management |
+
+---
+
+## 🆕 v1.4 新功能 | What's New in v1.4
+
+### 🎨 精美预设心语
+- ✅ **25 条预设心语**：涵盖 8 种风格
+- ✅ **首次访问自动加载**：画廊不再空空
+- ✅ **中英文混合**：60% 中文 + 40% 英文
+- ✅ **提供创作灵感**：多种风格供参考
+- ✅ **可以删除**：不喜欢的可以删除
+
+### v1.3 核心功能
+
+### 🔐 真实加密系统
+- ✅ **AES-256-GCM** 加密算法（美国政府标准）
+- ✅ **PBKDF2** 密钥派生（100,000 次迭代）
+- ✅ **Web Crypto API**（浏览器原生加密）
+- ✅ 随机盐和 IV（每次加密都不同）
+- ✅ 认证加密（防篡改）
+
+### 🎯 密码保护
+- 可选的密码保护功能
+- 密码强度验证（至少 6 位）
+- 密码不会被保存
+- 只有正确密码才能解密
+
+### 🔍 画廊功能
+- **搜索**：按内容搜索心语
+- **排序**：最新/最旧优先切换
+- **刷新**：重新加载画廊
+- **删除**：单独删除每条心语
+
+### 🗑️ 安全销毁
+- 内存中多次覆写数据
+- 永久删除，无法恢复
+- 两种销毁方式：60秒自动 + 手动删除
 
 ---
 
@@ -53,29 +93,45 @@ npm run dev
 
 ## 🎯 使用方法 | How to Use
 
-### 1️⃣ 输入秘密 | Enter Your Secret
-在加密页面输入你想要传递的暗号或情话
+### 1️⃣ 输入心语 | Enter Your Message
+在加密页面输入你想要传递的心语
 
 *Enter your message or secret on the encryption page*
 
-### 2️⃣ 选择氛围 | Choose Essence
-- **极光辉光** Aurora Glow - 冰蓝色调
-- **星尘闪耀** Stardust Sparkle - 紫色调
+### 2️⃣ 选择保护 | Choose Protection
+- **无密码**：快速创建，适合日常心语
+- **密码保护**：AES-256 加密，适合私密内容
 
-### 3️⃣ 生成雪花 | Generate Snowflake
-点击"结晶秘密"生成独特的雪花
+*No password for quick sharing, or password protection for sensitive content*
 
-*Click "Crystallize Secret" to generate your unique snowflake*
+### 3️⃣ 选择精华 | Choose Essence
+- **极光之息** Aurora Breath - 冰蓝色调
+- **星尘之梦** Stardust Dream - 紫色调
 
-### 4️⃣ 观赏倒计时 | Watch the Countdown
-雪花会在屏幕上旋转，60秒后融化
+### 4️⃣ 生成雪花 | Generate Snowflake
+点击"凝结心语"生成独特的雪花
+
+*Click "Crystallize Whisper" to generate your unique snowflake*
+
+### 5️⃣ 观赏倒计时 | Watch the Countdown
+雪花会在屏幕上旋转，60秒后融化消散
 
 *The snowflake rotates on screen and melts after 60 seconds*
 
-### 5️⃣ 导出留念 | Export as Art
-在融化前可以导出雪花图像作为永久纪念
+### 6️⃣ 保存或分享 | Save or Share
+- **保存此刻**：截图保存（包含雪花+文字）
+- **分享心语**：分享给朋友
+- **珍藏永恒**：导出高清图片
 
-*Export the snowflake as high-resolution SVG before it melts*
+*Screenshot, share, or export as high-resolution image*
+
+### 7️⃣ 画廊管理 | Gallery Management
+- **查看历史**：所有心语保存在画廊
+- **搜索**：按内容搜索
+- **排序**：按时间排序
+- **删除**：安全销毁不需要的心语
+
+*View history, search, sort, and securely delete messages*
 
 ---
 
@@ -86,35 +142,57 @@ npm run dev
 "在我们第一次看到星星的地方见面"
 "Meet me where we first saw the stars"
 ```
+💡 建议：使用密码保护，只有对方知道密码
 
-### 🔐 秘密传递 | Secret Sharing
+### 🔐 私密信息 | Private Information
 ```
-"密码是：极光2026"
-"The password is: Aurora2026"
+"账号密码：Aurora2026"
+"Account password: Aurora2026"
 ```
+💡 建议：必须使用密码保护 + 60秒后自动销毁
 
 ### 📝 诗意记录 | Poetic Notes
 ```
 "时间冻结的瞬间，像掌心的雪花"
 "A moment frozen in time, like a snowflake in my palm"
 ```
+💡 建议：无需密码，保存到画廊作为回忆
 
 ### 🎂 纪念日期 | Special Dates
 ```
 "2026.01.18 - 一切改变的那一天"
 "2026.01.18 - The day everything changed"
 ```
+💡 建议：导出为图片，永久保存
+
+### 🎁 惊喜礼物 | Surprise Gift
+```
+"生日礼物藏在你最喜欢的书里"
+"Your birthday gift is hidden in your favorite book"
+```
+💡 建议：密码保护 + 分享链接
 
 ---
 
 ## 🛠️ 技术栈 | Tech Stack
 
+### 前端框架 | Frontend
 - ⚛️ **React 19** - 用户界面框架
 - 📘 **TypeScript** - 类型安全
 - ⚡ **Vite** - 构建工具
 - 🎨 **Tailwind CSS** - 样式框架
+
+### 加密技术 | Encryption
+- 🔐 **AES-256-GCM** - 对称加密算法
+- 🔑 **PBKDF2** - 密钥派生函数
+- 🌐 **Web Crypto API** - 浏览器原生加密
+- 🔒 **SHA-256** - 哈希函数
+
+### 视觉效果 | Visual
 - 🌸 **SVG** - 雪花渲染
 - 🔢 **分形算法** - 雪花生成
+- 🎭 **Canvas API** - 图片导出
+- ✨ **CSS Animations** - 动画效果
 
 ---
 
@@ -124,13 +202,14 @@ npm run dev
 snowflake-encryption-protocol/
 ├── components/              # React组件
 │   ├── LandingView.tsx     # 首页
-│   ├── EncryptView.tsx     # 加密页
-│   ├── DecryptView.tsx     # 解密页
-│   ├── AfterglowView.tsx   # 余晖页
-│   └── GalleryView.tsx     # 博物馆
+│   ├── EncryptView.tsx     # 加密页（支持密码保护）
+│   ├── DecryptView.tsx     # 解密页（60秒倒计时）
+│   ├── AfterglowView.tsx   # 余晖页（导出图片）
+│   └── GalleryView.tsx     # 画廊（搜索/排序/删除）
 ├── utils/                   # 工具函数
 │   ├── snowflakeGenerator.ts  # 雪花生成算法
-│   └── encryption.ts        # 加密工具
+│   ├── encryption.ts        # AES-256 加密工具
+│   └── storage.ts           # 本地存储管理
 ├── App.tsx                  # 主应用
 ├── index.tsx               # 入口文件
 └── index.html              # HTML模板
@@ -163,11 +242,21 @@ snowflake-encryption-protocol/
 
 ## 📚 文档 | Documentation
 
+### 快速参考 | Quick Reference
 - 🚀 [快速开始.md](快速开始.md) - 3分钟上手指南
+- 🔐 [加密功能说明.md](加密功能说明.md) - 加密系统详解
+- 🎯 [画廊按钮说明.md](画廊按钮说明.md) - 按钮功能指南
+- 🎨 [预设心语说明.md](预设心语说明.md) - 预设内容详解
+
+### 详细文档 | Detailed Docs
 - 📖 [USAGE.md](USAGE.md) - 详细使用说明
 - 🌐 [DEPLOYMENT.md](DEPLOYMENT.md) - 部署指南
 - 🏗️ [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - 项目结构
-- ✅ [测试清单.md](测试清单.md) - 完整测试清单
+
+### 版本更新 | Version History
+- 📝 [v1.4更新说明.md](v1.4更新说明.md) - 最新版本更新
+- 📝 [v1.3更新说明.md](v1.3更新说明.md) - 加密系统更新
+- 📋 [更新日志.md](更新日志.md) - 完整更新历史
 
 ---
 
@@ -195,14 +284,34 @@ snowflake-encryption-protocol/
 
 ## 🔒 隐私和安全 | Privacy & Security
 
-- ✅ 本地生成雪花 | Local generation
-- ✅ 不存储用户数据 | No data storage
-- ✅ 不发送到服务器 | No server transmission
-- ✅ 倒计时后自动销毁 | Auto-destruction after countdown
+### ✅ 安全特性
+- ✅ **AES-256-GCM 加密**：军事级加密标准
+- ✅ **PBKDF2 密钥派生**：防止暴力破解（100,000 次迭代）
+- ✅ **本地加密**：所有加密在浏览器本地完成
+- ✅ **密码不保存**：密码只在加密/解密时使用
+- ✅ **随机盐和 IV**：每次加密都不同
+- ✅ **认证加密**：GCM 模式提供完整性验证
+- ✅ **安全销毁**：多次覆写后永久删除
+- ✅ **不发送到服务器**：所有数据保存在本地
+- ✅ **60秒自动销毁**：倒计时后自动清除
 
-**注意**: 这是一个艺术性加密项目，主要用于浪漫表白和临时信息传递。如需真正的加密安全，请使用专业加密工具。
+### ⚠️ 安全建议
+1. **使用强密码**：至少 8 位，包含字母、数字、符号
+2. **不要重复使用密码**：每条重要心语使用不同密码
+3. **及时销毁**：不需要的心语及时删除
+4. **密码丢失无法恢复**：没有「忘记密码」功能
+5. **本地存储**：清除浏览器数据会丢失所有心语
 
-*Note: This is an artistic encryption project for romantic messages and temporary sharing. For serious encryption needs, use professional tools.*
+### 🎯 适用场景
+- ✅ 浪漫表白和情话传递
+- ✅ 临时信息分享
+- ✅ 诗意记录和日记
+- ✅ 一般性私密信息
+- ⚠️ 不适合：国家机密、商业机密、法律文件
+
+**注意**: 虽然使用了军事级加密，但这是一个艺术性加密项目。如需最高级别的安全保障，请使用专业加密工具。
+
+*Note: While using military-grade encryption, this is an artistic encryption project. For maximum security, use professional encryption tools.*
 
 ---
 
