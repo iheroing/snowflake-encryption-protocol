@@ -124,8 +124,10 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   };
 
   return (
-    <div className="relative z-10 h-full w-full overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-32">
-      <header className="sticky top-0 z-50 flex items-center justify-between px-12 py-8 bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
+    <>
+      {/* 滚动内容区域 */}
+      <div className="relative z-10 h-full w-full overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-32">
+        <header className="sticky top-0 z-50 flex items-center justify-between px-12 py-8 bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
           <h2 className="font-display text-xl font-bold tracking-wide">心语画廊</h2>
@@ -301,8 +303,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           </div>
         </div>
       )}
+      </div>
 
-      {/* Floating HUD */}
+      {/* Floating HUD - 固定在视口底部 */}
       <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-background-dark/60 backdrop-blur-xl border border-white/10 p-2 rounded-2xl">
         <div className="flex gap-1 border-r border-white/10 pr-2">
           <button 
@@ -342,7 +345,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
         </button>
       </div>
 
-      {/* 搜索框 */}
+      {/* 搜索框 - 固定在视口底部 */}
       {showSearch && (
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
           <div className="relative">
@@ -445,7 +448,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
