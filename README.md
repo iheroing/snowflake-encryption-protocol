@@ -2,15 +2,15 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.5.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![React](https://img.shields.io/badge/React-19-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6)
-![Encryption](https://img.shields.io/badge/Encryption-AES--256-red)
+![Status](https://img.shields.io/badge/status-阅后即焚-red)
 
-**极致的浪漫 × 极致的加密**
+**极致的浪漫 × 极致的简约**
 
-*A poetic encryption experience with military-grade security*
+*A poetic experience where emotions crystallize into snowflakes*
 
 [快速开始](#-快速开始) • [在线演示](https://snowflake-encryption-protocol.vercel.app) • [文档](#-文档) • [部署](#-部署)
 
@@ -20,24 +20,40 @@
 
 ## ✨ 核心概念 | Core Concept
 
-利用"世上没有两片相同的雪花"这个自然界定律，将文字信息编码在独一无二的3D雪花晶体结构里。现在支持**真实的 AES-256 加密**，让你的秘密真正安全。
+2026年第一场雪的灵感 - 将情绪凝结成雪花，随风而逝。
 
-*Leveraging nature's law that "no two snowflakes are alike," this app encodes text into unique 3D snowflake crystal structures with real AES-256 encryption.*
+利用"世上没有两片相同的雪花"这个自然界定律，将文字信息编码在独一无二的雪花晶体结构里。专注于"阅后即焚"的核心体验，简单、纯粹、美好。
+
+*Inspired by the first snow of 2026 - crystallizing emotions into snowflakes that drift away with the wind. Each text generates a unique snowflake, focusing on the "burn after reading" experience.*
 
 ### 🎯 核心特性 | Key Features
 
 | 特性 | 说明 | Feature | Description |
 |------|------|---------|-------------|
 | ❄️ **独特性** | 基于Hash值通过分形算法生成独一无二的雪花 | **Uniqueness** | Each text generates a unique snowflake via fractal algorithms |
-| 🔐 **真实加密** | AES-256-GCM 军事级加密，密码保护 | **Real Encryption** | Military-grade AES-256-GCM encryption with password protection |
-| ⏱️ **易逝性** | 60秒倒计时后雪花融化，信息随风而逝 | **Ephemerality** | Snowflakes melt after 60 seconds, data destroyed forever |
-| 🗑️ **安全销毁** | 多次覆写后永久删除，无法恢复 | **Secure Deletion** | Multiple overwrites before deletion, unrecoverable |
-| 🎨 **艺术性** | 生成的雪花极致美丽，可导出保存 | **Artistry** | Beautiful snowflakes that can be exported as art |
-| 🔍 **智能管理** | 搜索、排序、画廊管理 | **Smart Management** | Search, sort, and gallery management |
+| ⏱️ **自定义时间** | 30秒-30分钟可选，时间到期自动融化 | **Custom Time** | 30s to 30min options, auto-melt after expiration |
+| 🔥 **阅后即焚** | 不保存到画廊，真正的临时消息 | **Burn After Reading** | No gallery save, truly ephemeral messages |
+| 🎨 **艺术性** | 生成的雪花极致美丽，可截图保存 | **Artistry** | Beautiful snowflakes that can be screenshot |
+| 🖼️ **精美预设** | 25条预设心语，8种风格 | **Presets** | 25 preset whispers in 8 styles |
+| ✨ **简约设计** | 专注核心体验，简单纯粹 | **Minimalist** | Focus on core experience, simple and pure |
 
 ---
 
-## 🆕 v1.4 新功能 | What's New in v1.4
+## 🆕 v1.5 新功能 | What's New in v1.5
+
+### 🔥 真正的阅后即焚
+- ✅ **移除密码保护**：简化交互流程
+- ✅ **移除自动保存**：不保存到画廊，真正的临时消息
+- ✅ **自定义时间**：30秒、60秒、5分钟、10分钟、30分钟
+- ✅ **强化警告**：红色警告框，明确提示
+- ✅ **预设自动加载**：画廊始终有内容
+
+### 💡 设计理念
+- **珍惜当下** - 不是所有美好都需要永久保存
+- **简约纯粹** - 专注核心体验，移除复杂功能
+- **自然之美** - 就像雪花一样，短暂而美好
+
+### v1.4 功能
 
 ### 🎨 精美预设心语
 - ✅ **25 条预设心语**：涵盖 8 种风格
