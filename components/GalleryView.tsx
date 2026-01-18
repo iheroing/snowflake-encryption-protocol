@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { getSnowflakes, type SnowflakeRecord, deleteSnowflake } from '../utils/storage';
+import { getSnowflakes, type SnowflakeRecord, deleteSnowflake, forceLoadPresets } from '../utils/storage';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { decrypt } from '../utils/encryption';
 
@@ -27,6 +27,11 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   const loadRecords = () => {
     const loadedRecords = getSnowflakes();
     setRecords(loadedRecords);
+  };
+
+  const handleLoadPresets = () => {
+    forceLoadPresets();
+    loadRecords();
   };
 
   // 过滤和排序记录
@@ -152,13 +157,24 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               <span className="material-symbols-outlined text-6xl text-primary/40">ac_unit</span>
             </div>
             <h3 className="text-2xl font-bold mb-4">还没有心语</h3>
-            <p className="text-white/40 mb-8">创建你的第一片雪花，开始记录美好时刻</p>
-            <button 
-              onClick={onExit}
-              className="px-8 py-4 bg-primary text-background-dark font-bold rounded-xl hover:brightness-110 transition-all"
-            >
-              创建雪花
-            </button>
+            <p className="text-white/40 mb-8">创建你的第一片雪花，或加载精美预设</p>
+            <div className="flex gap-4">
+              <button 
+                onClick={handleLoadPresets}
+                className="px-8 py-4 bg-primary/20 border border-primary/40 text-primary font-bold rounded-xl hover:bg-primary/30 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="material-symbols-outlined">auto_awesome</span>
+                  加载预设
+                </span>
+              </button>
+              <button 
+                onClick={onExit}
+                className="px-8 py-4 bg-primary text-background-dark font-bold rounded-xl hover:brightness-110 transition-all"
+              >
+                创建雪花
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -311,6 +327,13 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
             <span className="material-symbols-outlined text-[20px]">
               {sortBy === 'newest' ? 'arrow_downward' : 'arrow_upward'}
             </span>
+          </button>
+          <button 
+            title="加载预设心语"
+            onClick={handleLoadPresets}
+            className="p-3 hover:text-primary transition-colors rounded-xl"
+          >
+            <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
           </button>
         </div>
         <button onClick={onExit} className="bg-primary text-background-dark font-bold py-3 px-8 rounded-xl flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all">

@@ -98,12 +98,16 @@ function initializePresets(): void {
     const isInitialized = localStorage.getItem(PRESET_INITIALIZED_KEY);
     if (isInitialized) return; // 已经初始化过了
     
-    const records: SnowflakeRecord[] = [];
+    // 获取现有记录
+    const existingData = localStorage.getItem(STORAGE_KEY);
+    const existingRecords: SnowflakeRecord[] = existingData ? JSON.parse(existingData) : [];
+    
     const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000); // 从几小时前开始
     
     // 创建预设记录
+    const presetRecords: SnowflakeRecord[] = [];
     PRESET_WHISPERS.forEach((preset, index) => {
-      records.push({
+      presetRecords.push({
         id: `preset_${index}_${Date.now()}`,
         message: preset.message,
         hasPassword: false,
@@ -112,8 +116,11 @@ function initializePresets(): void {
       });
     });
     
+    // 合并预设和现有记录（预设在前）
+    const allRecords = [...presetRecords, ...existingRecords];
+    
     // 保存到本地存储
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
     localStorage.setItem(PRESET_INITIALIZED_KEY, 'true');
   } catch (error) {
     console.error('Failed to initialize presets:', error);
@@ -181,5 +188,46 @@ export function resetPresets(): void {
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
     console.error('Failed to reset presets:', error);
+  }
+}
+
+// 强制加载预设（即使已经初始化过）
+export function forceLoadPresets(): void {
+  try {
+    // 获取现有记录
+    const existingData = localStorage.getItem(STORAGE_KEY);
+    const existingRecords: SnowflakeRecord[] = existingData ? JSON.parse(existingData) : [];
+    
+    // 检查是否已经有预设（通过 ID 前缀判断）
+    const hasPresets = existingRecords.some(r => r.id.startsWith('preset_'));
+    if (hasPresets) {
+      console.log('Presets already loaded');
+      return;
+    }
+    
+    const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000);
+    
+    // 创建预设记录
+    const presetRecords: SnowflakeRecord[] = [];
+    PRESET_WHISPERS.forEach((preset, index) => {
+      presetRecords.push({
+        id: `preset_${index}_${Date.now()}`,
+        message: preset.message,
+        hasPassword: false,
+        timestamp: baseTimestamp + (index * 3600000),
+        essence: preset.essence
+      });
+    });
+    
+    // 合并预设和现有记录
+    const allRecords = [...presetRecords, ...existingRecords];
+    
+    // 保存
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+    localStorage.setItem(PRESET_INITIALIZED_KEY, 'true');
+    
+    console.log('Presets loaded successfully!');
+  } catch (error) {
+    console.error('Failed to force load presets:', error);
   }
 }
