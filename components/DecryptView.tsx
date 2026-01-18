@@ -17,49 +17,121 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
   // 生成独特的雪花
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 800), [message]);
   
-  // 截图功能
+  // 截图功能 - 修复版本
   const handleScreenshot = async () => {
     if (!snowflakeRef.current) return;
     
     try {
-      // 创建canvas截图
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       
-      canvas.width = 1200;
-      canvas.height = 1200;
+      // 设置更大的画布尺寸以获得更好的质量
+      const width = 1200;
+      const height = 1400;
+      canvas.width = width;
+      canvas.height = height;
       
-      // 绘制背景
-      ctx.fillStyle = '#090B11';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // 绘制深色背景
+      const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/2);
+      gradient.addColorStop(0, '#0a0d15');
+      gradient.addColorStop(1, '#050608');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      
+      // 添加光晕效果
+      ctx.save();
+      ctx.globalAlpha = 0.1;
+      const glowGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, 400);
+      glowGradient.addColorStop(0, '#38dafa');
+      glowGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGradient;
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
       
       // 加载并绘制雪花
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       img.src = snowflakeURL;
+      
       img.onload = () => {
-        ctx.drawImage(img, 200, 200, 800, 800);
+        // 绘制雪花（居中，占据大部分空间）
+        const snowflakeSize = 800;
+        const snowflakeX = (width - snowflakeSize) / 2;
+        const snowflakeY = 150;
+        ctx.drawImage(img, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
         
-        // 添加文字
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'italic 48px "Playfair Display", serif';
+        // 绘制文字
         ctx.textAlign = 'center';
-        ctx.fillText(message, canvas.width / 2, canvas.height - 100);
+        ctx.textBaseline = 'middle';
         
-        // 下载
+        // 主文字
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'italic 600 42px "Playfair Display", serif';
+        ctx.shadowColor = 'rgba(56, 218, 250, 0.8)';
+        ctx.shadowBlur = 20;
+        
+        // 处理长文本换行
+        const maxWidth = width - 200;
+        const words = message.split('');
+        let line = '';
+        let y = snowflakeY + snowflakeSize + 80;
+        const lineHeight = 60;
+        
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line + words[i];
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth && i > 0) {
+            ctx.fillText(line, width / 2, y);
+            line = words[i];
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, width / 2, y);
+        
+        // 重置阴影
+        ctx.shadowBlur = 0;
+        
+        // 添加顶部标题
+        ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
+        ctx.font = '300 16px "Space Grotesk", sans-serif';
+        ctx.fillText('SNOWFLAKE WHISPER', width / 2, 60);
+        
+        // 添加底部时间戳
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.font = '300 14px "Space Grotesk", sans-serif';
+        const timestamp = new Date().toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        ctx.fillText(timestamp, width / 2, height - 40);
+        
+        // 导出为 PNG
         canvas.toBlob((blob) => {
           if (blob) {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.download = `snowflake-${Date.now()}.png`;
+            link.download = `snowflake-whisper-${Date.now()}.png`;
             link.href = url;
             link.click();
             URL.revokeObjectURL(url);
           }
-        });
+        }, 'image/png', 1.0);
+      };
+      
+      img.onerror = () => {
+        console.error('Failed to load snowflake image');
+        alert('截图失败，请重试');
       };
     } catch (error) {
       console.error('Screenshot failed:', error);
+      alert('截图失败，请重试');
     }
   };
   
@@ -68,8 +140,8 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: '雪花加密',
-          text: '我创建了一片独特的雪花 ❄️',
+          title: '雪花密语',
+          text: '我凝结了一片独特的雪花 ❄️',
           url: window.location.href
         });
       } catch (error) {
@@ -78,7 +150,7 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
     } else {
       // 复制链接
       navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制到剪贴板！');
+      alert('链接已复制！快去分享你的心语吧 ✨');
     }
   };
 
@@ -112,7 +184,7 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
             <span className="material-symbols-outlined text-primary text-xl">ac_unit</span>
           </div>
           <div>
-            <h2 className="text-white text-sm font-bold tracking-widest">雪花加密</h2>
+            <h2 className="text-white text-sm font-bold tracking-widest">雪花密语</h2>
             <p className="text-[10px] text-primary/70 tracking-wider font-medium uppercase">Crystallized</p>
           </div>
         </div>
@@ -126,8 +198,8 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-red-400 text-3xl animate-pulse">warning</span>
           <div className="flex-1">
-            <h3 className="text-red-400 font-bold text-lg mb-1">阅后即焚</h3>
-            <p className="text-white/60 text-sm">此雪花将在 {timeLeft} 秒后永久融化，信息无法恢复。请及时截图保存。</p>
+            <h3 className="text-red-400 font-bold text-lg mb-1">随风而逝</h3>
+            <p className="text-white/60 text-sm">这片雪花将在 {timeLeft} 秒后融化消散，心语将随风而逝。请及时保存这一刻的美好。</p>
           </div>
         </div>
       </div>
@@ -190,7 +262,7 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
             className="flex items-center gap-2 px-6 py-3 bg-primary/20 border border-primary/40 rounded-xl text-primary hover:bg-primary/30 transition-all"
           >
             <span className="material-symbols-outlined text-lg">screenshot</span>
-            <span className="text-sm font-bold">截图保存</span>
+            <span className="text-sm font-bold">保存此刻</span>
           </button>
           
           <button 
@@ -198,7 +270,7 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
             className="flex items-center gap-2 px-6 py-3 bg-aurora-purple/20 border border-aurora-purple/40 rounded-xl text-aurora-purple hover:bg-aurora-purple/30 transition-all"
           >
             <span className="material-symbols-outlined text-lg">share</span>
-            <span className="text-sm font-bold">分享</span>
+            <span className="text-sm font-bold">分享心语</span>
           </button>
           
           <button 
@@ -206,7 +278,7 @@ const DecryptView: React.FC<Props> = ({ message, onClose, onExport }) => {
             className="flex items-center gap-2 px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
           >
             <span className="material-symbols-outlined text-lg">download</span>
-            <span className="text-sm font-bold">导出高清</span>
+            <span className="text-sm font-bold">珍藏永恒</span>
           </button>
         </div>
 

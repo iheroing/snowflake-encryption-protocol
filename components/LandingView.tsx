@@ -11,12 +11,12 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
     <main className="relative z-10 h-full w-full flex flex-col items-center justify-center text-center px-6">
       {/* Top Header */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 opacity-30 tracking-[0.3em] text-[10px] font-light uppercase">
-        Snowflake Encryption Protocol
+        Snowflake Whisper
       </div>
 
       <div className="mb-12 space-y-2 opacity-80">
-        <span className="text-primary text-xs tracking-widest font-medium uppercase">Encrypted Transmission</span>
-        <p className="text-xl font-light italic text-glacial/80 font-serif">"来自虚空的低语..."</p>
+        <span className="text-primary text-xs tracking-widest font-medium uppercase">Ephemeral Message</span>
+        <p className="text-xl font-light italic text-glacial/80 font-serif">"心语凝结成雪，随风而逝..."</p>
       </div>
 
       {/* Hero Interactive Seed */}
@@ -45,8 +45,8 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
 
       <div className="mt-20 space-y-6">
         <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white/90">
-          屏住呼吸 <br/>
-          <span className="text-primary font-display italic">点击结晶你的秘密</span>
+          轻触晶核 <br/>
+          <span className="text-primary font-display italic">凝结你的心语</span>
         </h1>
         <div className="flex items-center justify-center space-x-4">
           <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-primary/50"></div>

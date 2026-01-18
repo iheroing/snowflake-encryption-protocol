@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { saveSnowflake } from '../utils/storage';
 
 interface Props {
   onCrystallized: (msg: string) => void;
@@ -16,6 +17,9 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
     if (!text.trim()) return;
     setIsGenerating(true);
     
+    // 保存到本地存储
+    saveSnowflake(text.trim(), essence);
+    
     // 模拟生成过程
     setTimeout(() => {
       onCrystallized(text);
@@ -28,8 +32,8 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
           <div className="flex flex-col">
-            <h2 className="text-sm font-bold tracking-wide text-white/90">雪花加密</h2>
-            <span className="text-[8px] tracking-wider text-primary/60 uppercase">Encryption Protocol</span>
+            <h2 className="text-sm font-bold tracking-wide text-white/90">雪花密语</h2>
+            <span className="text-[8px] tracking-wider text-primary/60 uppercase">Snowflake Whisper</span>
           </div>
         </div>
         <button onClick={onBack} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all">
@@ -38,13 +42,13 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
       </header>
 
       <div className="w-full max-w-4xl flex flex-col items-center">
-        <span className="text-primary/40 text-[10px] tracking-widest mb-4 uppercase">Transmission Phase</span>
-        <h1 className="text-glacial text-2xl tracking-wide font-light">低语你的秘密...</h1>
+        <span className="text-primary/40 text-[10px] tracking-widest mb-4 uppercase">Whisper Phase</span>
+        <h1 className="text-glacial text-2xl tracking-wide font-light">写下你的心语...</h1>
         
         <div className="w-full relative mt-12">
           <textarea 
             className="w-full bg-transparent border-none focus:ring-0 text-white text-center text-4xl md:text-6xl font-light placeholder:text-white/5 resize-none min-h-[200px] leading-relaxed tracking-tight font-serif italic"
-            placeholder="开始加密..."
+            placeholder="此刻的心语..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             spellCheck={false}
@@ -54,19 +58,19 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         <div className="mt-16 flex flex-col items-center gap-6">
-          <span className="text-[10px] tracking-widest text-white/30 uppercase">Select Crystal Essence</span>
+          <span className="text-[10px] tracking-widest text-white/30 uppercase">Choose Your Essence</span>
           <div className="bg-white/5 backdrop-blur-md p-1.5 rounded-full flex items-center gap-2 border border-white/5">
             <button 
               onClick={() => setEssence('aurora')}
               className={`px-8 py-3 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(56,218,250,0.2)]' : 'text-white/40 hover:text-white/70'}`}
             >
-              极光辉光
+              极光之息
             </button>
             <button 
               onClick={() => setEssence('stardust')}
               className={`px-8 py-3 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'stardust' ? 'bg-aurora-purple/20 text-aurora-purple shadow-[0_0_15px_rgba(203,115,252,0.2)]' : 'text-white/40 hover:text-white/70'}`}
             >
-              星尘闪耀
+              星尘之梦
             </button>
           </div>
         </div>
@@ -80,11 +84,11 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             {isGenerating ? (
               <>
                 <span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>
-                结晶中...
+                凝结中...
               </>
             ) : (
               <>
-                结晶秘密
+                凝结心语
                 <span className="material-symbols-outlined text-lg">auto_fix_high</span>
               </>
             )}
