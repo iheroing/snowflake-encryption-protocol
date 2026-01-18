@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雪花密语 - 项目演示</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #0a0d15 0%, #1a1d2e 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+    
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 2rem;
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 1s ease-in forwards;
+    }
+    
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    
+    .slide-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      z-index: 10;
+    }
+    
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38dafa 0%, #CB73FC 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #38dafa;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    h3 {
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: #CB73FC;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 1rem;
+    }
+
+    
+    .subtitle {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-align: center;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(56, 218, 250, 0.2);
+      border-radius: 1rem;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(56, 218, 250, 0.5);
+      box-shadow: 0 10px 40px rgba(56, 218, 250, 0.2);
+    }
+
+    
+    .icon {
+      font-size: 3rem;
+      color: #38dafa;
+      margin-bottom: 1rem;
+    }
+    
+    .demo-frame {
+      width: 100%;
+      max-width: 900px;
+      height: 600px;
+      border: 2px solid rgba(56, 218, 250, 0.3);
+      border-radius: 1rem;
+      margin: 2rem auto;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(56, 218, 250, 0.3);
+    }
+    
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    
+    .tech-badge {
+      background: rgba(56, 218, 250, 0.1);
+      border: 1px solid rgba(56, 218, 250, 0.3);
+      padding: 0.5rem 1.5rem;
+      border-radius: 2rem;
+      font-size: 1rem;
+      color: #38dafa;
+    }
+
+    
+    .timeline {
+      position: relative;
+      padding: 2rem 0;
+      margin-top: 2rem;
+    }
+    
+    .timeline-item {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      align-items: flex-start;
+    }
+    
+    .timeline-dot {
+      width: 20px;
+      height: 20px;
+      background: #38dafa;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.5rem;
+      box-shadow: 0 0 20px rgba(56, 218, 250, 0.5);
+    }
+    
+    .timeline-content {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      border-left: 3px solid #38dafa;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      padding: 1rem 3rem;
+      background: linear-gradient(135deg, #38dafa 0%, #CB73FC 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 2rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    
+    .cta-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 40px rgba(56, 218, 250, 0.4);
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #38dafa;
+    }
+    
+    .stat-label {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 0.5rem;
+    }
+    
+    .code-block {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(56, 218, 250, 0.2);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+
+  <!-- Slide 1: 封面 -->
+  <section class="slide">
+    <div class="slide-bg">
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="snowflake-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+            <circle cx="100" cy="100" r="2" fill="#38dafa" opacity="0.3"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#snowflake-pattern)"/>
+      </svg>
+    </div>
+    <div class="container">
+      <h1>❄️ 雪花密语</h1>
+      <p class="subtitle">Snowflake Whisper</p>
+      <p class="subtitle" style="margin-top: 2rem;">
+        2026年第一场雪的灵感<br/>
+        将情绪凝结成雪花，随风而逝
+      </p>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number">∞</div>
+          <div class="stat-label">独特雪花</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">60s</div>
+          <div class="stat-label">阅后即焚</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">纯前端</div>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <a href="https://snowflake-encryption-protocol.vercel.app" class="cta-button" target="_blank">
+          立即体验 →
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 2: 灵感来源 -->
+  <section class="slide">
+    <div class="container">
+      <h2>� 灵感来源</h2>
+      <div style="max-width: 800px; margin: 0 auto;">
+        <div style="background: rgba(255, 255, 255, 0.05); border-left: 4px solid #38dafa; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+          <p style="font-size: 1.4rem; line-height: 2; font-style: italic; color: rgba(255, 255, 255, 0.9);">
+            "2026年的第一场雪，轻轻飘落在窗前。<br/>
+            每一片雪花都是独一无二的，<br/>
+            就像此刻的心情，转瞬即逝..."
+          </p>
+        </div>
+        
+        <div class="feature-grid" style="margin-top: 3rem;">
+          <div class="feature-card">
+            <span class="material-symbols-outlined icon">ac_unit</span>
+            <h3>雪花的消逝</h3>
+            <p>雪花落在手心，很快就会融化消失。这种短暂而美好的瞬间，让我们意识到：不是所有美好都需要永久保存。</p>
+          </div>
+          <div class="feature-card">
+            <span class="material-symbols-outlined icon">mood</span>
+            <h3>情绪的流动</h3>
+            <p>我们的情绪（vibe）就像雪花一样 - 独特、短暂、转瞬即逝。有时候，我们只是想记录下这一刻的感受。</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 3rem; padding: 2rem; background: rgba(203, 115, 252, 0.1); border-radius: 1rem; border: 1px solid rgba(203, 115, 252, 0.3);">
+          <h3 style="text-align: center; margin-bottom: 1.5rem;">💡 核心理念</h3>
+          <p style="text-align: center; font-size: 1.3rem; line-height: 1.8;">
+            <strong style="color: #38dafa;">记录</strong> 此刻的情绪<br/>
+            <strong style="color: #CB73FC;">可视化</strong> 成独特的雪花<br/>
+            <strong style="color: #50fa7b;">分享</strong> 给在乎的人<br/>
+            <strong style="color: #ff6b6b;">阅后即焚</strong> 随风而逝
+          </p>
+        </div>
+
+        <p style="text-align: center; margin-top: 3rem; font-size: 1.3rem; font-style: italic; color: rgba(255, 255, 255, 0.7);">
+          就像雪花一样，有些美好只需要存在于那一刻
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: 项目简介 -->
+  <section class="slide">
+    <div class="container">
+      <h2>💡 项目简介</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">ac_unit</span>
+          <h3>独特雪花</h3>
+          <p>基于分形算法，每段文字生成独一无二的雪花图案。就像自然界中没有两片相同的雪花，每个心语都有专属的视觉呈现。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">schedule</span>
+          <h3>阅后即焚</h3>
+          <p>自定义时间限制（30秒-30分钟），时间到期后雪花自动融化消散，心语永久消失。珍惜当下，不留痕迹。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">palette</span>
+          <h3>视觉美学</h3>
+          <p>极光之息与星尘之梦两种精华，配合优雅的动画效果，打造沉浸式的视觉体验。科技与艺术的完美融合。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 4: 核心功能 -->
+  <section class="slide">
+    <div class="container">
+      <h2>✨ 核心功能</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>1. 创建心语</h3>
+            <p>输入你想说的话，选择精华类型（极光之息/星尘之梦），设置时间限制（30秒-30分钟）。系统会基于文字内容生成独特的雪花图案。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>2. 查看雪花</h3>
+            <p>欣赏美丽的雪花图案，配合实时倒计时和融化动画。可以截图保存、分享给朋友，或者珍藏这一刻的美好。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>3. 阅后即焚</h3>
+            <p>时间到期后，雪花自动融化消散，心语永久消失。不保存到画廊，真正的临时消息，只留下回忆。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 5: 实时演示 -->
+  <section class="slide">
+    <div class="container">
+      <h2>🎬 实时演示</h2>
+      <p style="text-align: center; margin-bottom: 2rem;">
+        体验完整的雪花密语流程
+      </p>
+      <iframe 
+        src="https://snowflake-encryption-protocol.vercel.app" 
+        class="demo-frame"
+        title="雪花密语演示"
+      ></iframe>
+      <p style="text-align: center; color: rgba(255, 255, 255, 0.6); margin-top: 1rem;">
+        👆 点击上方演示区域进行交互体验
+      </p>
+    </div>
+  </section>
+
+
+  <!-- Slide 6: 技术架构 -->
+  <section class="slide">
+    <div class="container">
+      <h2>🛠️ 技术架构</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>前端框架</h3>
+          <p><strong>React 19</strong> - 最新版本，提供流畅的用户体验</p>
+          <p><strong>TypeScript</strong> - 类型安全，代码质量保证</p>
+          <p><strong>Vite</strong> - 极速构建工具</p>
+        </div>
+        <div class="feature-card">
+          <h3>样式方案</h3>
+          <p><strong>Tailwind CSS</strong> - 原子化 CSS 框架</p>
+          <p><strong>自定义动画</strong> - 雪花旋转、融化效果</p>
+          <p><strong>响应式设计</strong> - 完美适配各种设备</p>
+        </div>
+        <div class="feature-card">
+          <h3>核心算法</h3>
+          <p><strong>分形生成</strong> - 基于文字生成独特雪花</p>
+          <p><strong>Canvas 渲染</strong> - 高性能图形绘制</p>
+          <p><strong>倒计时系统</strong> - 精确的时间控制</p>
+        </div>
+      </div>
+      <div class="tech-stack">
+        <span class="tech-badge">React 19</span>
+        <span class="tech-badge">TypeScript</span>
+        <span class="tech-badge">Vite</span>
+        <span class="tech-badge">Tailwind CSS</span>
+        <span class="tech-badge">Canvas API</span>
+        <span class="tech-badge">Vercel</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 7: 代码示例 -->
+  <section class="slide">
+    <div class="container">
+      <h2>💻 核心代码</h2>
+      <h3>雪花生成算法</h3>
+      <div class="code-block">
+<pre style="color: #38dafa;">
+// 基于文字生成独特的雪花图案
+function generateSnowflake(text: string) {
+  const seed = hashCode(text);
+  const branches = 6; // 六角对称
+  
+  for (let i = 0; i < branches; i++) {
+    const angle = (Math.PI * 2 * i) / branches;
+    drawBranch(angle, seed);
+  }
+  
+  return snowflakeCanvas;
+}
+</pre>
+      </div>
+      <h3 style="margin-top: 2rem;">倒计时系统</h3>
+      <div class="code-block">
+<pre style="color: #CB73FC;">
+// 自定义时间限制的倒计时
+useEffect(() => {
+  if (timeLeft <= 0) {
+    setIsMelting(true); // 触发融化动画
+    setTimeout(() => onClose(), 2000);
+    return;
+  }
+  const timer = setInterval(() => {
+    setTimeLeft(prev => prev - 1);
+  }, 1000);
+  return () => clearInterval(timer);
+}, [timeLeft]);
+</pre>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 8: 设计理念 -->
+  <section class="slide">
+    <div class="container">
+      <h2>🎨 设计理念</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">favorite</span>
+          <h3>珍惜当下</h3>
+          <p>雪花的短暂性提醒我们珍惜每一个瞬间。不是所有美好都需要永久保存，有些记忆留在心中更加珍贵。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">auto_awesome</span>
+          <h3>简约纯粹</h3>
+          <p>移除复杂功能，专注核心体验。没有密码保护，没有画廊保存，只有最纯粹的"阅后即焚"。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">nature</span>
+          <h3>自然之美</h3>
+          <p>灵感来自自然界的雪花 - 独一无二、转瞬即逝。用科技重现自然的美学，让每个心语都成为艺术品。</p>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 3rem; font-size: 1.5rem; font-style: italic; color: rgba(255, 255, 255, 0.7);">
+        "世上没有两片相同的雪花，<br/>也没有两次相同的机会"
+      </p>
+    </div>
+  </section>
+
+
+  <!-- Slide 9: 使用场景 -->
+  <section class="slide">
+    <div class="container">
+      <h2>🌟 使用场景</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">celebration</span>
+          <h3>浪漫表白</h3>
+          <p>"在我们第一次看到星星的地方见面" - 创建一个只属于你们的秘密时刻，60秒后随风而逝。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">lock</span>
+          <h3>临时消息</h3>
+          <p>"晚上8点，老地方" - 发送不想留下痕迹的临时约定，阅后即焚保护隐私。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">psychology</span>
+          <h3>心情记录</h3>
+          <p>"此刻的心情..." - 记录当下的感受，不需要永久保存，只是想表达这一刻。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">card_giftcard</span>
+          <h3>惊喜祝福</h3>
+          <p>"生日快乐！" - 创建限时祝福，增加仪式感和神秘感，让祝福更加特别。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">explore</span>
+          <h3>寻宝游戏</h3>
+          <p>"线索在..." - 设计限时寻宝游戏，增加紧迫感和趣味性。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">brush</span>
+          <h3>艺术创作</h3>
+          <p>将文字转化为视觉艺术，每个雪花都是独特的作品，可以截图收藏。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 10: 项目亮点 -->
+  <section class="slide">
+    <div class="container">
+      <h2>⭐ 项目亮点</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>🚀 纯前端实现</h3>
+            <p>无需后端服务器，无需数据库，完全在浏览器中运行。部署简单，维护成本低，响应速度快。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>🎯 用户体验优先</h3>
+            <p>流畅的动画效果，直观的交互设计，响应式布局适配所有设备。从首页到融化，每个细节都经过精心打磨。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>🔒 隐私保护</h3>
+            <p>不保存任何数据到服务器，所有内容仅在本地处理。时间到期后自动销毁，真正的"阅后即焚"。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>🎨 视觉创新</h3>
+            <p>独特的分形算法生成雪花，每个文字都有专属的视觉呈现。科技与艺术的完美结合。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 11: 版本迭代 -->
+  <section class="slide">
+    <div class="container">
+      <h2>📈 版本迭代</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>v1.0 - 初始版本</h3>
+            <p>基础的雪花生成和60秒倒计时功能，实现核心的"阅后即焚"概念。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>v1.2 - 功能增强</h3>
+            <p>添加截图功能、分享功能，优化雪花生成算法，提升视觉效果。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>v1.3 - 画廊系统</h3>
+            <p>实现本地存储画廊，添加25个精美预设心语，支持搜索、排序、删除功能。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h3>v1.5 - 简化重构 ✨</h3>
+            <p>移除复杂功能，专注核心体验。添加自定义时间限制（30秒-30分钟），强化"阅后即焚"概念。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 12: 技术细节 -->
+  <section class="slide">
+    <div class="container">
+      <h2>🔧 技术细节</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>分形算法</h3>
+          <p>基于文字内容生成唯一的种子值，通过六角对称的分形算法绘制雪花。每个字符都会影响雪花的形态，确保独一无二。</p>
+        </div>
+        <div class="feature-card">
+          <h3>Canvas 渲染</h3>
+          <p>使用 HTML5 Canvas API 进行高性能图形绘制，支持实时旋转动画和融化效果。导出为高质量 PNG 图片。</p>
+        </div>
+        <div class="feature-card">
+          <h3>状态管理</h3>
+          <p>使用 React Hooks 管理组件状态，实现流畅的页面切换和数据传递。简洁的代码结构，易于维护。</p>
+        </div>
+        <div class="feature-card">
+          <h3>响应式设计</h3>
+          <p>使用 Tailwind CSS 实现完美的响应式布局，从手机到桌面都有最佳体验。自适应字体大小和间距。</p>
+        </div>
+        <div class="feature-card">
+          <h3>动画效果</h3>
+          <p>CSS 动画 + JavaScript 控制，实现雪花旋转、融化、淡入淡出等效果。流畅的 60fps 动画体验。</p>
+        </div>
+        <div class="feature-card">
+          <h3>部署方案</h3>
+          <p>使用 Vercel 进行自动化部署，推送代码即可上线。全球 CDN 加速，访问速度快。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 13: 未来规划 -->
+  <section class="slide">
+    <div class="container">
+      <h2>🔮 未来规划</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">qr_code</span>
+          <h3>二维码分享</h3>
+          <p>生成包含雪花的二维码，扫码即可查看心语。增加分享的趣味性和神秘感。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">volume_up</span>
+          <h3>音效系统</h3>
+          <p>添加倒计时提示音、融化音效，增强沉浸式体验。可选开启/关闭。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">animation</span>
+          <h3>更多动画</h3>
+          <p>不同的融化效果、雪花飘落动画、粒子特效等，让每次体验都有新鲜感。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">language</span>
+          <h3>多语言支持</h3>
+          <p>支持英文、日文等多种语言，让更多人体验雪花密语的魅力。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">palette</span>
+          <h3>主题定制</h3>
+          <p>更多精华类型选择，自定义颜色方案，打造个性化的雪花风格。</p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">share</span>
+          <h3>社交集成</h3>
+          <p>一键分享到社交平台，生成短链接，让分享更加便捷。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Slide 14: 结尾 -->
+  <section class="slide">
+    <div class="container" style="text-align: center;">
+      <h1>❄️ 感谢观看</h1>
+      <p class="subtitle" style="margin-top: 2rem; margin-bottom: 3rem;">
+        雪花密语 - 让每个瞬间都成为永恒的回忆
+      </p>
+      
+      <div class="feature-grid" style="margin-top: 3rem;">
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">link</span>
+          <h3>在线体验</h3>
+          <p style="word-break: break-all;">
+            <a href="https://snowflake-encryption-protocol.vercel.app" 
+               target="_blank" 
+               style="color: #38dafa; text-decoration: none;">
+              snowflake-encryption-protocol.vercel.app
+            </a>
+          </p>
+        </div>
+        <div class="feature-card">
+          <span class="material-symbols-outlined icon">code</span>
+          <h3>GitHub 仓库</h3>
+          <p style="word-break: break-all;">
+            <a href="https://github.com/iheroing/snowflake-encryption-protocol" 
+               target="_blank" 
+               style="color: #38dafa; text-decoration: none;">
+              github.com/iheroing/snowflake-encryption-protocol
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 4rem;">
+        <a href="https://snowflake-encryption-protocol.vercel.app" class="cta-button" target="_blank">
+          立即体验雪花密语 →
+        </a>
+      </div>
+
+      <p style="margin-top: 3rem; font-size: 1.2rem; font-style: italic; color: rgba(255, 255, 255, 0.5);">
+        "世上没有两片相同的雪花，也没有两次相同的机会"
+      </p>
+    </div>
+  </section>
+
+  <script>
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // 滚动动画
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.slide').forEach(slide => {
+      slide.style.transform = 'translateY(20px)';
+      observer.observe(slide);
+    });
+  </script>
+</body>
+</html>

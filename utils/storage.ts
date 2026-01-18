@@ -10,7 +10,6 @@ export interface SnowflakeRecord {
 }
 
 const STORAGE_KEY = 'snowflake_whispers';
-const PRESET_INITIALIZED_KEY = 'snowflake_preset_initialized';
 const MAX_RECORDS = 50; // 最多保存50条记录
 
 // 精美的预设心语
@@ -130,12 +129,30 @@ function initializePresets(): void {
 // 获取所有雪花记录
 export function getSnowflakes(): SnowflakeRecord[] {
   try {
-    // 首次访问时初始化预设
-    initializePresets();
-    
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return [];
-    return JSON.parse(data);
+    const records: SnowflakeRecord[] = data ? JSON.parse(data) : [];
+    
+    // 检查是否有预设（通过 ID 前缀判断）
+    const hasPresets = records.some(r => r.id.startsWith('preset_'));
+    
+    // 如果没有预设，自动加载
+    if (!hasPresets && PRESET_WHISPERS.length > 0) {
+      const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000);
+      const presetRecords: SnowflakeRecord[] = PRESET_WHISPERS.map((preset, index) => ({
+        id: `preset_${index}_${Date.now()}`,
+        message: preset.message,
+        hasPassword: false,
+        timestamp: baseTimestamp + (index * 3600000),
+        essence: preset.essence
+      }));
+      
+      // 合并预设和现有记录
+      const allRecords = [...presetRecords, ...records];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+      return allRecords;
+    }
+    
+    return records;
   } catch (error) {
     console.error('Failed to load snowflakes:', error);
     return [];
