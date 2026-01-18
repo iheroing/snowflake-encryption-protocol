@@ -123,10 +123,28 @@ export function saveSnowflake(
 
 // 获取所有雪花记录
 export function getSnowflakes(): SnowflakeRecord[] {
+  let records: SnowflakeRecord[] = [];
+  
   try {
     console.log('[Storage] Getting snowflakes...');
     const data = localStorage.getItem(STORAGE_KEY);
-    const records: SnowflakeRecord[] = data ? JSON.parse(data) : [];
+    
+    // 尝试解析数据
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        records = parsed;
+      } else {
+        console.warn('[Storage] Data is not an array, resetting...');
+        records = [];
+      }
+    }
+  } catch (error) {
+    console.error('[Storage] Failed to load snowflakes (parse error), resetting:', error);
+    records = [];
+  }
+
+  try {
     console.log('[Storage] Current records:', records.length);
     
     // 检查是否有预设（通过 ID 前缀判断）
@@ -155,8 +173,8 @@ export function getSnowflakes(): SnowflakeRecord[] {
     console.log('[Storage] Returning existing records:', records.length);
     return records;
   } catch (error) {
-    console.error('[Storage] Failed to load snowflakes:', error);
-    return [];
+    console.error('[Storage] Failed to process/save presets:', error);
+    return records; // 即使预设加载失败，至少返回已解析的记录
   }
 }
 
