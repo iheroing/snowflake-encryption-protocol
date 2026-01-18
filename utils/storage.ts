@@ -121,41 +121,6 @@ export function saveSnowflake(
   }
 }
 
-// 初始化预设心语
-function initializePresets(): void {
-  try {
-    const isInitialized = localStorage.getItem(PRESET_INITIALIZED_KEY);
-    if (isInitialized) return; // 已经初始化过了
-    
-    // 获取现有记录
-    const existingData = localStorage.getItem(STORAGE_KEY);
-    const existingRecords: SnowflakeRecord[] = existingData ? JSON.parse(existingData) : [];
-    
-    const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000); // 从几小时前开始
-    
-    // 创建预设记录
-    const presetRecords: SnowflakeRecord[] = [];
-    PRESET_WHISPERS.forEach((preset, index) => {
-      presetRecords.push({
-        id: `preset_${index}_${Date.now()}`,
-        message: preset.message,
-        hasPassword: false,
-        timestamp: baseTimestamp + (index * 3600000), // 每个相隔1小时
-        essence: preset.essence
-      });
-    });
-    
-    // 合并预设和现有记录（预设在前）
-    const allRecords = [...presetRecords, ...existingRecords];
-    
-    // 保存到本地存储
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
-    localStorage.setItem(PRESET_INITIALIZED_KEY, 'true');
-  } catch (error) {
-    console.error('Failed to initialize presets:', error);
-  }
-}
-
 // 获取所有雪花记录
 export function getSnowflakes(): SnowflakeRecord[] {
   try {
@@ -231,7 +196,6 @@ export function getSnowflakeCount(): number {
 // 重置预设（用于测试或重新初始化）
 export function resetPresets(): void {
   try {
-    localStorage.removeItem(PRESET_INITIALIZED_KEY);
     localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
     console.error('Failed to reset presets:', error);
@@ -255,23 +219,19 @@ export function forceLoadPresets(): void {
     const baseTimestamp = Date.now() - (PRESET_WHISPERS.length * 3600000);
     
     // 创建预设记录
-    const presetRecords: SnowflakeRecord[] = [];
-    PRESET_WHISPERS.forEach((preset, index) => {
-      presetRecords.push({
-        id: `preset_${index}_${Date.now()}`,
-        message: preset.message,
-        hasPassword: false,
-        timestamp: baseTimestamp + (index * 3600000),
-        essence: preset.essence
-      });
-    });
+    const presetRecords: SnowflakeRecord[] = PRESET_WHISPERS.map((preset, index) => ({
+      id: `preset_${index}_${Date.now()}`,
+      message: preset.message,
+      hasPassword: false,
+      timestamp: baseTimestamp + (index * 3600000),
+      essence: preset.essence
+    }));
     
     // 合并预设和现有记录
     const allRecords = [...presetRecords, ...existingRecords];
     
     // 保存
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
-    localStorage.setItem(PRESET_INITIALIZED_KEY, 'true');
     
     console.log('Presets loaded successfully!');
   } catch (error) {
