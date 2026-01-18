@@ -30,8 +30,8 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   };
 
   return (
-    <main className="relative z-10 min-h-full w-full flex flex-col items-center justify-start px-6 py-20 overflow-y-auto">
-      <header className="fixed top-0 w-full flex items-center justify-between px-12 py-8">
+    <main className="relative z-10 min-h-screen w-full flex flex-col items-center px-6 py-20 overflow-y-auto">
+      <header className="w-full flex items-center justify-between px-0 md:px-12 py-8 mb-8">
         <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
           <div className="flex flex-col">
@@ -44,7 +44,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </button>
       </header>
 
-      <div className="w-full max-w-4xl flex flex-col items-center">
+      <div className="w-full max-w-4xl flex flex-col items-center pb-20">
         <span className="text-primary/40 text-[10px] tracking-widest mb-4 uppercase">Whisper Phase</span>
         <h1 className="text-glacial text-2xl tracking-wide font-light">写下你的心语...</h1>
         
@@ -143,17 +143,6 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </span>
         </button>
       </div>
-
-      <footer className="fixed bottom-10 w-full px-12 flex justify-between items-end text-[9px] tracking-wide opacity-30">
-        <div className="space-y-2">
-          <p className="uppercase">Quantum-Resistant Layer Active</p>
-          <p className="uppercase">Fractal Geometry: Class 7</p>
-        </div>
-        <div className="text-right">
-          <p>© 2026 Snowflake Protocol</p>
-          <p className="uppercase">Ephemeral by Design</p>
-        </div>
-      </footer>
     </main>
   );
 };
