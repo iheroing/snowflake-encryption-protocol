@@ -136,8 +136,23 @@ function generateBranch(
 
 // 生成雪花的Data URL
 export function generateSnowflakeDataURL(text: string, size: number = 400, signature: string = ''): string {
-  const params = generateSnowflakeParams(text, signature);
-  const svg = generateSnowflakeSVG(params, size);
-  const encoded = encodeURIComponent(svg);
-  return `data:image/svg+xml,${encoded}`;
+  const safeText = (text ?? '').trim() || 'snowflake';
+  const params = generateSnowflakeParams(safeText, signature);
+  const svg = generateSnowflakeSVG(params, size).trim();
+
+  try {
+    const encoded = encodeURIComponent(svg);
+    return `data:image/svg+xml;charset=UTF-8,${encoded}`;
+  } catch {
+    // Fallback for uncommon URI encoding issues in certain webviews.
+    const bytes = new TextEncoder().encode(svg);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = globalThis.btoa ? globalThis.btoa(binary) : '';
+    return base64
+      ? `data:image/svg+xml;base64,${base64}`
+      : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"></svg>')}`;
+  }
 }

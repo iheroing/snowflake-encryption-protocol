@@ -173,6 +173,19 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     return formatDate(timestamp);
   };
 
+  const handleSnowflakeImageError = (
+    event: React.SyntheticEvent<HTMLImageElement>,
+    signature: string,
+    size: number
+  ) => {
+    const image = event.currentTarget;
+    if (image.dataset.fallbackApplied === '1') {
+      return;
+    }
+    image.dataset.fallbackApplied = '1';
+    image.src = generateSnowflakeDataURL(signature, size, signature);
+  };
+
   return (
     <div className="relative w-full min-h-[var(--cine-viewport)]">
       <div className="relative z-10 min-h-[var(--cine-viewport)] overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-[calc(var(--cine-safe-bottom)+9rem)] px-4 md:px-8">
@@ -264,6 +277,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     src={generateSnowflakeDataURL(record.encryptedMessage ?? record.message, 400, record.id)}
                     alt="snowflake"
                     className="w-full h-full object-contain"
+                    onError={(event) => handleSnowflakeImageError(event, record.id, 400)}
                   />
                 </div>
                 
@@ -359,6 +373,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 src={generateSnowflakeDataURL(selectedRecord.message, 600, selectedRecord.id)}
                 alt="snowflake"
                 className="w-96 h-96 object-contain animate-[spin_20s_linear_infinite]"
+                onError={(event) => handleSnowflakeImageError(event, selectedRecord.id, 600)}
               />
               
               <h2 className="text-4xl font-serif italic text-center leading-relaxed max-w-2xl">
