@@ -4,6 +4,8 @@ import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { buildShareUrl, getSnowflakeId } from '../utils/share';
 import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
+import LanguageToggleButton from './LanguageToggleButton';
+import { useI18n } from '../contexts/I18nContext';
 
 interface Props {
   message: string;
@@ -25,6 +27,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
   const snowflakeRef = useRef<HTMLDivElement>(null);
   const meltRafRef = useRef<number | null>(null);
   const { play } = useSound();
+  const { t, localeTag } = useI18n();
   
   const isPermanent = ttl === -1;
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
@@ -134,12 +137,12 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
         // 添加顶部标题
         ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
         ctx.font = '300 16px "Space Grotesk", sans-serif';
-        ctx.fillText('SNOWFLAKE WHISPER', width / 2, 60);
+        ctx.fillText(t('common.appSubtitle'), width / 2, 60);
         
         // 添加底部时间戳
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.font = '300 14px "Space Grotesk", sans-serif';
-        const timestamp = new Date().toLocaleString('zh-CN', {
+        const timestamp = new Date().toLocaleString(localeTag, {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
@@ -164,11 +167,11 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
       
       img.onerror = () => {
         console.error('Failed to load snowflake image');
-        alert('截图失败，请重试');
+        alert(t('decrypt.screenshotFailed'));
       };
     } catch (error) {
       console.error('Screenshot failed:', error);
-      alert('截图失败，请重试');
+      alert(t('decrypt.screenshotFailed'));
     }
   };
   
@@ -178,8 +181,8 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
       try {
         play('share');
         await navigator.share({
-          title: '雪花密语',
-          text: `我分享了一片独特的雪花 ${snowflakeId} ❄️`,
+          title: t('decrypt.shareTitle'),
+          text: t('decrypt.shareText', { id: snowflakeId }),
           url: shareUrl
         });
         return;
@@ -191,9 +194,9 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
     try {
       await navigator.clipboard.writeText(shareUrl);
       play('share');
-      alert('分享链接已复制！快去分享你的心语吧 ✨');
+      alert(t('decrypt.shareCopied'));
     } catch {
-      prompt('复制这条分享链接：', shareUrl);
+      prompt(t('common.copyPrompt'), shareUrl);
     }
   };
 
@@ -251,11 +254,12 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               <span className="material-symbols-outlined text-primary text-xl">ac_unit</span>
             </div>
             <div>
-              <h2 className="text-white text-sm font-bold tracking-widest">雪花密语</h2>
-              <p className="text-[10px] text-primary/70 tracking-wider font-medium uppercase">Crystallized</p>
+              <h2 className="text-white text-sm font-bold tracking-widest">{t('common.appName')}</h2>
+              <p className="text-[10px] text-primary/70 tracking-wider font-medium uppercase">{t('decrypt.scene')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggleButton compact />
             <SoundToggleButton />
             <button onClick={onClose} className="size-10 flex items-center justify-center rounded-full cine-btn-ghost">
               <span className="material-symbols-outlined">close</span>
@@ -270,15 +274,15 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-green-400 text-2xl">bookmark</span>
               <div className="text-sm text-white/80">
-                永久保存模式，已可在画廊管理
-                {source === 'shared' && <span className="text-primary/80"> · 来自分享链接并已识别</span>}
+                {t('decrypt.permanent')}
+                {source === 'shared' && <span className="text-primary/80"> · {t('decrypt.sharedRecognized')}</span>}
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-red-400 text-2xl animate-pulse">warning</span>
               <div className="text-sm text-white/80">
-                阅后即焚：剩余 <span className="text-red-400 font-bold tabular-nums">{timeLeft}s</span>，到期自动融化
+                {t('decrypt.ephemeralPrefix')} <span className="text-red-400 font-bold tabular-nums">{timeLeft}s</span> {t('decrypt.ephemeralSuffix')}
               </div>
             </div>
           )}
@@ -306,10 +310,10 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
 
             <div className="absolute inset-0 flex flex-col items-center justify-center px-8 md:px-14 transition-all duration-300" style={{ opacity: 1 - meltEase * 1.1, transform: `translateY(${meltEase * 18}px) scale(${1 - meltEase * 0.12})` }}>
               <span className="text-primary text-[10px] tracking-widest font-bold opacity-60 mb-3 uppercase">
-                Crystallization Complete
+                {t('decrypt.completed')}
               </span>
               <h1 className="text-xl md:text-3xl font-bold tracking-tight text-white drop-shadow-[0_0_25px_rgba(56,218,250,0.8)] leading-tight font-display italic text-center line-clamp-4">
-                {message || "在我们第一次看到星星的地方见面"}
+                {message || t('decrypt.defaultMessage')}
               </h1>
               <p className="mt-3 text-[10px] tracking-[0.2em] text-primary/60 uppercase">
                 {snowflakeId}
@@ -318,7 +322,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
 
             {isMelting && (
               <div className="absolute bottom-6 text-[11px] tracking-[0.2em] uppercase text-primary/70 animate-pulse">
-                Melting Into Silence
+                {t('decrypt.meltingIntoSilence')}
               </div>
             )}
           </div>
@@ -330,7 +334,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               <div className="min-w-[220px]">
                 <div className="flex items-baseline gap-2">
                   <span className="text-[10px] uppercase tracking-widest text-primary/60">
-                    {isMelting ? 'Melting' : 'Melting in'}
+                    {isMelting ? t('decrypt.meltingLabel') : t('decrypt.meltingIn')}
                   </span>
                   <span className="text-2xl font-bold tabular-nums text-white">
                     {isMelting ? `${Math.round(meltEase * 100)}%` : `${timeLeft}s`}
@@ -344,7 +348,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-green-300/90 font-medium">Permanently Saved · Gallery Ready</div>
+              <div className="text-sm text-green-300/90 font-medium">{t('decrypt.permanentReady')}</div>
             )}
 
             <div className="flex flex-wrap gap-2 md:justify-end">
@@ -353,7 +357,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
                 className="flex items-center gap-2 px-4 py-2.5 cine-btn-accent text-sm"
               >
                 <span className="material-symbols-outlined text-lg">screenshot</span>
-                保存此刻
+                {t('decrypt.saveMoment')}
               </button>
 
               <button
@@ -361,7 +365,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-aurora-purple transition-all text-sm bg-aurora-purple/20 border border-aurora-purple/40 hover:bg-aurora-purple/30"
               >
                 <span className="material-symbols-outlined text-lg">share</span>
-                分享心语
+                {t('decrypt.shareWhisper')}
               </button>
 
               <button
@@ -369,7 +373,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
                 className="flex items-center gap-2 px-4 py-2.5 cine-btn-ghost text-sm"
               >
                 <span className="material-symbols-outlined text-lg">download</span>
-                珍藏永恒
+                {t('decrypt.export')}
               </button>
 
               {isPermanent && onOpenGallery && (
@@ -378,7 +382,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-green-300 transition-all text-sm bg-green-500/20 border border-green-500/40 hover:bg-green-500/30"
                 >
                   <span className="material-symbols-outlined text-lg">collections</span>
-                  前往画廊
+                  {t('decrypt.gotoGallery')}
                 </button>
               )}
             </div>

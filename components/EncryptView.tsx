@@ -4,6 +4,8 @@ import { saveSnowflake } from '../utils/storage';
 import { createSnowflakeSignature } from '../utils/share';
 import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
+import LanguageToggleButton from './LanguageToggleButton';
+import { useI18n } from '../contexts/I18nContext';
 
 interface Props {
   onCrystallized: (payload: { message: string; ttl: number; signature: string }) => void;
@@ -21,6 +23,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   const [passwordError, setPasswordError] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { play } = useSound();
+  const { t } = useI18n();
 
   const handleCrystallize = async () => {
     const message = text.trim();
@@ -31,11 +34,11 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
 
     if (shouldEncrypt) {
       if (password.length < 6) {
-        setPasswordError('密码至少需要 6 位');
+        setPasswordError(t('encrypt.passwordShort'));
         return;
       }
       if (password !== confirmPassword) {
-        setPasswordError('两次输入的密码不一致');
+        setPasswordError(t('encrypt.passwordMismatch'));
         return;
       }
     }
@@ -63,7 +66,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
       }, 1500);
     } catch (error) {
       console.error('Crystallization failed:', error);
-      alert('凝结失败，请重试');
+      alert(t('encrypt.failed'));
       setIsGenerating(false);
     }
   };
@@ -76,11 +79,12 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         <div className="flex items-center gap-3 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary">ac_unit</span>
           <div className="flex flex-col">
-            <h2 className="text-sm font-bold tracking-wide text-white/90">雪花密语</h2>
-            <span className="text-[10px] tracking-[0.2em] text-primary/60 uppercase">Snowflake Whisper</span>
+            <h2 className="text-sm font-bold tracking-wide text-white/90">{t('common.appName')}</h2>
+            <span className="text-[10px] tracking-[0.2em] text-primary/60 uppercase">{t('common.appSubtitle')}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageToggleButton compact />
           <SoundToggleButton compact />
           <button onClick={onBack} className="size-10 cine-btn-ghost flex items-center justify-center rounded-full">
             <span className="material-symbols-outlined text-white/70">close</span>
@@ -90,14 +94,14 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
 
       <div className="relative z-10 w-full flex-1 min-h-0 overflow-y-auto md:overflow-visible flex items-center justify-center">
       <div className="w-full max-w-4xl flex flex-col items-center pb-10 md:pb-12">
-        <span className="text-primary/35 text-[10px] tracking-[0.35em] mb-4 uppercase">Whisper Phase</span>
-        <h1 className="text-glacial text-2xl md:text-3xl tracking-wide font-light">写下你的心语...</h1>
+        <span className="text-primary/35 text-[10px] tracking-[0.35em] mb-4 uppercase">{t('encrypt.phase')}</span>
+        <h1 className="text-glacial text-2xl md:text-3xl tracking-wide font-light">{t('encrypt.title')}</h1>
         
         <div className="w-full relative mt-8 md:mt-10">
           <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(56,218,250,0.12),transparent_68%)] blur-2xl"></div>
           <textarea 
             className="relative w-full bg-white/[0.02] border border-white/10 rounded-3xl focus:ring-0 text-white/90 text-center text-4xl md:text-6xl font-light placeholder:text-white/15 resize-none min-h-[170px] md:min-h-[220px] leading-relaxed tracking-tight font-serif italic px-6 py-10 md:py-12 backdrop-blur-[2px]"
-            placeholder="此刻的心语..."
+            placeholder={t('encrypt.placeholder')}
             value={text}
             onChange={(e) => setText(e.target.value)}
             spellCheck={false}
@@ -107,19 +111,19 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         <div className="mt-10 md:mt-11 flex flex-col items-center gap-4">
-          <span className="text-[10px] tracking-[0.28em] text-white/30 uppercase">Choose Your Essence</span>
+          <span className="text-[10px] tracking-[0.28em] text-white/30 uppercase">{t('encrypt.chooseEssence')}</span>
           <div className="cine-pill backdrop-blur-md p-2 rounded-full flex items-center gap-2">
             <button 
               onClick={() => setEssence('aurora')}
               className={`px-7 py-3 rounded-full text-[10px] tracking-widest font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_18px_rgba(56,218,250,0.24)]' : 'text-white/45 hover:text-white/75'}`}
             >
-              极光之息
+              {t('encrypt.aurora')}
             </button>
             <button 
               onClick={() => setEssence('stardust')}
               className={`px-7 py-3 rounded-full text-[10px] tracking-widest font-medium transition-all ${essence === 'stardust' ? 'bg-aurora-purple/20 text-aurora-purple shadow-[0_0_18px_rgba(203,115,252,0.24)]' : 'text-white/45 hover:text-white/75'}`}
             >
-              星尘之梦
+              {t('encrypt.stardust')}
             </button>
           </div>
         </div>
@@ -129,16 +133,16 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           <div className="flex flex-col items-center gap-3">
             <span className="text-[10px] tracking-[0.24em] text-white/30 uppercase flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">schedule</span>
-              Time Limit
+              {t('encrypt.timeLimit')}
             </span>
             <div className="flex flex-wrap gap-2.5 justify-center">
               {[
-                { label: '30秒', value: 30 },
-                { label: '60秒', value: 60 },
-                { label: '5分钟', value: 300 },
-                { label: '10分钟', value: 600 },
-                { label: '30分钟', value: 1800 },
-                { label: '永久', value: -1 },
+                { label: t('encrypt.ttl30'), value: 30 },
+                { label: t('encrypt.ttl60'), value: 60 },
+                { label: t('encrypt.ttl5m'), value: 300 },
+                { label: t('encrypt.ttl10m'), value: 600 },
+                { label: t('encrypt.ttl30m'), value: 1800 },
+                { label: t('encrypt.ttlForever'), value: -1 },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -164,8 +168,8 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             : 'bg-red-500/10 border-red-500/30 text-red-300'
         }`}>
           {ttl === -1
-            ? '永久保存模式：会进入画廊，可后续分享与查看。'
-            : '阅后即焚模式：到期自动融化，不会进入画廊。'}
+            ? t('encrypt.modePermanent')
+            : t('encrypt.modeEphemeral')}
         </div>
 
         <div className="mt-5 w-full max-w-3xl">
@@ -176,7 +180,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           >
             <span className="flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">tune</span>
-              高级设置（密码保护）
+              {t('encrypt.advanced')}
             </span>
             <span className="material-symbols-outlined text-sm">{showAdvanced ? 'expand_less' : 'expand_more'}</span>
           </button>
@@ -188,10 +192,10 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
               <div>
                 <h3 className="text-sm font-bold text-white/90 flex items-center gap-2">
                   <span className="material-symbols-outlined text-base text-primary">lock</span>
-                  密码保护（可选）
+                  {t('encrypt.passwordTitle')}
                 </h3>
                 <p className="text-[11px] text-white/50 mt-1">
-                  仅“永久保存”支持密码保护；画廊查看时需要输入密码解密。
+                  {t('encrypt.passwordDesc')}
                 </p>
               </div>
               <button
@@ -209,7 +213,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
                       : 'bg-white/5 border border-white/10 text-white/70 hover:text-white'
                 }`}
               >
-                {enablePassword ? '已开启' : '未开启'}
+                {enablePassword ? t('encrypt.enabled') : t('encrypt.disabled')}
               </button>
             </div>
 
@@ -217,7 +221,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
               <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
                 <input
                   type="password"
-                  placeholder="设置密码（至少 6 位）"
+                  placeholder={t('encrypt.setPassword')}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -228,7 +232,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
                 />
                 <input
                   type="password"
-                  placeholder="再次输入密码"
+                  placeholder={t('encrypt.confirmPassword')}
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
@@ -259,11 +263,11 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
               {isGenerating ? (
                 <>
                   <span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>
-                  凝结中...
+                  {t('encrypt.crystallizing')}
                 </>
               ) : (
                 <>
-                  凝结心语
+                  {t('encrypt.crystallize')}
                   <span className="material-symbols-outlined text-lg">auto_fix_high</span>
                 </>
               )}

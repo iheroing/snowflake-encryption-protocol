@@ -31,6 +31,8 @@ class SoundManager {
   private graph: AudioGraph | null = null;
   private bgm: HTMLAudioElement | null = null;
   private bgmFadeRaf: number | null = null;
+  private primed = false;
+  private mutedAutoplayActive = false;
   private scene: SoundScene = 'landing';
   private enabled = true;
   private listeners = new Set<EnabledListener>();
@@ -47,6 +49,10 @@ class SoundManager {
     } catch {
       this.enabled = true;
     }
+
+    if (this.enabled) {
+      this.prime();
+    }
   }
 
   getEnabled(): boolean {
@@ -56,6 +62,25 @@ class SoundManager {
   subscribe(listener: EnabledListener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  prime(): void {
+    if (this.primed || typeof window === 'undefined') {
+      return;
+    }
+    this.primed = true;
+
+    const bgm = this.ensureBgm();
+    bgm.load();
+    void this.ensureGraph();
+
+    // Try muted autoplay so unmute can be instant on first interaction.
+    bgm.muted = true;
+    void bgm.play().then(() => {
+      this.mutedAutoplayActive = true;
+    }).catch(() => {
+      this.mutedAutoplayActive = false;
+    });
   }
 
   async unlock(): Promise<void> {
@@ -69,10 +94,15 @@ class SoundManager {
     }
 
     const bgm = this.ensureBgm();
+    bgm.muted = false;
     try {
       await bgm.play();
     } catch {
       // Autoplay can fail before user gesture; ignore and wait for next unlock.
+    }
+
+    if (this.mutedAutoplayActive) {
+      this.mutedAutoplayActive = false;
     }
 
     if (graph) {
@@ -118,6 +148,7 @@ class SoundManager {
       return;
     }
 
+    this.prime();
     void this.unlock();
   }
 

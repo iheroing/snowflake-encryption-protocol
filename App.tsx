@@ -7,6 +7,7 @@ import AfterglowView from './components/AfterglowView';
 import { createSnowflakeSignature, parseShareUrl, removeShareParamFromUrl } from './utils/share';
 import { useSound } from './contexts/SoundContext';
 import type { SoundScene } from './utils/sound';
+import { useI18n } from './contexts/I18nContext';
 
 enum View {
   LANDING = 'landing',
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [signature, setSignature] = useState<string>(createSnowflakeSignature());
   const [decryptSource, setDecryptSource] = useState<'local' | 'shared'>('local');
   const { setScene, play } = useSound();
+  const { t, localeTag } = useI18n();
   const hasMountedRef = useRef(false);
 
   useEffect(() => {
@@ -57,6 +59,11 @@ const App: React.FC = () => {
     }
     play('switch');
   }, [currentView, play, setScene]);
+
+  useEffect(() => {
+    document.title = `${t('common.appName')} | ${t('common.appSubtitle')}`;
+    document.documentElement.lang = localeTag;
+  }, [localeTag, t]);
 
   return (
     <div className="relative w-full min-h-[100svh] bg-background-dark select-none">

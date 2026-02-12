@@ -2,6 +2,8 @@
 import React from 'react';
 import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
+import LanguageToggleButton from './LanguageToggleButton';
+import { useI18n } from '../contexts/I18nContext';
 
 interface Props {
   onCrystallize: () => void;
@@ -10,6 +12,7 @@ interface Props {
 
 const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
   const { play } = useSound();
+  const { t } = useI18n();
 
   return (
     <main className="cine-page px-5 md:px-8">
@@ -18,22 +21,23 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary">ac_unit</span>
           <div className="text-left">
-            <h2 className="text-sm font-bold tracking-wide text-white/90">雪花密语</h2>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60">Snowflake Whisper</p>
+            <h2 className="text-sm font-bold tracking-wide text-white/90">{t('common.appName')}</h2>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60">{t('common.appSubtitle')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={onEnterMuseum} className="cine-btn-ghost px-4 py-2 text-xs font-semibold tracking-[0.16em] uppercase">
-            心语画廊
+            {t('landing.museum')}
           </button>
+          <LanguageToggleButton compact />
           <SoundToggleButton compact />
         </div>
       </header>
 
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center py-5 md:py-7">
       <div className="mb-7 md:mb-8 space-y-2 opacity-80">
-        <span className="text-primary text-xs tracking-[0.24em] font-medium uppercase">Ephemeral Message</span>
-        <p className="text-xl font-light italic text-glacial/80 font-serif">"心语凝结成雪，随风而逝..."</p>
+        <span className="text-primary text-xs tracking-[0.24em] font-medium uppercase">{t('landing.phase')}</span>
+        <p className="text-xl font-light italic text-glacial/80 font-serif">{t('landing.quote')}</p>
       </div>
 
       <div onClick={() => {
@@ -64,8 +68,8 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
 
       <div className="mt-8 md:mt-10 space-y-4">
         <h1 className="text-xl md:text-3xl font-bold tracking-wide text-white/90">
-          轻触晶核 <br/>
-          <span className="text-primary font-display italic">凝结你的心语</span>
+          {t('landing.line1')} <br/>
+          <span className="text-primary font-display italic">{t('landing.line2')}</span>
         </h1>
         <div className="flex items-center justify-center space-x-4">
           <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-primary/50"></div>
@@ -75,7 +79,7 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
       </div>
 
       <p className="mt-8 text-[10px] tracking-[0.2em] uppercase cine-muted">
-        Tap the core to begin
+        {t('landing.hint')}
       </p>
       </div>
       </div>

@@ -4,6 +4,8 @@ import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { getSnowflakeId } from '../utils/share';
 import SoundToggleButton from './SoundToggleButton';
 import { useSound } from '../contexts/SoundContext';
+import LanguageToggleButton from './LanguageToggleButton';
+import { useI18n } from '../contexts/I18nContext';
 
 interface Props {
   onBack: () => void;
@@ -16,6 +18,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
   const [selectedCanvas, setSelectedCanvas] = useState('postcard');
   const canvasRef = useRef<HTMLDivElement>(null);
   const { play } = useSound();
+  const { t, localeTag } = useI18n();
   
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 1200, signature), [message, signature]);
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
@@ -138,25 +141,25 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         // 添加顶部标题
         ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
         ctx.font = `300 ${width * 0.012}px "Space Grotesk", sans-serif`;
-        ctx.fillText('SNOWFLAKE WHISPER', width / 2, height * 0.05);
+        ctx.fillText(t('common.appSubtitle'), width / 2, height * 0.05);
         
         // 添加底部时间戳
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.font = `300 ${width * 0.01}px "Space Grotesk", sans-serif`;
-        const timestamp = new Date().toLocaleString('zh-CN', {
+        const timestamp = new Date().toLocaleString(localeTag, {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
           minute: '2-digit'
         });
-        ctx.fillText(`Captured at ${timestamp}`, width / 2, height * 0.95);
+        ctx.fillText(`${t('afterglow.stampPrefix')} ${timestamp}`, width / 2, height * 0.95);
         
         // 添加底部装饰文字
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.font = `300 ${width * 0.008}px "Space Grotesk", sans-serif`;
-        ctx.fillText('FRACTAL ENGINE ONLINE', width * 0.2, height * 0.97);
-        ctx.fillText(`Render: ${width} x ${height}`, width * 0.8, height * 0.97);
+        ctx.fillText(t('afterglow.footerEngine').toUpperCase(), width * 0.2, height * 0.97);
+        ctx.fillText(`${t('afterglow.footerRender')}: ${width} x ${height}`, width * 0.8, height * 0.97);
         
         // 导出为 PNG
         canvas.toBlob((blob) => {
@@ -176,11 +179,11 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
       
       img.onerror = () => {
         console.error('Failed to load snowflake image');
-        alert('导出失败，请重试');
+        alert(t('afterglow.exportFailed'));
       };
     } catch (error) {
       console.error('Export failed:', error);
-      alert('导出失败，请重试');
+      alert(t('afterglow.exportFailed'));
     }
   };
 
@@ -193,15 +196,16 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         <div className="flex items-center gap-6">
           <button onClick={onBack} className="flex items-center gap-2 text-primary hover:text-white transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-xs font-bold tracking-[0.2em] uppercase">Return</span>
+            <span className="text-xs font-bold tracking-[0.2em] uppercase">{t('afterglow.return')}</span>
           </button>
           <div className="h-4 w-px bg-white/10"></div>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-primary">ac_unit</span>
-            <h2 className="font-serif italic text-lg tracking-tight">雪花密语</h2>
+            <h2 className="font-serif italic text-lg tracking-tight">{t('common.appName')}</h2>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageToggleButton compact />
           <SoundToggleButton compact />
           <button onClick={onExit} className="size-10 rounded-full cine-btn-ghost flex items-center justify-center">
              <span className="material-symbols-outlined">close</span>
@@ -222,7 +226,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
                  <div className="text-center">
                     <p className="font-serif text-3xl italic text-glacial font-light">"{message}"</p>
                     <p className="text-[10px] tracking-[0.4em] uppercase text-white/30 mt-4">
-                      Captured at {new Date().toLocaleTimeString()} • {new Date().toLocaleDateString()}
+                      {t('afterglow.capturedAt')} {new Date().toLocaleTimeString(localeTag)} • {new Date().toLocaleDateString(localeTag)}
                     </p>
                     <p className="text-[10px] tracking-[0.25em] uppercase text-primary/50 mt-3">{snowflakeId}</p>
                  </div>
@@ -233,17 +237,17 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         {/* Sidebar Controls */}
         <aside className="w-[420px] h-full cine-panel-strong p-8 flex flex-col gap-10">
           <div>
-            <h1 className="font-serif text-3xl font-bold mb-3">余晖</h1>
-            <p className="text-white/40 text-sm leading-relaxed">将这一刻的美好，凝结成永恒的艺术品。</p>
+            <h1 className="font-serif text-3xl font-bold mb-3">{t('afterglow.title')}</h1>
+            <p className="text-white/40 text-sm leading-relaxed">{t('afterglow.desc')}</p>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-[10px] font-bold tracking-widest text-white/40 uppercase">Canvas Selection</h3>
+            <h3 className="text-[10px] font-bold tracking-widest text-white/40 uppercase">{t('afterglow.canvasSelection')}</h3>
             <div className="flex flex-col gap-3">
               {[
-                { id: 'postcard', label: '明信片 (1600×1000)', icon: 'drafts' },
-                { id: 'desktop', label: '桌面壁纸 (2560×1440)', icon: 'desktop_windows' },
-                { id: 'mobile', label: '手机壁纸 (1080×1920)', icon: 'smartphone' }
+                { id: 'postcard', label: t('afterglow.optionPostcard'), icon: 'drafts' },
+                { id: 'desktop', label: t('afterglow.optionDesktop'), icon: 'desktop_windows' },
+                { id: 'mobile', label: t('afterglow.optionMobile'), icon: 'smartphone' }
               ].map(opt => (
                 <div 
                   key={opt.id}
@@ -261,9 +265,9 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
           <div className="mt-auto space-y-6">
              <button onClick={handleExport} className="w-full cine-btn-primary font-bold py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] shadow-lg shadow-primary/20">
                 <span className="material-symbols-outlined">download</span>
-                导出艺术品
+                {t('afterglow.export')}
              </button>
-             <p className="text-[10px] text-center text-white/30 tracking-widest uppercase">High-Resolution PNG</p>
+             <p className="text-[10px] text-center text-white/30 tracking-widest uppercase">{t('afterglow.hiRes')}</p>
           </div>
         </aside>
       </main>
@@ -271,11 +275,11 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
       <footer className="px-2 md:px-4 py-5 border-t border-white/5 bg-background-dark/80 flex items-center justify-between">
          <div className="flex items-center gap-2">
             <span className="size-1.5 bg-primary rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">Fractal Engine Online</span>
+            <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">{t('afterglow.footerEngine')}</span>
          </div>
          <div className="flex gap-8 text-[10px] text-white/30 tracking-widest">
-            <span>Render: 4096 x 2304</span>
-            <span>Complexity: 8.4M poly</span>
+            <span>{t('afterglow.footerRender')}: 4096 x 2304</span>
+            <span>{t('afterglow.footerComplexity')}: 8.4M poly</span>
          </div>
       </footer>
       </div>

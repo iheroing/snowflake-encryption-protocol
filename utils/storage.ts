@@ -11,7 +11,7 @@ export interface SnowflakeRecord {
 
 const STORAGE_KEY = 'snowflake_whispers';
 const MAX_RECORDS = 50;
-const ENCRYPTED_PLACEHOLDER = '🔒 已加密心语';
+const ENCRYPTED_PLACEHOLDER = '🔒 ENCRYPTED_WHISPER';
 
 const memoryStorage = new Map<string, string>();
 

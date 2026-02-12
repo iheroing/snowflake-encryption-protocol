@@ -6,6 +6,8 @@ import { decrypt } from '../utils/encryption';
 import { buildShareUrl, getSnowflakeId } from '../utils/share';
 import SoundToggleButton from './SoundToggleButton';
 import { useSound } from '../contexts/SoundContext';
+import LanguageToggleButton from './LanguageToggleButton';
+import { useI18n } from '../contexts/I18nContext';
 
 interface Props {
   onExit: () => void;
@@ -24,6 +26,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   const [password, setPassword] = useState("");
   const [decryptError, setDecryptError] = useState("");
   const { play } = useSound();
+  const { t, localeTag } = useI18n();
 
   useEffect(() => {
     loadRecords();
@@ -38,7 +41,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     } catch (error) {
       console.error('[Gallery] Failed to load records:', error);
       setRecords([]);
-      setLoadError('画廊数据读取失败，请重试');
+      setLoadError(t('gallery.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -95,13 +98,13 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       setPassword("");
       setDecryptError("");
     } catch (error) {
-      setDecryptError("密码错误，请重试");
+      setDecryptError(t('gallery.decryptError'));
     }
   };
 
   const handleDeleteSnowflake = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('确定要永久销毁这片雪花吗？此操作不可恢复。')) {
+    if (confirm(t('gallery.deleteConfirm'))) {
       deleteSnowflake(id);
       loadRecords();
       if (selectedRecord?.id === id) {
@@ -119,8 +122,8 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       event.stopPropagation();
     }
 
-    if (!record.message.trim() || record.message.includes('已加密心语')) {
-      alert('加密心语请先解密后再分享');
+    if (!record.message.trim() || (record.hasPassword && record.message.trim().startsWith('🔒'))) {
+      alert(t('gallery.encryptedNeedDecrypt'));
       return;
     }
 
@@ -129,8 +132,8 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: '雪花密语',
-          text: `分享一片雪花：${getSnowflakeId(record.id)}`,
+          title: t('gallery.shareTitle'),
+          text: t('gallery.shareText', { id: getSnowflakeId(record.id) }),
           url: shareUrl
         });
         play('share');
@@ -143,15 +146,15 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       play('share');
-      alert('分享链接已复制');
+      alert(t('gallery.shareCopied'));
     } catch {
-      prompt('复制这条分享链接：', shareUrl);
+      prompt(t('common.copyPrompt'), shareUrl);
     }
   };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleString('zh-CN', {
+    return date.toLocaleString(localeTag, {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
@@ -166,10 +169,10 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return '刚刚';
-    if (minutes < 60) return `${minutes}分钟前`;
-    if (hours < 24) return `${hours}小时前`;
-    if (days < 7) return `${days}天前`;
+    if (minutes < 1) return t('gallery.justNow');
+    if (minutes < 60) return t('gallery.minutesAgo', { count: minutes });
+    if (hours < 24) return t('gallery.hoursAgo', { count: hours });
+    if (days < 7) return t('gallery.daysAgo', { count: days });
     return formatDate(timestamp);
   };
 
@@ -186,18 +189,26 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     image.src = generateSnowflakeDataURL(signature, size, signature);
   };
 
+  const getDisplayMessage = (record: SnowflakeRecord): string => {
+    if (record.hasPassword && record.message.trim().startsWith('🔒')) {
+      return t('gallery.passwordPromptTitle');
+    }
+    return record.message;
+  };
+
   return (
     <div className="relative w-full min-h-[var(--cine-viewport)]">
       <div className="relative z-10 min-h-[var(--cine-viewport)] overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-[calc(var(--cine-safe-bottom)+9rem)] px-4 md:px-8">
         <header className="sticky top-[var(--cine-safe-top)] z-50 cine-stage flex items-center justify-between px-4 md:px-5 py-3 cine-header">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary">ac_unit</span>
-          <h2 className="font-display text-lg font-bold tracking-[0.16em] uppercase">心语画廊</h2>
+          <h2 className="font-display text-lg font-bold tracking-[0.16em] uppercase">{t('gallery.title')}</h2>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageToggleButton compact />
           <SoundToggleButton compact />
           <button onClick={onExit} className="cine-btn-ghost px-5 py-2.5 text-sm font-bold tracking-[0.16em] uppercase">
-            返回
+            {t('common.back')}
           </button>
         </div>
       </header>
@@ -205,15 +216,15 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       <main className="cine-stage px-2 md:px-4 pt-14 md:pt-16">
         <section className="text-center mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 cine-pill text-primary text-[10px] font-bold tracking-[0.18em] mb-8 animate-pulse uppercase">
-            {records.length} Whispers Preserved
+            {t('gallery.preserved', { count: records.length })}
           </div>
           <h1 className="font-display text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-tight italic">
-            心语 <br/><span className="text-primary not-italic">画廊</span>
+            {t('gallery.heroLine1')} <br/><span className="text-primary not-italic">{t('gallery.heroLine2')}</span>
           </h1>
           <p className="max-w-2xl mx-auto text-lg text-white/50 font-light leading-relaxed">
             {records.length > 0 
-              ? '这里保存着你凝结的每一片雪花，每一句心语。它们曾在60秒后消逝，但美好永远留存。'
-              : '还没有保存的心语。去创建你的第一片雪花吧！'
+              ? t('gallery.introHasRecords')
+              : t('gallery.introEmpty')
             }
           </p>
         </section>
@@ -221,7 +232,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 text-white/60">
             <span className="material-symbols-outlined text-4xl animate-spin mb-4">progress_activity</span>
-            正在加载画廊内容...
+            {t('gallery.loading')}
           </div>
         ) : loadError ? (
           <div className="flex flex-col items-center justify-center py-24">
@@ -233,7 +244,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               onClick={loadRecords}
               className="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:brightness-110 transition-all"
             >
-              重新加载
+              {t('gallery.reload')}
             </button>
           </div>
         ) : records.length === 0 ? (
@@ -241,8 +252,8 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
             <div className="size-32 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center mb-8">
               <span className="material-symbols-outlined text-6xl text-primary/40">ac_unit</span>
             </div>
-            <h3 className="text-2xl font-bold mb-4">还没有心语</h3>
-            <p className="text-white/40 mb-8">创建你的第一片雪花，或加载精美预设</p>
+            <h3 className="text-2xl font-bold mb-4">{t('gallery.emptyTitle')}</h3>
+            <p className="text-white/40 mb-8">{t('gallery.emptyDesc')}</p>
             <div className="flex gap-4">
               <button 
                 onClick={handleLoadPresets}
@@ -250,14 +261,14 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               >
                 <span className="flex items-center gap-2">
                   <span className="material-symbols-outlined">auto_awesome</span>
-                  加载预设
+                  {t('gallery.loadPresets')}
                 </span>
               </button>
               <button 
                 onClick={onExit}
                 className="px-8 py-4 cine-btn-primary font-bold"
               >
-                创建雪花
+                {t('gallery.create')}
               </button>
             </div>
           </div>
@@ -288,21 +299,21 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     </span>
                     <div className="flex items-center gap-2">
                       {record.hasPassword && (
-                        <span className="material-symbols-outlined text-primary/60 text-sm" title="密码保护">
+                        <span className="material-symbols-outlined text-primary/60 text-sm" title={t('gallery.lockTitle')}>
                           lock
                         </span>
                       )}
                       <button
                         onClick={(e) => handleDeleteSnowflake(record.id, e)}
                         className="material-symbols-outlined text-red-400/40 hover:text-red-400 transition-colors text-sm"
-                        title="销毁"
+                        title={t('gallery.deleteTitle')}
                       >
                         delete
                       </button>
                       <button
                         onClick={(e) => handleShareRecord(record, e)}
                         className="material-symbols-outlined text-primary/40 hover:text-primary transition-colors text-sm"
-                        title="分享"
+                        title={t('gallery.shareTitleShort')}
                       >
                         share
                       </button>
@@ -313,10 +324,10 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                   </div>
                   <div>
                     <h4 className="font-serif text-2xl mb-4 italic leading-snug text-white/90 line-clamp-3">
-                      {record.message}
+                      {getDisplayMessage(record)}
                     </h4>
                     {record.hasPassword && (
-                      <p className="text-primary/60 text-xs mb-2">已加密，点击后输入密码查看</p>
+                      <p className="text-primary/60 text-xs mb-2">{t('gallery.encryptedHint')}</p>
                     )}
                     <p className="text-[10px] tracking-widest uppercase text-white/35 mb-2">
                       {getSnowflakeId(record.id)}
@@ -338,9 +349,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               <div className="size-20 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center text-primary animate-pulse">
                 <span className="material-symbols-outlined text-4xl">add</span>
               </div>
-              <h4 className="font-display text-2xl">凝结新的心语</h4>
+              <h4 className="font-display text-2xl">{t('gallery.newWhisper')}</h4>
               <p className="text-sm text-white/40 leading-relaxed px-4">
-                创建一片新的雪花，记录此刻的心情
+                {t('gallery.newWhisperDesc')}
               </p>
             </div>
           </div>
@@ -397,7 +408,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 >
                   <span className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg">replay</span>
-                    重新体验
+                    {t('gallery.replay')}
                   </span>
                 </button>
                 <button
@@ -406,7 +417,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 >
                   <span className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg">share</span>
-                    分享链接
+                    {t('gallery.shareLink')}
                   </span>
                 </button>
               </div>
@@ -420,27 +431,27 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       <div className="fixed bottom-[calc(var(--cine-safe-bottom)+20px)] left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 cine-panel-strong p-2">
         <div className="flex gap-1 border-r border-white/10 pr-2">
           <button 
-            title="刷新画廊"
+            title={t('gallery.refresh')}
             onClick={loadRecords}
             className="group relative p-3 hover:text-primary transition-colors rounded-xl"
           >
             <span className="material-symbols-outlined text-[20px]">refresh</span>
             <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              刷新
+              {t('gallery.refresh')}
             </span>
           </button>
           <button 
-            title="搜索心语"
+            title={t('gallery.search')}
             onClick={() => setShowSearch(!showSearch)}
             className={`group relative p-3 transition-colors rounded-xl ${showSearch ? 'text-primary' : 'hover:text-primary'}`}
           >
             <span className="material-symbols-outlined text-[20px]">search</span>
             <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              搜索
+              {t('gallery.search')}
             </span>
           </button>
           <button 
-            title={sortBy === 'newest' ? '最新优先' : '最旧优先'}
+            title={sortBy === 'newest' ? t('gallery.sortNewest') : t('gallery.sortOldest')}
             onClick={() => setSortBy(sortBy === 'newest' ? 'oldest' : 'newest')}
             className="group relative p-3 hover:text-primary transition-colors rounded-xl"
           >
@@ -448,23 +459,23 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               {sortBy === 'newest' ? 'arrow_downward' : 'arrow_upward'}
             </span>
             <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              {sortBy === 'newest' ? '最新优先' : '最旧优先'}
+              {sortBy === 'newest' ? t('gallery.sortNewest') : t('gallery.sortOldest')}
             </span>
           </button>
           <button 
-            title="加载预设心语"
+            title={t('gallery.loadPresetTooltip')}
             onClick={handleLoadPresets}
             className="group relative p-3 hover:text-primary transition-colors rounded-xl"
           >
             <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
             <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-background-dark/90 border border-primary/20 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              加载预设
+              {t('gallery.loadPresets')}
             </span>
           </button>
         </div>
         <button onClick={onExit} className="cine-btn-primary font-bold py-3 px-8 flex items-center gap-2 active:scale-95">
           <span className="material-symbols-outlined text-[20px]">add_comment</span>
-          创建雪花
+          {t('gallery.create')}
         </button>
       </div>
 
@@ -474,7 +485,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           <div className="relative">
             <input
               type="text"
-              placeholder="搜索心语..."
+              placeholder={t('gallery.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full cine-panel-strong px-6 py-4 pr-12 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
@@ -486,7 +497,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           </div>
           {searchQuery && (
             <div className="mt-2 text-center text-xs text-white/40">
-              找到 {filteredRecords.length} 条结果
+              {t('gallery.foundCount', { count: filteredRecords.length })}
             </div>
           )}
         </div>
@@ -525,15 +536,15 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               </div>
               
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-2">密码保护的心语</h3>
-                <p className="text-white/50 text-sm">请输入密码以解密查看</p>
+                <h3 className="text-2xl font-bold mb-2">{t('gallery.passwordPromptTitle')}</h3>
+                <p className="text-white/50 text-sm">{t('gallery.passwordPromptDesc')}</p>
               </div>
 
               <div className="w-full space-y-4">
                 <div className="relative">
                   <input
                     type="password"
-                    placeholder="输入密码"
+                    placeholder={t('gallery.passwordPlaceholder')}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -564,7 +575,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                   disabled={!password}
                   className="w-full cine-btn-primary font-bold py-3 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
                 >
-                  解密查看
+                  {t('gallery.decryptView')}
                 </button>
               </div>
             </div>
