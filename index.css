@@ -130,3 +130,29 @@ body {
   border: 1px solid rgba(248, 113, 113, 0.35);
   border-radius: 14px;
 }
+
+@keyframes gallery-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate3d(var(--gallery-flake-drift, 0px), 118vh, 0) rotate(360deg);
+  }
+}
+
+.gallery-falling-flake {
+  animation-name: gallery-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-falling-flake {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
