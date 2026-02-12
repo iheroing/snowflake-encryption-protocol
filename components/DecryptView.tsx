@@ -7,9 +7,10 @@ interface Props {
   ttl: number; // 自定义时间（秒）
   onClose: () => void;
   onExport: () => void;
+  onOpenGallery?: () => void;
 }
 
-const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
+const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport, onOpenGallery }) => {
   const [timeLeft, setTimeLeft] = useState(ttl);
   const [rotation, setRotation] = useState(0);
   const [isMelting, setIsMelting] = useState(false);
@@ -317,6 +318,16 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport }) => {
             <span className="material-symbols-outlined text-lg">download</span>
             <span className="text-sm font-bold">珍藏永恒</span>
           </button>
+
+          {isPermanent && onOpenGallery && (
+            <button
+              onClick={onOpenGallery}
+              className="flex items-center gap-2 px-6 py-3 bg-green-500/20 border border-green-500/40 rounded-xl text-green-300 hover:bg-green-500/30 transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">collections</span>
+              <span className="text-sm font-bold">前往画廊</span>
+            </button>
+          )}
         </div>
 
         {/* 标签 */}

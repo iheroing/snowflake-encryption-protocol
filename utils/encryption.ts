@@ -1,5 +1,9 @@
 // 真实的加密工具 - 使用 Web Crypto API (AES-256-GCM)
 
+function toArrayBuffer(view: Uint8Array): ArrayBuffer {
+  return view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength) as ArrayBuffer;
+}
+
 // 将密码转换为加密密钥
 async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
   const encoder = new TextEncoder();
@@ -17,7 +21,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: salt,
+      salt: toArrayBuffer(salt),
       iterations: 100000,
       hash: 'SHA-256'
     },
@@ -43,7 +47,7 @@ export async function encrypt(text: string, password: string): Promise<string> {
     
     // 加密数据
     const encryptedData = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv },
+      { name: 'AES-GCM', iv: toArrayBuffer(iv) },
       key,
       data
     );
@@ -78,9 +82,9 @@ export async function decrypt(encryptedText: string, password: string): Promise<
     
     // 解密数据
     const decryptedData = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: iv },
+      { name: 'AES-GCM', iv: toArrayBuffer(iv) },
       key,
-      encryptedData
+      toArrayBuffer(encryptedData)
     );
     
     // 转换为文本
@@ -114,7 +118,8 @@ export async function secureDestroy(data: string): Promise<void> {
   temp = '';
   
   // 提示垃圾回收（虽然不能强制）
-  if (global.gc) {
-    global.gc();
+  const gc = (globalThis as { gc?: () => void }).gc;
+  if (typeof gc === 'function') {
+    gc();
   }
 }

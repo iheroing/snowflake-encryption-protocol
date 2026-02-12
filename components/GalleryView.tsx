@@ -12,6 +12,8 @@ interface Props {
 const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   const [records, setRecords] = useState<SnowflakeRecord[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<SnowflakeRecord | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
@@ -20,15 +22,22 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   const [decryptError, setDecryptError] = useState("");
 
   useEffect(() => {
-    // 加载历史记录
     loadRecords();
   }, []);
 
   const loadRecords = () => {
-    console.log('[Gallery] Loading records...');
-    const loadedRecords = getSnowflakes();
-    console.log('[Gallery] Loaded records:', loadedRecords.length);
-    setRecords(loadedRecords);
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const loadedRecords = getSnowflakes();
+      setRecords(loadedRecords);
+    } catch (error) {
+      console.error('[Gallery] Failed to load records:', error);
+      setRecords([]);
+      setLoadError('画廊数据读取失败，请重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoadPresets = () => {
@@ -126,10 +135,10 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   };
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative min-h-screen w-full">
       {/* 滚动内容区域 */}
-      <div className="absolute inset-0 z-10 overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-32">
-        <header className="sticky top-0 z-50 flex items-center justify-between px-12 py-8 bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
+      <div className="relative z-10 min-h-screen overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-40">
+        <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 py-8 bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
           <h2 className="font-display text-xl font-bold tracking-wide">心语画廊</h2>
@@ -139,7 +148,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
         </button>
       </header>
 
-      <main className="max-w-7xl mx-auto px-12 pt-16">
+      <main className="max-w-7xl mx-auto px-6 md:px-12 pt-16">
         <section className="text-center mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] font-bold tracking-wide mb-8 animate-pulse uppercase">
             {records.length} Whispers Preserved
@@ -155,7 +164,25 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           </p>
         </section>
 
-        {records.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-24 text-white/60">
+            <span className="material-symbols-outlined text-4xl animate-spin mb-4">progress_activity</span>
+            正在加载画廊内容...
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="text-red-400 mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined">error</span>
+              {loadError}
+            </div>
+            <button
+              onClick={loadRecords}
+              className="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:brightness-110 transition-all"
+            >
+              重新加载
+            </button>
+          </div>
+        ) : records.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="size-32 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center mb-8">
               <span className="material-symbols-outlined text-6xl text-primary/40">ac_unit</span>
@@ -193,7 +220,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 {/* 雪花预览 */}
                 <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity flex items-center justify-center">
                   <img 
-                    src={generateSnowflakeDataURL(record.message, 400)}
+                    src={generateSnowflakeDataURL(record.encryptedMessage ?? record.message, 400)}
                     alt="snowflake"
                     className="w-full h-full object-contain"
                   />
@@ -226,6 +253,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     <h4 className="font-serif text-2xl mb-4 italic leading-snug text-white/90 line-clamp-3">
                       {record.message}
                     </h4>
+                    {record.hasPassword && (
+                      <p className="text-primary/60 text-xs mb-2">已加密，点击后输入密码查看</p>
+                    )}
                     <div className="flex items-center gap-2 text-white/30 text-xs tracking-widest uppercase">
                       <span className="material-symbols-outlined text-sm">schedule</span>
                       {formatDate(record.timestamp)}
@@ -307,8 +337,8 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       )}
       </div>
 
-      {/* Floating HUD - 绝对定位在父容器底部 */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 bg-background-dark/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl">
+      {/* Floating HUD */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 bg-background-dark/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl">
         <div className="flex gap-1 border-r border-white/10 pr-2">
           <button 
             title="刷新画廊"
@@ -359,9 +389,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
         </button>
       </div>
 
-      {/* 搜索框 - 绝对定位在父容器底部 */}
+      {/* 搜索框 */}
       {showSearch && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
+        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
           <div className="relative">
             <input
               type="text"
@@ -430,7 +460,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                       setPassword(e.target.value);
                       setDecryptError("");
                     }}
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleDecrypt();
                       }

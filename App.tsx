@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import LandingView from './components/LandingView';
 import DecryptView from './components/DecryptView';
 import GalleryView from './components/GalleryView';
@@ -48,6 +48,7 @@ const App: React.FC = () => {
           ttl={ttl}
           onClose={() => setCurrentView(View.LANDING)}
           onExport={() => setCurrentView(View.AFTERGLOW)}
+          onOpenGallery={() => setCurrentView(View.GALLERY)}
         />
       )}
 
@@ -56,6 +57,7 @@ const App: React.FC = () => {
           onExit={() => setCurrentView(View.LANDING)}
           onViewSnowflake={(msg) => {
             setMessage(msg);
+            setTtl(60);
             setCurrentView(View.DECRYPT);
           }}
         />

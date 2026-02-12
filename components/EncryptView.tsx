@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { encrypt } from '../utils/encryption';
 import { saveSnowflake } from '../utils/storage';
 
 interface Props {
@@ -12,21 +12,44 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   const [essence, setEssence] = useState<'aurora' | 'stardust'>('aurora');
   const [isGenerating, setIsGenerating] = useState(false);
   const [ttl, setTtl] = useState(60); // 默认60秒
+  const [enablePassword, setEnablePassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const handleCrystallize = async () => {
-    if (!text.trim()) return;
+    const message = text.trim();
+    if (!message) return;
+
+    const canPersist = ttl === -1;
+    const shouldEncrypt = canPersist && enablePassword;
+
+    if (shouldEncrypt) {
+      if (password.length < 6) {
+        setPasswordError('密码至少需要 6 位');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setPasswordError('两次输入的密码不一致');
+        return;
+      }
+    }
     
     setIsGenerating(true);
     
     try {
-      // 如果选择永久，保存到画廊
-      if (ttl === -1) {
-        saveSnowflake(text.trim(), essence);
+      let encryptedMessage: string | undefined;
+      if (shouldEncrypt) {
+        encryptedMessage = await encrypt(message, password);
+      }
+
+      if (canPersist) {
+        saveSnowflake(message, essence, encryptedMessage, shouldEncrypt);
       }
       
       // 模拟生成过程
       setTimeout(() => {
-        onCrystallized(text, ttl);
+        onCrystallized(message, ttl);
       }, 1500);
     } catch (error) {
       console.error('Crystallization failed:', error);
@@ -82,6 +105,71 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
               星尘之梦
             </button>
           </div>
+        </div>
+
+        <div className="mt-8 w-full max-w-2xl rounded-2xl p-6 bg-white/5 border border-white/10">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-bold text-white/90 flex items-center gap-2">
+                <span className="material-symbols-outlined text-base text-primary">lock</span>
+                密码保护（可选）
+              </h3>
+              <p className="text-xs text-white/50 mt-1">
+                仅“永久保存”支持密码保护；画廊查看时需要输入密码解密。
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={ttl !== -1}
+              onClick={() => {
+                setEnablePassword(prev => !prev);
+                setPasswordError("");
+              }}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                ttl !== -1
+                  ? 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
+                  : enablePassword
+                    ? 'bg-primary/20 border border-primary/40 text-primary'
+                    : 'bg-white/5 border border-white/10 text-white/70 hover:text-white'
+              }`}
+            >
+              {enablePassword ? '已开启' : '未开启'}
+            </button>
+          </div>
+
+          {enablePassword && ttl === -1 && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                type="password"
+                placeholder="设置密码（至少 6 位）"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError("");
+                }}
+                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+                autoComplete="new-password"
+              />
+              <input
+                type="password"
+                placeholder="再次输入密码"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setPasswordError("");
+                }}
+                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+                autoComplete="new-password"
+              />
+            </div>
+          )}
+
+          {passwordError && (
+            <p className="mt-3 text-xs text-red-400 flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">error</span>
+              {passwordError}
+            </p>
+          )}
         </div>
 
         {/* 时间选择器 */}

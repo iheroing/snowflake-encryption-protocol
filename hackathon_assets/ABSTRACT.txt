@@ -1,0 +1,12 @@
+Project Name: 雪花密语 (Snowflake Whisper)
+Team: Solo (Assisted by Kiro)
+
+Description:
+Snowflake Whisper is an ephemeral, poetic encryption tool exploring the concept of "Data Impermanence." 
+
+It transforms text messages into unique, fractally generated snowflakes using cryptographic hashes. Built with React 19 and the Web Crypto API, it ensures military-grade AES-256 encryption entirely in the browser. Messages "melt" (self-destruct) after 60 seconds, challenging the modern norm of permanent data storage. 
+
+Developed in under 1 hour with Kiro, utilizing AI for complex fractal algorithm generation and security protocol implementation.
+
+Tech Stack: React 19, TypeScript, Tailwind CSS, Web Crypto API
+Key Feature: Text-to-Fractal Visualization, Client-side Encryption, Ephemeral Messaging.
