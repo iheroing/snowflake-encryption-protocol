@@ -2,6 +2,8 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { getSnowflakeId } from '../utils/share';
+import SoundToggleButton from './SoundToggleButton';
+import { useSound } from '../contexts/SoundContext';
 
 interface Props {
   onBack: () => void;
@@ -13,6 +15,7 @@ interface Props {
 const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper from the void", signature = "afterglow_default" }) => {
   const [selectedCanvas, setSelectedCanvas] = useState('postcard');
   const canvasRef = useRef<HTMLDivElement>(null);
+  const { play } = useSound();
   
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 1200, signature), [message, signature]);
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
@@ -158,6 +161,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         // 导出为 PNG
         canvas.toBlob((blob) => {
           if (blob) {
+            play('export');
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             const canvasType = selectedCanvas === 'postcard' ? 'postcard' : 
@@ -181,11 +185,11 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
   };
 
   return (
-    <div className="relative z-10 h-full w-full flex flex-col overflow-hidden bg-background-dark">
-      {/* Background Decor */}
+    <div className="relative z-10 cine-page w-full flex flex-col overflow-hidden bg-background-dark px-4 md:px-8">
       <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary rounded-full blur-[120px] opacity-10"></div>
       
-      <header className="relative z-50 w-[min(1280px,94vw)] mx-auto mt-4 mb-4 flex items-center justify-between px-4 md:px-5 py-3 cine-header">
+      <div className="cine-stage cine-fold flex flex-col">
+      <header className="relative z-50 w-full mx-auto mb-4 flex items-center justify-between px-4 md:px-5 py-3 cine-header">
         <div className="flex items-center gap-6">
           <button onClick={onBack} className="flex items-center gap-2 text-primary hover:text-white transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
@@ -197,13 +201,15 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
             <h2 className="font-serif italic text-lg tracking-tight">雪花密语</h2>
           </div>
         </div>
-        <button onClick={onExit} className="size-10 rounded-full cine-btn-ghost flex items-center justify-center">
-           <span className="material-symbols-outlined">close</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <SoundToggleButton compact />
+          <button onClick={onExit} className="size-10 rounded-full cine-btn-ghost flex items-center justify-center">
+             <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
       </header>
 
-      <main className="relative flex-1 flex px-6 md:px-12 pb-12 gap-10 overflow-hidden items-center justify-center">
-        {/* Preview Container */}
+      <main className="relative flex-1 min-h-0 flex pb-8 md:pb-10 gap-10 overflow-hidden items-center justify-center">
         <div className="flex-1 flex flex-col items-center justify-center">
            <div ref={canvasRef} className="relative w-full max-w-2xl aspect-[1.6/1] cine-panel-strong flex items-center justify-center p-12 crystal-glow">
               <div className="absolute inset-0 stardust-bg opacity-10"></div>
@@ -262,7 +268,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         </aside>
       </main>
 
-      <footer className="px-6 md:px-12 py-6 border-t border-white/5 bg-background-dark/80 flex items-center justify-between">
+      <footer className="px-2 md:px-4 py-5 border-t border-white/5 bg-background-dark/80 flex items-center justify-between">
          <div className="flex items-center gap-2">
             <span className="size-1.5 bg-primary rounded-full animate-pulse"></span>
             <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">Fractal Engine Online</span>
@@ -272,6 +278,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
             <span>Complexity: 8.4M poly</span>
          </div>
       </footer>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import LandingView from './components/LandingView';
 import DecryptView from './components/DecryptView';
 import GalleryView from './components/GalleryView';
 import EncryptView from './components/EncryptView';
 import AfterglowView from './components/AfterglowView';
 import { createSnowflakeSignature, parseShareUrl, removeShareParamFromUrl } from './utils/share';
+import { useSound } from './contexts/SoundContext';
+import type { SoundScene } from './utils/sound';
 
 enum View {
   LANDING = 'landing',
@@ -20,6 +22,8 @@ const App: React.FC = () => {
   const [ttl, setTtl] = useState<number>(60); // 时间限制
   const [signature, setSignature] = useState<string>(createSnowflakeSignature());
   const [decryptSource, setDecryptSource] = useState<'local' | 'shared'>('local');
+  const { setScene, play } = useSound();
+  const hasMountedRef = useRef(false);
 
   useEffect(() => {
     const sharedPayload = parseShareUrl();
@@ -37,8 +41,25 @@ const App: React.FC = () => {
     window.history.replaceState({}, '', cleanedUrl);
   }, []);
 
+  useEffect(() => {
+    const sceneMap: Record<View, SoundScene> = {
+      [View.LANDING]: 'landing',
+      [View.ENCRYPT]: 'encrypt',
+      [View.DECRYPT]: 'decrypt',
+      [View.GALLERY]: 'gallery',
+      [View.AFTERGLOW]: 'afterglow'
+    };
+    setScene(sceneMap[currentView]);
+
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    play('switch');
+  }, [currentView, play, setScene]);
+
   return (
-    <div className="relative w-full min-h-screen bg-background-dark select-none">
+    <div className="relative w-full min-h-[100svh] bg-background-dark select-none">
       {/* Dynamic Background */}
       <div className="fixed inset-0 stardust-bg opacity-30 pointer-events-none z-0"></div>
       <div className="fixed -top-24 -left-24 w-[520px] h-[520px] bg-primary/10 blur-[140px] rounded-full pointer-events-none z-0"></div>

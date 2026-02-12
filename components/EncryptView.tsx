@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { encrypt } from '../utils/encryption';
 import { saveSnowflake } from '../utils/storage';
 import { createSnowflakeSignature } from '../utils/share';
+import { useSound } from '../contexts/SoundContext';
+import SoundToggleButton from './SoundToggleButton';
 
 interface Props {
   onCrystallized: (payload: { message: string; ttl: number; signature: string }) => void;
@@ -18,6 +20,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const { play } = useSound();
 
   const handleCrystallize = async () => {
     const message = text.trim();
@@ -55,6 +58,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
       
       // 模拟生成过程
       setTimeout(() => {
+        play('crystallize');
         onCrystallized({ message, ttl, signature });
       }, 1500);
     } catch (error) {
@@ -65,9 +69,10 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   };
 
   return (
-    <main className="relative z-10 min-h-screen w-full flex flex-col items-center px-4 md:px-6 py-8 md:py-10 overflow-y-auto">
+    <main className="cine-page px-4 md:px-6 overflow-y-auto">
       <div className="pointer-events-none absolute top-[20%] left-1/2 -translate-x-1/2 w-[620px] h-[620px] rounded-full bg-primary/10 blur-[160px]"></div>
-      <header className="relative z-10 w-full max-w-5xl flex items-center justify-between px-4 md:px-5 py-3 mb-6 md:mb-8 cine-header">
+      <div className="relative z-10 cine-stage cine-fold flex flex-col">
+      <header className="w-full max-w-5xl mx-auto flex items-center justify-between px-4 md:px-5 py-3 mb-5 md:mb-6 cine-header">
         <div className="flex items-center gap-3 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary">ac_unit</span>
           <div className="flex flex-col">
@@ -75,12 +80,15 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             <span className="text-[10px] tracking-[0.2em] text-primary/60 uppercase">Snowflake Whisper</span>
           </div>
         </div>
-        <button onClick={onBack} className="size-10 cine-btn-ghost flex items-center justify-center rounded-full">
-          <span className="material-symbols-outlined text-white/70">close</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <SoundToggleButton compact />
+          <button onClick={onBack} className="size-10 cine-btn-ghost flex items-center justify-center rounded-full">
+            <span className="material-symbols-outlined text-white/70">close</span>
+          </button>
+        </div>
       </header>
 
-      <div className="relative z-10 w-full flex-1 flex items-start md:items-center justify-center">
+      <div className="relative z-10 w-full flex-1 min-h-0 overflow-y-auto md:overflow-visible flex items-center justify-center">
       <div className="w-full max-w-4xl flex flex-col items-center pb-10 md:pb-12">
         <span className="text-primary/35 text-[10px] tracking-[0.35em] mb-4 uppercase">Whisper Phase</span>
         <h1 className="text-glacial text-2xl md:text-3xl tracking-wide font-light">写下你的心语...</h1>
@@ -241,7 +249,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         )}
 
-        <div className="mt-8 w-full max-w-md sticky bottom-4 md:bottom-6 z-20">
+        <div className="mt-8 w-full max-w-md sticky bottom-[calc(var(--cine-safe-bottom)+8px)] z-20">
           <button 
             onClick={handleCrystallize}
             disabled={!text.trim() || isGenerating}
@@ -262,6 +270,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             </span>
           </button>
         </div>
+      </div>
       </div>
       </div>
     </main>

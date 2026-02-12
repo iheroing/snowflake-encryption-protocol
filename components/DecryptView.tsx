@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { buildShareUrl, getSnowflakeId } from '../utils/share';
+import { useSound } from '../contexts/SoundContext';
+import SoundToggleButton from './SoundToggleButton';
 
 interface Props {
   message: string;
@@ -15,117 +17,19 @@ interface Props {
 
 const MELT_DURATION_MS = 9000;
 
-interface AmbientAudioGraph {
-  ctx: AudioContext;
-  master: GainNode;
-  padA: OscillatorNode;
-  padB: OscillatorNode;
-  lfo: OscillatorNode;
-  lfoGain: GainNode;
-}
-
 const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExport, onOpenGallery, source = 'local' }) => {
   const [timeLeft, setTimeLeft] = useState(ttl);
   const [rotation, setRotation] = useState(0);
   const [isMelting, setIsMelting] = useState(false);
   const [meltProgress, setMeltProgress] = useState(0);
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const snowflakeRef = useRef<HTMLDivElement>(null);
   const meltRafRef = useRef<number | null>(null);
-  const audioRef = useRef<AmbientAudioGraph | null>(null);
+  const { play } = useSound();
   
-  // 是否永久保存
   const isPermanent = ttl === -1;
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
   const meltEase = useMemo(() => 1 - Math.pow(1 - Math.min(1, meltProgress), 3), [meltProgress]);
-  
-  // 生成独特的雪花
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 800, signature), [message, signature]);
-
-  const initializeAmbientAudio = useCallback(async () => {
-    if (typeof window === 'undefined' || audioRef.current) {
-      return;
-    }
-    const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtx) {
-      return;
-    }
-
-    const ctx = new AudioCtx();
-    const master = ctx.createGain();
-    master.gain.value = 0;
-    master.connect(ctx.destination);
-
-    const padA = ctx.createOscillator();
-    padA.type = 'sine';
-    padA.frequency.value = 174;
-
-    const padB = ctx.createOscillator();
-    padB.type = 'triangle';
-    padB.frequency.value = 261.6;
-
-    const padGain = ctx.createGain();
-    padGain.gain.value = 0.008;
-    padA.connect(padGain);
-    padB.connect(padGain);
-    padGain.connect(master);
-
-    const lfo = ctx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.08;
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 0.004;
-    lfo.connect(lfoGain);
-    lfoGain.connect(padGain.gain);
-
-    padA.start();
-    padB.start();
-    lfo.start();
-
-    audioRef.current = { ctx, master, padA, padB, lfo, lfoGain };
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
-    }
-  }, []);
-
-  const triggerMeltSound = useCallback(() => {
-    const graph = audioRef.current;
-    if (!graph || !soundEnabled) {
-      return;
-    }
-    const { ctx, master } = graph;
-    const now = ctx.currentTime;
-
-    const tone = ctx.createOscillator();
-    tone.type = 'sine';
-    tone.frequency.setValueAtTime(720, now);
-    tone.frequency.exponentialRampToValueAtTime(110, now + 4.5);
-
-    const toneGain = ctx.createGain();
-    toneGain.gain.setValueAtTime(0.0001, now);
-    toneGain.gain.exponentialRampToValueAtTime(0.02, now + 0.25);
-    toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.8);
-
-    const airy = ctx.createOscillator();
-    airy.type = 'triangle';
-    airy.frequency.setValueAtTime(520, now);
-    airy.frequency.exponentialRampToValueAtTime(160, now + 3.4);
-
-    const airyGain = ctx.createGain();
-    airyGain.gain.setValueAtTime(0.0001, now);
-    airyGain.gain.exponentialRampToValueAtTime(0.012, now + 0.35);
-    airyGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
-
-    tone.connect(toneGain);
-    airy.connect(airyGain);
-    toneGain.connect(master);
-    airyGain.connect(master);
-
-    tone.start(now);
-    airy.start(now);
-    tone.stop(now + 5.2);
-    airy.stop(now + 4.2);
-  }, [soundEnabled]);
 
   const startMelting = useCallback(() => {
     if (isMelting) {
@@ -134,7 +38,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
 
     setIsMelting(true);
     setMeltProgress(0);
-    triggerMeltSound();
+    play('melt');
 
     const startAt = performance.now();
     const tick = (now: number) => {
@@ -148,9 +52,8 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
     };
 
     meltRafRef.current = window.requestAnimationFrame(tick);
-  }, [isMelting, onClose, triggerMeltSound]);
+  }, [isMelting, onClose, play]);
   
-  // 截图功能 - 修复版本
   const handleScreenshot = async () => {
     if (!snowflakeRef.current) return;
     
@@ -248,6 +151,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
         // 导出为 PNG
         canvas.toBlob((blob) => {
           if (blob) {
+            play('export');
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.download = `snowflake-whisper-${Date.now()}.png`;
@@ -268,11 +172,11 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
     }
   };
   
-  // 分享功能
   const handleShare = async () => {
     const shareUrl = buildShareUrl(message, signature);
     if (navigator.share) {
       try {
+        play('share');
         await navigator.share({
           title: '雪花密语',
           text: `我分享了一片独特的雪花 ${snowflakeId} ❄️`,
@@ -286,10 +190,16 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
 
     try {
       await navigator.clipboard.writeText(shareUrl);
+      play('share');
       alert('分享链接已复制！快去分享你的心语吧 ✨');
     } catch {
       prompt('复制这条分享链接：', shareUrl);
     }
+  };
+
+  const handleExport = () => {
+    play('export');
+    onExport();
   };
 
   useEffect(() => {
@@ -303,7 +213,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
   }, [ttl, message, signature]);
 
   useEffect(() => {
-    if (isPermanent) return; // 永久保存不需要倒计时
+    if (isPermanent) return;
     
     if (timeLeft <= 0) {
       startMelting();
@@ -322,80 +232,19 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
   }, []);
 
   useEffect(() => {
-    const setup = async () => {
-      if (!soundEnabled) {
-        return;
-      }
-      await initializeAmbientAudio();
-      const graph = audioRef.current;
-      if (!graph) {
-        return;
-      }
-      if (graph.ctx.state === 'suspended') {
-        await graph.ctx.resume();
-      }
-      graph.master.gain.setTargetAtTime(0.035, graph.ctx.currentTime, 1.2);
-    };
-    void setup();
-  }, [initializeAmbientAudio, soundEnabled]);
-
-  useEffect(() => {
-    if (soundEnabled) {
-      return;
-    }
-    const graph = audioRef.current;
-    if (!graph) {
-      return;
-    }
-    graph.master.gain.setTargetAtTime(0.0001, graph.ctx.currentTime, 0.4);
-  }, [soundEnabled]);
-
-  useEffect(() => {
-    const unlockAudio = () => {
-      if (!soundEnabled) {
-        return;
-      }
-      void initializeAmbientAudio().then(async () => {
-        const graph = audioRef.current;
-        if (!graph) {
-          return;
-        }
-        if (graph.ctx.state === 'suspended') {
-          await graph.ctx.resume();
-        }
-        graph.master.gain.setTargetAtTime(0.035, graph.ctx.currentTime, 1.2);
-      });
-    };
-
-    window.addEventListener('pointerdown', unlockAudio, { once: true });
-    return () => window.removeEventListener('pointerdown', unlockAudio);
-  }, [initializeAmbientAudio, soundEnabled]);
-
-  useEffect(() => {
     return () => {
       if (meltRafRef.current !== null) {
         cancelAnimationFrame(meltRafRef.current);
       }
-      const graph = audioRef.current;
-      if (!graph) {
-        return;
-      }
-      graph.master.gain.setTargetAtTime(0.0001, graph.ctx.currentTime, 0.2);
-      graph.padA.stop();
-      graph.padB.stop();
-      graph.lfo.stop();
-      void graph.ctx.close();
-      audioRef.current = null;
     };
   }, []);
 
   return (
-    <main className="relative z-10 min-h-screen w-full px-4 md:px-8 py-4 md:py-6 overflow-y-auto md:overflow-hidden">
-      {/* Background Blooms */}
+    <main className="cine-page px-4 md:px-8 overflow-y-auto md:overflow-hidden">
       <div className="absolute top-[20%] left-[18%] w-[420px] h-[420px] bg-primary/10 rounded-full blur-[110px] pointer-events-none"></div>
       <div className="absolute bottom-[18%] right-[16%] w-[500px] h-[500px] bg-aurora-purple/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] grid grid-rows-[auto_auto_1fr_auto] gap-3 md:gap-4">
+      <div className="relative z-10 cine-stage cine-fold grid grid-rows-[auto_auto_1fr_auto] gap-3 md:gap-4">
         <header className="w-full flex items-center justify-between px-4 md:px-5 py-3 cine-header">
           <div className="flex items-center gap-3">
             <div className="size-8 flex items-center justify-center bg-primary/20 rounded-lg border border-primary/40">
@@ -407,16 +256,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSoundEnabled(prev => !prev)}
-              className="h-10 px-3 cine-btn-ghost rounded-full text-xs flex items-center gap-1"
-              title={soundEnabled ? '关闭环境音' : '开启环境音'}
-            >
-              <span className="material-symbols-outlined text-base">
-                {soundEnabled ? 'volume_up' : 'volume_off'}
-              </span>
-              {soundEnabled ? 'Ambient' : 'Muted'}
-            </button>
+            <SoundToggleButton />
             <button onClick={onClose} className="size-10 flex items-center justify-center rounded-full cine-btn-ghost">
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -525,7 +365,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               </button>
 
               <button
-                onClick={onExport}
+                onClick={handleExport}
                 className="flex items-center gap-2 px-4 py-2.5 cine-btn-ghost text-sm"
               >
                 <span className="material-symbols-outlined text-lg">download</span>

@@ -15,9 +15,14 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
+  min-height: 100svh;
 }
 
 :root {
+  --cine-safe-top: max(16px, env(safe-area-inset-top));
+  --cine-safe-bottom: max(16px, env(safe-area-inset-bottom));
+  --cine-viewport: 100svh;
+  --cine-stage-width: min(1280px, 94vw);
   --cine-panel-bg: rgba(255, 255, 255, 0.04);
   --cine-panel-border: rgba(255, 255, 255, 0.1);
   --cine-panel-bg-strong: rgba(9, 11, 17, 0.6);
@@ -25,6 +30,30 @@ body {
   --cine-primary: #38dafa;
   --cine-primary-soft: rgba(56, 218, 250, 0.18);
   --cine-danger-soft: rgba(248, 113, 113, 0.16);
+}
+
+@supports not (height: 100svh) {
+  :root {
+    --cine-viewport: 100vh;
+  }
+}
+
+.cine-page {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: var(--cine-viewport);
+  padding-top: var(--cine-safe-top);
+  padding-bottom: var(--cine-safe-bottom);
+}
+
+.cine-stage {
+  width: var(--cine-stage-width);
+  margin-inline: auto;
+}
+
+.cine-fold {
+  min-height: calc(var(--cine-viewport) - var(--cine-safe-top) - var(--cine-safe-bottom));
 }
 
 .cine-header {

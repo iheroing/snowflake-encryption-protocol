@@ -4,6 +4,8 @@ import { getSnowflakes, type SnowflakeRecord, deleteSnowflake, forceLoadPresets 
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { decrypt } from '../utils/encryption';
 import { buildShareUrl, getSnowflakeId } from '../utils/share';
+import SoundToggleButton from './SoundToggleButton';
+import { useSound } from '../contexts/SoundContext';
 
 interface Props {
   onExit: () => void;
@@ -21,6 +23,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [password, setPassword] = useState("");
   const [decryptError, setDecryptError] = useState("");
+  const { play } = useSound();
 
   useEffect(() => {
     loadRecords();
@@ -130,6 +133,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           text: `分享一片雪花：${getSnowflakeId(record.id)}`,
           url: shareUrl
         });
+        play('share');
         return;
       }
     } catch {
@@ -138,6 +142,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
 
     try {
       await navigator.clipboard.writeText(shareUrl);
+      play('share');
       alert('分享链接已复制');
     } catch {
       prompt('复制这条分享链接：', shareUrl);
@@ -169,20 +174,22 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
   };
 
   return (
-    <div className="relative min-h-screen w-full">
-      {/* 滚动内容区域 */}
-      <div className="relative z-10 min-h-screen overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-40">
-        <header className="sticky top-4 z-50 max-w-7xl mx-auto flex items-center justify-between px-4 md:px-5 py-3 cine-header">
+    <div className="relative w-full min-h-[var(--cine-viewport)]">
+      <div className="relative z-10 min-h-[var(--cine-viewport)] overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-[calc(var(--cine-safe-bottom)+9rem)] px-4 md:px-8">
+        <header className="sticky top-[var(--cine-safe-top)] z-50 cine-stage flex items-center justify-between px-4 md:px-5 py-3 cine-header">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary">ac_unit</span>
           <h2 className="font-display text-lg font-bold tracking-[0.16em] uppercase">心语画廊</h2>
         </div>
-        <button onClick={onExit} className="cine-btn-ghost px-5 py-2.5 text-sm font-bold tracking-[0.16em] uppercase">
-          返回
-        </button>
+        <div className="flex items-center gap-2">
+          <SoundToggleButton compact />
+          <button onClick={onExit} className="cine-btn-ghost px-5 py-2.5 text-sm font-bold tracking-[0.16em] uppercase">
+            返回
+          </button>
+        </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 md:px-12 pt-16">
+      <main className="cine-stage px-2 md:px-4 pt-14 md:pt-16">
         <section className="text-center mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 cine-pill text-primary text-[10px] font-bold tracking-[0.18em] mb-8 animate-pulse uppercase">
             {records.length} Whispers Preserved
@@ -395,7 +402,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       </div>
 
       {/* Floating HUD */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 cine-panel-strong p-2">
+      <div className="fixed bottom-[calc(var(--cine-safe-bottom)+20px)] left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 cine-panel-strong p-2">
         <div className="flex gap-1 border-r border-white/10 pr-2">
           <button 
             title="刷新画廊"
@@ -448,7 +455,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
 
       {/* 搜索框 */}
       {showSearch && (
-        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
+        <div className="fixed bottom-[calc(var(--cine-safe-bottom)+90px)] left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4">
           <div className="relative">
             <input
               type="text"

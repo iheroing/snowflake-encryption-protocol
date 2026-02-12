@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { useSound } from '../contexts/SoundContext';
+import SoundToggleButton from './SoundToggleButton';
 
 interface Props {
   onCrystallize: () => void;
@@ -7,9 +9,12 @@ interface Props {
 }
 
 const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
+  const { play } = useSound();
+
   return (
-    <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center text-center px-6 py-10 md:py-12">
-      <header className="absolute top-5 md:top-7 left-1/2 -translate-x-1/2 w-[min(1200px,92vw)] px-4 md:px-5 py-3 cine-header flex items-center justify-between">
+    <main className="cine-page px-5 md:px-8">
+      <div className="cine-stage cine-fold flex flex-col">
+      <header className="w-full px-4 md:px-5 py-3 cine-header flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary">ac_unit</span>
           <div className="text-left">
@@ -17,18 +22,24 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
             <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60">Snowflake Whisper</p>
           </div>
         </div>
-        <button onClick={onEnterMuseum} className="cine-btn-ghost px-4 py-2 text-xs font-semibold tracking-[0.16em] uppercase">
-          心语画廊
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={onEnterMuseum} className="cine-btn-ghost px-4 py-2 text-xs font-semibold tracking-[0.16em] uppercase">
+            心语画廊
+          </button>
+          <SoundToggleButton compact />
+        </div>
       </header>
 
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center py-5 md:py-7">
       <div className="mb-7 md:mb-8 space-y-2 opacity-80">
         <span className="text-primary text-xs tracking-[0.24em] font-medium uppercase">Ephemeral Message</span>
         <p className="text-xl font-light italic text-glacial/80 font-serif">"心语凝结成雪，随风而逝..."</p>
       </div>
 
-      {/* Hero Interactive Seed */}
-      <div onClick={onCrystallize} className="relative group cursor-pointer transition-all duration-700 hover:scale-105">
+      <div onClick={() => {
+        play('crystallize');
+        onCrystallize();
+      }} className="relative group cursor-pointer transition-all duration-700 hover:scale-105">
         <div className="absolute inset-0 rounded-full border border-primary/10 scale-150 animate-pulse"></div>
         <div className="absolute inset-0 rounded-full border border-primary/5 scale-[2.2] animate-pulse delay-700"></div>
         
@@ -51,7 +62,7 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
         </div>
       </div>
 
-      <div className="mt-10 md:mt-12 space-y-4">
+      <div className="mt-8 md:mt-10 space-y-4">
         <h1 className="text-xl md:text-3xl font-bold tracking-wide text-white/90">
           轻触晶核 <br/>
           <span className="text-primary font-display italic">凝结你的心语</span>
@@ -63,9 +74,11 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
         </div>
       </div>
 
-      <p className="absolute bottom-6 text-[10px] tracking-[0.2em] uppercase cine-muted">
+      <p className="mt-8 text-[10px] tracking-[0.2em] uppercase cine-muted">
         Tap the core to begin
       </p>
+      </div>
+      </div>
     </main>
   );
 };
