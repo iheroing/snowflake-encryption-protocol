@@ -17,6 +17,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleCrystallize = async () => {
     const message = text.trim();
@@ -82,9 +83,9 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         <span className="text-primary/40 text-[10px] tracking-widest mb-2 uppercase">Whisper Phase</span>
         <h1 className="text-glacial text-xl md:text-2xl tracking-wide font-light">写下你的心语...</h1>
         
-        <div className="w-full relative mt-5 md:mt-6">
+        <div className="w-full relative mt-4 md:mt-5">
           <textarea 
-            className="w-full bg-transparent border-none focus:ring-0 text-white text-center text-3xl md:text-5xl font-light placeholder:text-white/5 resize-none min-h-[120px] md:min-h-[150px] leading-relaxed tracking-tight font-serif italic"
+            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl focus:ring-0 text-white/90 text-center text-3xl md:text-5xl font-light placeholder:text-white/20 resize-none min-h-[110px] md:min-h-[135px] leading-relaxed tracking-tight font-serif italic px-4 py-6"
             placeholder="此刻的心语..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -94,92 +95,27 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-[3px] bg-primary blur-sm opacity-50"></div>
         </div>
 
-        <div className="mt-6 md:mt-8 flex flex-col items-center gap-4">
+        <div className="mt-5 md:mt-6 flex flex-col items-center gap-3">
           <span className="text-[10px] tracking-widest text-white/30 uppercase">Choose Your Essence</span>
           <div className="bg-white/5 backdrop-blur-md p-1.5 rounded-full flex items-center gap-2 border border-white/5">
             <button 
               onClick={() => setEssence('aurora')}
-              className={`px-8 py-3 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(56,218,250,0.2)]' : 'text-white/40 hover:text-white/70'}`}
+              className={`px-6 py-2.5 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(56,218,250,0.2)]' : 'text-white/40 hover:text-white/70'}`}
             >
               极光之息
             </button>
             <button 
               onClick={() => setEssence('stardust')}
-              className={`px-8 py-3 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'stardust' ? 'bg-aurora-purple/20 text-aurora-purple shadow-[0_0_15px_rgba(203,115,252,0.2)]' : 'text-white/40 hover:text-white/70'}`}
+              className={`px-6 py-2.5 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'stardust' ? 'bg-aurora-purple/20 text-aurora-purple shadow-[0_0_15px_rgba(203,115,252,0.2)]' : 'text-white/40 hover:text-white/70'}`}
             >
               星尘之梦
             </button>
           </div>
         </div>
 
-        <div className="mt-5 w-full max-w-3xl rounded-2xl p-4 md:p-5 bg-white/5 border border-white/10">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h3 className="text-sm font-bold text-white/90 flex items-center gap-2">
-                <span className="material-symbols-outlined text-base text-primary">lock</span>
-                密码保护（可选）
-              </h3>
-              <p className="text-[11px] text-white/50 mt-1">
-                仅“永久保存”支持密码保护；画廊查看时需要输入密码解密。
-              </p>
-            </div>
-            <button
-              type="button"
-              disabled={ttl !== -1}
-              onClick={() => {
-                setEnablePassword(prev => !prev);
-                setPasswordError("");
-              }}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                ttl !== -1
-                  ? 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
-                  : enablePassword
-                    ? 'bg-primary/20 border border-primary/40 text-primary'
-                    : 'bg-white/5 border border-white/10 text-white/70 hover:text-white'
-              }`}
-            >
-              {enablePassword ? '已开启' : '未开启'}
-            </button>
-          </div>
-
-          {enablePassword && ttl === -1 && (
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-              <input
-                type="password"
-                placeholder="设置密码（至少 6 位）"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordError("");
-                }}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
-                autoComplete="new-password"
-              />
-              <input
-                type="password"
-                placeholder="再次输入密码"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setPasswordError("");
-                }}
-                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
-                autoComplete="new-password"
-              />
-            </div>
-          )}
-
-          {passwordError && (
-            <p className="mt-3 text-xs text-red-400 flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm">error</span>
-              {passwordError}
-            </p>
-          )}
-        </div>
-
         {/* 时间选择器 */}
-        <div className="mt-5 w-full max-w-3xl">
-          <div className="flex flex-col items-center gap-4">
+        <div className="mt-4 w-full max-w-3xl">
+          <div className="flex flex-col items-center gap-3">
             <span className="text-[10px] tracking-widest text-white/30 uppercase flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">schedule</span>
               Time Limit
@@ -211,41 +147,98 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         </div>
 
-        {/* 阅后即焚警告 */}
-        <div className={`mt-5 w-full max-w-3xl rounded-2xl p-4 md:p-5 backdrop-blur-sm ${
-          ttl === -1 
-            ? 'bg-green-500/10 border border-green-500/30'
-            : 'bg-red-500/10 border border-red-500/30'
+        <div className={`mt-3 w-full max-w-3xl rounded-xl px-4 py-3 border text-xs ${
+          ttl === -1
+            ? 'bg-green-500/10 border-green-500/30 text-green-300'
+            : 'bg-red-500/10 border-red-500/30 text-red-300'
         }`}>
-          <div className="flex items-start gap-4">
-            <span className={`material-symbols-outlined text-2xl animate-pulse ${
-              ttl === -1 ? 'text-green-400' : 'text-red-400'
-            }`}>
-              {ttl === -1 ? 'bookmark' : 'warning'}
-            </span>
-            <div className="flex-1">
-              {ttl === -1 ? (
-                <>
-                  <h3 className="text-green-400 font-bold text-sm md:text-base mb-1">💚 永久保存</h3>
-                  <p className="text-white/60 text-xs md:text-sm leading-relaxed">
-                    这片雪花将永久保存到画廊，你可以随时查看。<br/>
-                    <span className="text-green-400/80">适合珍贵的回忆和重要的心语。</span>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h3 className="text-red-400 font-bold text-sm md:text-base mb-1">⚠️ 阅后即焚</h3>
-                  <p className="text-white/60 text-xs md:text-sm leading-relaxed">
-                    时间到期后，雪花将自动融化消散，心语将永远消失。<br/>
-                    <span className="text-red-400/80">不会保存到画廊，请珍惜这短暂的美好时光。</span>
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
+          {ttl === -1
+            ? '永久保存模式：会进入画廊，可后续分享与查看。'
+            : '阅后即焚模式：到期自动融化，不会进入画廊。'}
         </div>
 
-        <div className="mt-5 w-full max-w-sm sticky bottom-3 z-20">
+        <div className="mt-3 w-full max-w-3xl">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(prev => !prev)}
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-white/70 flex items-center justify-between hover:text-white transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">tune</span>
+              高级设置（密码保护）
+            </span>
+            <span className="material-symbols-outlined text-sm">{showAdvanced ? 'expand_less' : 'expand_more'}</span>
+          </button>
+        </div>
+
+        {showAdvanced && (
+          <div className="mt-3 w-full max-w-3xl rounded-2xl p-4 bg-white/5 border border-white/10">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-bold text-white/90 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base text-primary">lock</span>
+                  密码保护（可选）
+                </h3>
+                <p className="text-[11px] text-white/50 mt-1">
+                  仅“永久保存”支持密码保护；画廊查看时需要输入密码解密。
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={ttl !== -1}
+                onClick={() => {
+                  setEnablePassword(prev => !prev);
+                  setPasswordError("");
+                }}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                  ttl !== -1
+                    ? 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
+                    : enablePassword
+                      ? 'bg-primary/20 border border-primary/40 text-primary'
+                      : 'bg-white/5 border border-white/10 text-white/70 hover:text-white'
+                }`}
+              >
+                {enablePassword ? '已开启' : '未开启'}
+              </button>
+            </div>
+
+            {enablePassword && ttl === -1 && (
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input
+                  type="password"
+                  placeholder="设置密码（至少 6 位）"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError("");
+                  }}
+                  className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+                  autoComplete="new-password"
+                />
+                <input
+                  type="password"
+                  placeholder="再次输入密码"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setPasswordError("");
+                  }}
+                  className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+                  autoComplete="new-password"
+                />
+              </div>
+            )}
+
+            {passwordError && (
+              <p className="mt-3 text-xs text-red-400 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">error</span>
+                {passwordError}
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="mt-4 w-full max-w-sm sticky bottom-3 z-20">
           <button 
             onClick={handleCrystallize}
             disabled={!text.trim() || isGenerating}
