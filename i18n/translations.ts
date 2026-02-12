@@ -71,6 +71,7 @@ export const translations: Record<Locale, TranslationDict> = {
       ephemeral: '阅后即焚：剩余 {seconds}s，到期自动融化',
       completed: '凝结完成',
       defaultMessage: '在我们第一次看到星星的地方见面',
+      secureNoText: '安全模式 · 不展示明文',
       meltingLabel: '融化中',
       meltingIn: '融化倒计时',
       meltingIntoSilence: '融化入寂',
@@ -131,6 +132,7 @@ export const translations: Record<Locale, TranslationDict> = {
     },
     afterglow: {
       title: '余晖',
+      secureNoText: '安全模式 · 不展示明文',
       desc: '将这一刻的美好，凝结成永恒的艺术品。',
       return: '返回',
       canvasSelection: '画布选择',
@@ -211,6 +213,7 @@ export const translations: Record<Locale, TranslationDict> = {
       ephemeral: 'Ephemeral mode: {seconds}s remaining, auto-melts at timeout',
       completed: 'Crystallization Complete',
       defaultMessage: 'Meet me where we first saw the stars',
+      secureNoText: 'Secure mode · no plain text',
       meltingLabel: 'Melting',
       meltingIn: 'Melting in',
       meltingIntoSilence: 'Melting Into Silence',
@@ -271,6 +274,7 @@ export const translations: Record<Locale, TranslationDict> = {
     },
     afterglow: {
       title: 'Afterglow',
+      secureNoText: 'Secure mode · no plain text',
       desc: 'Crystallize this moment into a timeless artwork.',
       return: 'Return',
       canvasSelection: 'Canvas Selection',

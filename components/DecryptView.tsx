@@ -100,39 +100,12 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
         const snowflakeY = 150;
         ctx.drawImage(img, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
         
-        // 绘制文字
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // 主文字
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'italic 600 42px "Playfair Display", serif';
-        ctx.shadowColor = 'rgba(56, 218, 250, 0.8)';
-        ctx.shadowBlur = 20;
-        
-        // 处理长文本换行
-        const maxWidth = width - 200;
-        const words = message.split('');
-        let line = '';
-        let y = snowflakeY + snowflakeSize + 80;
-        const lineHeight = 60;
-        
-        for (let i = 0; i < words.length; i++) {
-          const testLine = line + words[i];
-          const metrics = ctx.measureText(testLine);
-          
-          if (metrics.width > maxWidth && i > 0) {
-            ctx.fillText(line, width / 2, y);
-            line = words[i];
-            y += lineHeight;
-          } else {
-            line = testLine;
-          }
-        }
-        ctx.fillText(line, width / 2, y);
-        
-        // 重置阴影
-        ctx.shadowBlur = 0;
+      // 绘制底部识别标识，不写入明文内容
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.52)';
+      ctx.font = '500 18px "Space Grotesk", sans-serif';
+      ctx.fillText(snowflakeId, width / 2, 1040);
         
         // 添加顶部标题
         ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
@@ -176,7 +149,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
   };
   
   const handleShare = async () => {
-    const shareUrl = buildShareUrl(message, signature);
+    const shareUrl = await buildShareUrl(message, signature);
     if (navigator.share) {
       try {
         play('share');
@@ -312,9 +285,9 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               <span className="text-primary text-[10px] tracking-widest font-bold opacity-60 mb-3 uppercase">
                 {t('decrypt.completed')}
               </span>
-              <h1 className="text-xl md:text-3xl font-bold tracking-tight text-white drop-shadow-[0_0_25px_rgba(56,218,250,0.8)] leading-tight font-display italic text-center line-clamp-4">
-                {message || t('decrypt.defaultMessage')}
-              </h1>
+              <p className="text-xs md:text-sm text-white/55 tracking-[0.16em] uppercase">
+                {t('decrypt.secureNoText')}
+              </p>
               <p className="mt-3 text-[10px] tracking-[0.2em] text-primary/60 uppercase">
                 {snowflakeId}
               </p>

@@ -28,19 +28,29 @@ const App: React.FC = () => {
   const hasMountedRef = useRef(false);
 
   useEffect(() => {
-    const sharedPayload = parseShareUrl();
-    if (!sharedPayload) {
-      return;
-    }
+    let cancelled = false;
 
-    setMessage(sharedPayload.message);
-    setTtl(-1);
-    setSignature(sharedPayload.signature);
-    setDecryptSource('shared');
-    setCurrentView(View.DECRYPT);
+    const applySharedPayload = async () => {
+      const sharedPayload = await parseShareUrl();
+      if (!sharedPayload || cancelled) {
+        return;
+      }
 
-    const cleanedUrl = removeShareParamFromUrl();
-    window.history.replaceState({}, '', cleanedUrl);
+      setMessage(sharedPayload.message);
+      setTtl(-1);
+      setSignature(sharedPayload.signature);
+      setDecryptSource('shared');
+      setCurrentView(View.DECRYPT);
+
+      const cleanedUrl = removeShareParamFromUrl();
+      window.history.replaceState({}, '', cleanedUrl);
+    };
+
+    void applySharedPayload();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

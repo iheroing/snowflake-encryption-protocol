@@ -127,7 +127,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       return;
     }
 
-    const shareUrl = buildShareUrl(record.message, record.id, record.timestamp);
+    const shareUrl = await buildShareUrl(record.message, record.id, record.timestamp);
 
     try {
       if (navigator.share) {

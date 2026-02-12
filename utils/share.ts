@@ -1,11 +1,22 @@
+import { decrypt, encrypt, generateRandomPassword } from './encryption';
 import { hashString } from './snowflakeGenerator';
 
 const SHARE_PARAM_KEY = 's';
-const SHARE_VERSION = 1;
+const SHARE_KEY_HASH_PARAM = 'k';
+const SHARE_VERSION = 2;
 
 interface SharePayloadV1 {
   v: number;
   m: string;
+  sig: string;
+  ts: number;
+  id: string;
+  c: string;
+}
+
+interface SharePayloadV2 {
+  v: number;
+  ct: string;
   sig: string;
   ts: number;
   id: string;
@@ -32,9 +43,32 @@ function fromBase64Url(input: string): string {
   return decodeURIComponent(escape(atob(padded)));
 }
 
-function computeChecksum(payload: Omit<SharePayloadV1, 'c'>): string {
+function computeChecksumV1(payload: Omit<SharePayloadV1, 'c'>): string {
   const checksumSeed = `${payload.v}|${payload.m}|${payload.sig}|${payload.ts}|${payload.id}`;
   return hashString(checksumSeed).toString(36);
+}
+
+function computeChecksumV2(payload: Omit<SharePayloadV2, 'c'>): string {
+  const checksumSeed = `${payload.v}|${payload.ct}|${payload.sig}|${payload.ts}|${payload.id}`;
+  return hashString(checksumSeed).toString(36);
+}
+
+function buildShareKey(): string {
+  return generateRandomPassword().replace(/[^a-zA-Z0-9]/g, '').slice(0, 32);
+}
+
+function readShareKeyFromHash(url: URL): string | null {
+  const hash = url.hash.startsWith('#') ? url.hash.slice(1) : url.hash;
+  if (!hash) {
+    return null;
+  }
+
+  const params = new URLSearchParams(hash);
+  const key = params.get(SHARE_KEY_HASH_PARAM);
+  if (!key || key.length < 10 || key.length > 128) {
+    return null;
+  }
+  return key;
 }
 
 export function createSnowflakeSignature(): string {
@@ -46,12 +80,12 @@ export function getSnowflakeId(signature: string): string {
   return `SN-${numeric.toString(36).toUpperCase().padStart(7, '0').slice(-7)}`;
 }
 
-export function buildShareUrl(
+export async function buildShareUrl(
   message: string,
   signature: string,
   timestamp: number = Date.now(),
   baseUrl: string = window.location.href
-): string {
+): Promise<string> {
   const trimmed = message.trim();
   if (!trimmed) {
     throw new Error('Empty message can not be shared');
@@ -60,29 +94,76 @@ export function buildShareUrl(
     throw new Error('Message is too long to share');
   }
 
+  const shareKey = buildShareKey();
+  const ciphertext = await encrypt(trimmed, shareKey);
+
   const url = new URL(baseUrl);
   url.hash = '';
   url.search = '';
 
-  const payloadBase = {
+  const payloadBase: Omit<SharePayloadV2, 'c'> = {
     v: SHARE_VERSION,
-    m: trimmed,
+    ct: ciphertext,
     sig: signature,
     ts: timestamp,
-    id: getSnowflakeId(signature),
+    id: getSnowflakeId(signature)
   };
 
-  const payload: SharePayloadV1 = {
+  const payload: SharePayloadV2 = {
     ...payloadBase,
-    c: computeChecksum(payloadBase),
+    c: computeChecksumV2(payloadBase)
   };
 
   const encodedPayload = toBase64Url(JSON.stringify(payload));
   url.searchParams.set(SHARE_PARAM_KEY, encodedPayload);
+
+  const hashParams = new URLSearchParams();
+  hashParams.set(SHARE_KEY_HASH_PARAM, shareKey);
+  url.hash = hashParams.toString();
+
   return url.toString();
 }
 
-export function parseShareUrl(urlValue: string = window.location.href): ParsedSharePayload | null {
+function parseLegacyPayload(parsed: SharePayloadV1): ParsedSharePayload | null {
+  if (
+    typeof parsed.m !== 'string' ||
+    typeof parsed.sig !== 'string' ||
+    typeof parsed.ts !== 'number' ||
+    typeof parsed.id !== 'string' ||
+    typeof parsed.c !== 'string'
+  ) {
+    return null;
+  }
+
+  if (!parsed.m.trim() || parsed.m.length > 500) {
+    return null;
+  }
+
+  const expectedChecksum = computeChecksumV1({
+    v: parsed.v,
+    m: parsed.m,
+    sig: parsed.sig,
+    ts: parsed.ts,
+    id: parsed.id
+  });
+
+  if (expectedChecksum !== parsed.c) {
+    return null;
+  }
+
+  if (getSnowflakeId(parsed.sig) !== parsed.id) {
+    return null;
+  }
+
+  return {
+    message: parsed.m,
+    signature: parsed.sig,
+    timestamp: parsed.ts,
+    snowflakeId: parsed.id
+  };
+}
+
+export async function parseShareUrl(urlValue: string = window.location.href): Promise<ParsedSharePayload | null> {
   try {
     const url = new URL(urlValue);
     const token = url.searchParams.get(SHARE_PARAM_KEY);
@@ -90,45 +171,63 @@ export function parseShareUrl(urlValue: string = window.location.href): ParsedSh
       return null;
     }
 
-    const parsed = JSON.parse(fromBase64Url(token)) as SharePayloadV1;
-    if (!parsed || parsed.v !== SHARE_VERSION) {
+    const parsed = JSON.parse(fromBase64Url(token)) as SharePayloadV1 | SharePayloadV2;
+    if (!parsed || typeof parsed.v !== 'number') {
       return null;
     }
 
+    // Backward compatibility with early plaintext links.
+    if (parsed.v === 1) {
+      return parseLegacyPayload(parsed as SharePayloadV1);
+    }
+
+    if (parsed.v !== SHARE_VERSION) {
+      return null;
+    }
+
+    const payload = parsed as SharePayloadV2;
+
     if (
-      typeof parsed.m !== 'string' ||
-      typeof parsed.sig !== 'string' ||
-      typeof parsed.ts !== 'number' ||
-      typeof parsed.id !== 'string' ||
-      typeof parsed.c !== 'string'
+      typeof payload.ct !== 'string' ||
+      typeof payload.sig !== 'string' ||
+      typeof payload.ts !== 'number' ||
+      typeof payload.id !== 'string' ||
+      typeof payload.c !== 'string'
     ) {
       return null;
     }
-    if (!parsed.m.trim() || parsed.m.length > 500) {
-      return null;
-    }
 
-    const expectedChecksum = computeChecksum({
-      v: parsed.v,
-      m: parsed.m,
-      sig: parsed.sig,
-      ts: parsed.ts,
-      id: parsed.id,
+    const expectedChecksum = computeChecksumV2({
+      v: payload.v,
+      ct: payload.ct,
+      sig: payload.sig,
+      ts: payload.ts,
+      id: payload.id
     });
 
-    if (expectedChecksum !== parsed.c) {
+    if (expectedChecksum !== payload.c) {
       return null;
     }
 
-    if (getSnowflakeId(parsed.sig) !== parsed.id) {
+    if (getSnowflakeId(payload.sig) !== payload.id) {
+      return null;
+    }
+
+    const shareKey = readShareKeyFromHash(url);
+    if (!shareKey) {
+      return null;
+    }
+
+    const message = await decrypt(payload.ct, shareKey);
+    if (!message.trim() || message.length > 500) {
       return null;
     }
 
     return {
-      message: parsed.m,
-      signature: parsed.sig,
-      timestamp: parsed.ts,
-      snowflakeId: parsed.id,
+      message,
+      signature: payload.sig,
+      timestamp: payload.ts,
+      snowflakeId: payload.id
     };
   } catch {
     return null;
@@ -138,5 +237,14 @@ export function parseShareUrl(urlValue: string = window.location.href): ParsedSh
 export function removeShareParamFromUrl(urlValue: string = window.location.href): string {
   const url = new URL(urlValue);
   url.searchParams.delete(SHARE_PARAM_KEY);
+
+  const hash = url.hash.startsWith('#') ? url.hash.slice(1) : url.hash;
+  if (hash) {
+    const hashParams = new URLSearchParams(hash);
+    hashParams.delete(SHARE_KEY_HASH_PARAM);
+    const nextHash = hashParams.toString();
+    url.hash = nextHash ? `#${nextHash}` : '';
+  }
+
   return url.toString();
 }

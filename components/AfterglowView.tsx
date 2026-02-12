@@ -100,43 +100,11 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         // 绘制雪花
         ctx.drawImage(img, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
         
-        // 绘制文字
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        
-        // 主文字
-        const textY = selectedCanvas === 'mobile'
-          ? snowflakeY + snowflakeSize + 150
-          : snowflakeY + snowflakeSize + 100;
-        
         ctx.fillStyle = '#D1DCE3';
-        ctx.font = `italic 600 ${width * 0.035}px "Playfair Display", serif`;
-        ctx.shadowColor = 'rgba(56, 218, 250, 0.6)';
-        ctx.shadowBlur = 20;
-        
-        // 处理长文本换行
-        const maxWidth = width * 0.7;
-        const words = message.split('');
-        let line = '';
-        let y = textY;
-        const lineHeight = width * 0.05;
-        
-        for (let i = 0; i < words.length; i++) {
-          const testLine = line + words[i];
-          const metrics = ctx.measureText(testLine);
-          
-          if (metrics.width > maxWidth && i > 0) {
-            ctx.fillText(line, width / 2, y);
-            line = words[i];
-            y += lineHeight;
-          } else {
-            line = testLine;
-          }
-        }
-        ctx.fillText(line, width / 2, y);
-        
-        // 重置阴影
-        ctx.shadowBlur = 0;
+        ctx.font = `500 ${Math.max(12, width * 0.012)}px "Space Grotesk", sans-serif`;
+        ctx.fillText(snowflakeId, width / 2, selectedCanvas === 'mobile' ? height * 0.7 : height * 0.78);
         
         // 添加顶部标题
         ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
@@ -224,7 +192,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
                     alt="Afterglow Fractal"
                  />
                  <div className="text-center">
-                    <p className="font-serif text-3xl italic text-glacial font-light">"{message}"</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/45">{t('afterglow.secureNoText')}</p>
                     <p className="text-[10px] tracking-[0.4em] uppercase text-white/30 mt-4">
                       {t('afterglow.capturedAt')} {new Date().toLocaleTimeString(localeTag)} • {new Date().toLocaleDateString(localeTag)}
                     </p>
