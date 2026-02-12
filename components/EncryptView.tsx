@@ -72,10 +72,10 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   };
 
   return (
-    <main className="cine-page px-4 md:px-6 overflow-y-auto">
+    <main className="cine-page px-4 md:px-6 overflow-hidden">
       <div className="pointer-events-none absolute top-[20%] left-1/2 -translate-x-1/2 w-[620px] h-[620px] rounded-full bg-primary/10 blur-[160px]"></div>
       <div className="relative z-10 cine-stage cine-fold flex flex-col">
-      <header className="w-full max-w-5xl mx-auto flex items-center justify-between px-4 md:px-5 py-3 mb-5 md:mb-6 cine-header">
+      <header className="w-full max-w-5xl mx-auto flex items-center justify-between px-4 md:px-5 py-3 mb-3 md:mb-4 cine-header">
         <div className="flex items-center gap-3 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary">ac_unit</span>
           <div className="flex flex-col">
@@ -92,15 +92,15 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
       </header>
 
-      <div className="relative z-10 w-full flex-1 min-h-0 overflow-y-auto md:overflow-visible flex items-center justify-center">
-      <div className="w-full max-w-4xl flex flex-col items-center pb-10 md:pb-12">
+      <div className="relative z-10 w-full flex-1 min-h-0 overflow-y-auto flex items-start justify-center">
+      <div className="w-full max-w-4xl flex flex-col items-center pb-32 md:pb-36">
         <span className="text-primary/35 text-[10px] tracking-[0.35em] mb-4 uppercase">{t('encrypt.phase')}</span>
         <h1 className="text-glacial text-2xl md:text-3xl tracking-wide font-light">{t('encrypt.title')}</h1>
         
-        <div className="w-full relative mt-8 md:mt-10">
+        <div className="w-full relative mt-6 md:mt-8">
           <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(56,218,250,0.12),transparent_68%)] blur-2xl"></div>
           <textarea 
-            className="relative w-full bg-white/[0.02] border border-white/10 rounded-3xl focus:ring-0 text-white/90 text-center text-4xl md:text-6xl font-light placeholder:text-white/15 resize-none min-h-[170px] md:min-h-[220px] leading-relaxed tracking-tight font-serif italic px-6 py-10 md:py-12 backdrop-blur-[2px]"
+            className="relative w-full bg-white/[0.02] border border-white/10 rounded-3xl focus:ring-0 text-white/90 text-center text-4xl md:text-6xl font-light placeholder:text-white/15 resize-none min-h-[136px] md:min-h-[170px] leading-relaxed tracking-tight font-serif italic px-6 py-8 md:py-9 backdrop-blur-[2px]"
             placeholder={t('encrypt.placeholder')}
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -110,7 +110,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-16 h-[3px] bg-primary blur-sm opacity-55"></div>
         </div>
 
-        <div className="mt-10 md:mt-11 flex flex-col items-center gap-4">
+        <div className="mt-7 md:mt-8 flex flex-col items-center gap-3">
           <span className="text-[10px] tracking-[0.28em] text-white/30 uppercase">{t('encrypt.chooseEssence')}</span>
           <div className="cine-pill backdrop-blur-md p-2 rounded-full flex items-center gap-2">
             <button 
@@ -129,7 +129,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         {/* 时间选择器 */}
-        <div className="mt-8 w-full max-w-3xl">
+        <div className="mt-6 w-full max-w-3xl">
           <div className="flex flex-col items-center gap-3">
             <span className="text-[10px] tracking-[0.24em] text-white/30 uppercase flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">schedule</span>
@@ -162,7 +162,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         </div>
 
-        <div className={`mt-5 w-full max-w-3xl rounded-xl px-4 py-3 border text-xs ${
+        <div className={`mt-4 w-full max-w-3xl rounded-xl px-4 py-3 border text-xs ${
           ttl === -1
             ? 'bg-green-500/10 border-green-500/30 text-green-300'
             : 'bg-red-500/10 border-red-500/30 text-red-300'
@@ -172,7 +172,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             : t('encrypt.modeEphemeral')}
         </div>
 
-        <div className="mt-5 w-full max-w-3xl">
+        <div className="mt-4 w-full max-w-3xl">
           <button
             type="button"
             onClick={() => setShowAdvanced(prev => !prev)}
@@ -253,28 +253,29 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         )}
 
-        <div className="mt-8 w-full max-w-md sticky bottom-[calc(var(--cine-safe-bottom)+8px)] z-20">
-          <button 
-            onClick={handleCrystallize}
-            disabled={!text.trim() || isGenerating}
-            className="group relative w-full py-4 cine-btn-primary text-sm font-bold tracking-[0.2em] disabled:opacity-30 disabled:pointer-events-none shadow-[0_16px_40px_rgba(56,218,250,0.28)]"
-          >
-            <span className="relative z-10 flex items-center justify-center gap-3">
-              {isGenerating ? (
-                <>
-                  <span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>
-                  {t('encrypt.crystallizing')}
-                </>
-              ) : (
-                <>
-                  {t('encrypt.crystallize')}
-                  <span className="material-symbols-outlined text-lg">auto_fix_high</span>
-                </>
-              )}
-            </span>
-          </button>
-        </div>
       </div>
+      </div>
+
+      <div className="fixed left-1/2 -translate-x-1/2 bottom-[calc(var(--cine-safe-bottom)+10px)] z-30 w-[min(32rem,calc(100vw-2rem))]">
+        <button
+          onClick={handleCrystallize}
+          disabled={!text.trim() || isGenerating}
+          className="group relative w-full py-4 cine-btn-primary text-sm font-bold tracking-[0.2em] disabled:opacity-30 disabled:pointer-events-none shadow-[0_16px_40px_rgba(56,218,250,0.28)]"
+        >
+          <span className="relative z-10 flex items-center justify-center gap-3">
+            {isGenerating ? (
+              <>
+                <span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>
+                {t('encrypt.crystallizing')}
+              </>
+            ) : (
+              <>
+                {t('encrypt.crystallize')}
+                <span className="material-symbols-outlined text-lg">auto_fix_high</span>
+              </>
+            )}
+          </span>
+        </button>
       </div>
       </div>
     </main>
