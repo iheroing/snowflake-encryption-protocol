@@ -34,8 +34,9 @@ class SeededRandom {
 }
 
 // 从文本生成雪花参数
-export function generateSnowflakeParams(text: string): SnowflakeParams {
-  const hash = hashString(text);
+export function generateSnowflakeParams(text: string, signature: string = ''): SnowflakeParams {
+  const seedSource = signature.trim() || text;
+  const hash = hashString(seedSource);
   const rng = new SeededRandom(hash);
   
   return {
@@ -134,8 +135,8 @@ function generateBranch(
 }
 
 // 生成雪花的Data URL
-export function generateSnowflakeDataURL(text: string, size: number = 400): string {
-  const params = generateSnowflakeParams(text);
+export function generateSnowflakeDataURL(text: string, size: number = 400, signature: string = ''): string {
+  const params = generateSnowflakeParams(text, signature);
   const svg = generateSnowflakeSVG(params, size);
   const encoded = encodeURIComponent(svg);
   return `data:image/svg+xml,${encoded}`;

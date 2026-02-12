@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LandingView from './components/LandingView';
 import DecryptView from './components/DecryptView';
 import GalleryView from './components/GalleryView';
 import EncryptView from './components/EncryptView';
 import AfterglowView from './components/AfterglowView';
+import { createSnowflakeSignature, parseShareUrl, removeShareParamFromUrl } from './utils/share';
 
 enum View {
   LANDING = 'landing',
@@ -18,6 +18,24 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.LANDING);
   const [message, setMessage] = useState<string>("");
   const [ttl, setTtl] = useState<number>(60); // 时间限制
+  const [signature, setSignature] = useState<string>(createSnowflakeSignature());
+  const [decryptSource, setDecryptSource] = useState<'local' | 'shared'>('local');
+
+  useEffect(() => {
+    const sharedPayload = parseShareUrl();
+    if (!sharedPayload) {
+      return;
+    }
+
+    setMessage(sharedPayload.message);
+    setTtl(-1);
+    setSignature(sharedPayload.signature);
+    setDecryptSource('shared');
+    setCurrentView(View.DECRYPT);
+
+    const cleanedUrl = removeShareParamFromUrl();
+    window.history.replaceState({}, '', cleanedUrl);
+  }, []);
 
   return (
     <div className="relative w-full min-h-screen bg-background-dark select-none">
@@ -33,9 +51,11 @@ const App: React.FC = () => {
 
       {currentView === View.ENCRYPT && (
         <EncryptView 
-          onCrystallized={(msg, time) => {
-            setMessage(msg);
-            setTtl(time);
+          onCrystallized={({ message: nextMessage, ttl: nextTtl, signature: nextSignature }) => {
+            setMessage(nextMessage);
+            setTtl(nextTtl);
+            setSignature(nextSignature);
+            setDecryptSource('local');
             setCurrentView(View.DECRYPT);
           }}
           onBack={() => setCurrentView(View.LANDING)}
@@ -45,19 +65,23 @@ const App: React.FC = () => {
       {currentView === View.DECRYPT && (
         <DecryptView 
           message={message}
+          signature={signature}
           ttl={ttl}
           onClose={() => setCurrentView(View.LANDING)}
           onExport={() => setCurrentView(View.AFTERGLOW)}
           onOpenGallery={() => setCurrentView(View.GALLERY)}
+          source={decryptSource}
         />
       )}
 
       {currentView === View.GALLERY && (
         <GalleryView 
           onExit={() => setCurrentView(View.LANDING)}
-          onViewSnowflake={(msg) => {
-            setMessage(msg);
+          onViewSnowflake={({ message: nextMessage, signature: nextSignature }) => {
+            setMessage(nextMessage);
             setTtl(60);
+            setSignature(nextSignature);
+            setDecryptSource('local');
             setCurrentView(View.DECRYPT);
           }}
         />
@@ -66,6 +90,7 @@ const App: React.FC = () => {
       {currentView === View.AFTERGLOW && (
         <AfterglowView 
           message={message}
+          signature={signature}
           onBack={() => setCurrentView(View.DECRYPT)}
           onExit={() => setCurrentView(View.LANDING)}
         />

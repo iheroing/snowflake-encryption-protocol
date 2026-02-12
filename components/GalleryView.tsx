@@ -3,10 +3,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { getSnowflakes, type SnowflakeRecord, deleteSnowflake, forceLoadPresets } from '../utils/storage';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { decrypt } from '../utils/encryption';
+import { buildShareUrl, getSnowflakeId } from '../utils/share';
 
 interface Props {
   onExit: () => void;
-  onViewSnowflake?: (message: string) => void;
+  onViewSnowflake?: (payload: { message: string; signature: string }) => void;
 }
 
 const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
@@ -108,6 +109,39 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
 
   const handleCloseModal = () => {
     setSelectedRecord(null);
+  };
+
+  const handleShareRecord = async (record: SnowflakeRecord, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (!record.message.trim() || record.message.includes('已加密心语')) {
+      alert('加密心语请先解密后再分享');
+      return;
+    }
+
+    const shareUrl = buildShareUrl(record.message, record.id, record.timestamp);
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: '雪花密语',
+          text: `分享一片雪花：${getSnowflakeId(record.id)}`,
+          url: shareUrl
+        });
+        return;
+      }
+    } catch {
+      // fall back to clipboard
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert('分享链接已复制');
+    } catch {
+      prompt('复制这条分享链接：', shareUrl);
+    }
   };
 
   const formatDate = (timestamp: number) => {
@@ -220,7 +254,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 {/* 雪花预览 */}
                 <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity flex items-center justify-center">
                   <img 
-                    src={generateSnowflakeDataURL(record.encryptedMessage ?? record.message, 400)}
+                    src={generateSnowflakeDataURL(record.encryptedMessage ?? record.message, 400, record.id)}
                     alt="snowflake"
                     className="w-full h-full object-contain"
                   />
@@ -244,6 +278,13 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                       >
                         delete
                       </button>
+                      <button
+                        onClick={(e) => handleShareRecord(record, e)}
+                        className="material-symbols-outlined text-primary/40 hover:text-primary transition-colors text-sm"
+                        title="分享"
+                      >
+                        share
+                      </button>
                       <span className="material-symbols-outlined text-primary/40 group-hover:text-primary transition-colors">
                         visibility
                       </span>
@@ -256,6 +297,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     {record.hasPassword && (
                       <p className="text-primary/60 text-xs mb-2">已加密，点击后输入密码查看</p>
                     )}
+                    <p className="text-[10px] tracking-widest uppercase text-white/35 mb-2">
+                      {getSnowflakeId(record.id)}
+                    </p>
                     <div className="flex items-center gap-2 text-white/30 text-xs tracking-widest uppercase">
                       <span className="material-symbols-outlined text-sm">schedule</span>
                       {formatDate(record.timestamp)}
@@ -305,7 +349,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               </span>
               
               <img 
-                src={generateSnowflakeDataURL(selectedRecord.message, 600)}
+                src={generateSnowflakeDataURL(selectedRecord.message, 600, selectedRecord.id)}
                 alt="snowflake"
                 className="w-96 h-96 object-contain animate-[spin_20s_linear_infinite]"
               />
@@ -314,12 +358,16 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 {selectedRecord.message}
               </h2>
 
+              <p className="text-[10px] tracking-[0.2em] uppercase text-primary/50">
+                {getSnowflakeId(selectedRecord.id)}
+              </p>
+
               <div className="flex gap-4">
                 <button 
                   onClick={() => {
                     // 重新查看这个雪花
                     if (onViewSnowflake) {
-                      onViewSnowflake(selectedRecord.message);
+                      onViewSnowflake({ message: selectedRecord.message, signature: selectedRecord.id });
                     }
                     handleCloseModal();
                   }}
@@ -328,6 +376,15 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                   <span className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg">replay</span>
                     重新体验
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleShareRecord(selectedRecord)}
+                  className="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg">share</span>
+                    分享链接
                   </span>
                 </button>
               </div>

@@ -1,18 +1,21 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { getSnowflakeId } from '../utils/share';
 
 interface Props {
   onBack: () => void;
   onExit: () => void;
   message?: string;
+  signature?: string;
 }
 
-const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper from the void" }) => {
+const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper from the void", signature = "afterglow_default" }) => {
   const [selectedCanvas, setSelectedCanvas] = useState('postcard');
   const canvasRef = useRef<HTMLDivElement>(null);
   
-  const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 1200), [message]);
+  const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 1200, signature), [message, signature]);
+  const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
   
   const handleExport = async () => {
     try {
@@ -215,6 +218,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
                     <p className="text-[10px] tracking-[0.4em] uppercase text-white/30 mt-4">
                       Captured at {new Date().toLocaleTimeString()} • {new Date().toLocaleDateString()}
                     </p>
+                    <p className="text-[10px] tracking-[0.25em] uppercase text-primary/50 mt-3">{snowflakeId}</p>
                  </div>
               </div>
            </div>

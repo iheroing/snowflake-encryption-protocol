@@ -210,11 +210,11 @@ export function saveSnowflake(
   essence: 'aurora' | 'stardust' = 'aurora',
   encryptedMessage?: string,
   hasPassword: boolean = false
-): void {
+): SnowflakeRecord | null {
   const normalizedMessage = message.trim();
   const passwordEnabled = hasPassword && Boolean(encryptedMessage);
   if (!normalizedMessage && !passwordEnabled) {
-    return;
+    return null;
   }
 
   const records = getSnowflakes();
@@ -229,6 +229,7 @@ export function saveSnowflake(
 
   const nextRecords = limitRecords([newRecord, ...records]);
   writeStorage(JSON.stringify(nextRecords));
+  return newRecord;
 }
 
 export function getSnowflakes(): SnowflakeRecord[] {

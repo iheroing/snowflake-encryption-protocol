@@ -1,16 +1,19 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { buildShareUrl, getSnowflakeId } from '../utils/share';
 
 interface Props {
   message: string;
+  signature: string;
   ttl: number; // 自定义时间（秒）
   onClose: () => void;
   onExport: () => void;
   onOpenGallery?: () => void;
+  source?: 'local' | 'shared';
 }
 
-const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport, onOpenGallery }) => {
+const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExport, onOpenGallery, source = 'local' }) => {
   const [timeLeft, setTimeLeft] = useState(ttl);
   const [rotation, setRotation] = useState(0);
   const [isMelting, setIsMelting] = useState(false);
@@ -18,9 +21,10 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport, onOpenG
   
   // 是否永久保存
   const isPermanent = ttl === -1;
+  const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
   
   // 生成独特的雪花
-  const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 800), [message]);
+  const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 800, signature), [message, signature]);
   
   // 截图功能 - 修复版本
   const handleScreenshot = async () => {
@@ -142,22 +146,32 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport, onOpenG
   
   // 分享功能
   const handleShare = async () => {
+    const shareUrl = buildShareUrl(message, signature);
     if (navigator.share) {
       try {
         await navigator.share({
           title: '雪花密语',
-          text: '我凝结了一片独特的雪花 ❄️',
-          url: window.location.href
+          text: `我分享了一片独特的雪花 ${snowflakeId} ❄️`,
+          url: shareUrl
         });
+        return;
       } catch (error) {
-        console.log('Share cancelled');
+        // fallback to clipboard
       }
-    } else {
-      // 复制链接
-      navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制！快去分享你的心语吧 ✨');
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert('分享链接已复制！快去分享你的心语吧 ✨');
+    } catch {
+      prompt('复制这条分享链接：', shareUrl);
     }
   };
+
+  useEffect(() => {
+    setTimeLeft(ttl);
+    setIsMelting(false);
+  }, [ttl, message, signature]);
 
   useEffect(() => {
     if (isPermanent) return; // 永久保存不需要倒计时
@@ -221,6 +235,9 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport, onOpenG
             <div className="flex-1">
               <h3 className="text-green-400 font-bold text-lg mb-1">💚 永久保存</h3>
               <p className="text-white/60 text-sm">这片雪花已保存到画廊，你可以随时在画廊中查看和管理。</p>
+              {source === 'shared' && (
+                <p className="text-primary/70 text-xs mt-2">来自分享链接，已完成识别与还原。</p>
+              )}
             </div>
           </div>
         </div>
@@ -253,6 +270,9 @@ const DecryptView: React.FC<Props> = ({ message, ttl, onClose, onExport, onOpenG
             <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white drop-shadow-[0_0_25px_rgba(56,218,250,0.8)] leading-tight font-display italic text-center">
               {message || "在我们第一次看到星星的地方见面"}
             </h1>
+            <p className="mt-4 text-[10px] tracking-[0.2em] text-primary/60 uppercase">
+              {snowflakeId}
+            </p>
           </div>
         </div>
       </div>

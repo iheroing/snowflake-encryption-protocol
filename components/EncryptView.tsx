@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { encrypt } from '../utils/encryption';
 import { saveSnowflake } from '../utils/storage';
+import { createSnowflakeSignature } from '../utils/share';
 
 interface Props {
-  onCrystallized: (msg: string, ttl: number) => void;
+  onCrystallized: (payload: { message: string; ttl: number; signature: string }) => void;
   onBack: () => void;
 }
 
@@ -43,13 +44,17 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         encryptedMessage = await encrypt(message, password);
       }
 
+      let signature = createSnowflakeSignature();
       if (canPersist) {
-        saveSnowflake(message, essence, encryptedMessage, shouldEncrypt);
+        const saved = saveSnowflake(message, essence, encryptedMessage, shouldEncrypt);
+        if (saved?.id) {
+          signature = saved.id;
+        }
       }
       
       // 模拟生成过程
       setTimeout(() => {
-        onCrystallized(message, ttl);
+        onCrystallized({ message, ttl, signature });
       }, 1500);
     } catch (error) {
       console.error('Crystallization failed:', error);
