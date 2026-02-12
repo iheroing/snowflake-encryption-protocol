@@ -172,19 +172,19 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
     <div className="relative min-h-screen w-full">
       {/* 滚动内容区域 */}
       <div className="relative z-10 min-h-screen overflow-y-auto bg-background-dark/80 backdrop-blur-sm scroll-smooth pb-40">
-        <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 py-8 bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
+        <header className="sticky top-4 z-50 max-w-7xl mx-auto flex items-center justify-between px-4 md:px-5 py-3 cine-header">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
-          <h2 className="font-display text-xl font-bold tracking-wide">心语画廊</h2>
+          <span className="material-symbols-outlined text-primary">ac_unit</span>
+          <h2 className="font-display text-lg font-bold tracking-[0.16em] uppercase">心语画廊</h2>
         </div>
-        <button onClick={onExit} className="bg-primary text-background-dark px-8 py-3 rounded-full font-bold text-sm tracking-tight hover:brightness-110 transition-all">
+        <button onClick={onExit} className="cine-btn-ghost px-5 py-2.5 text-sm font-bold tracking-[0.16em] uppercase">
           返回
         </button>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 md:px-12 pt-16">
         <section className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] font-bold tracking-wide mb-8 animate-pulse uppercase">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 cine-pill text-primary text-[10px] font-bold tracking-[0.18em] mb-8 animate-pulse uppercase">
             {records.length} Whispers Preserved
           </div>
           <h1 className="font-display text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-tight italic">
@@ -226,7 +226,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
             <div className="flex gap-4">
               <button 
                 onClick={handleLoadPresets}
-                className="px-8 py-4 bg-primary/20 border border-primary/40 text-primary font-bold rounded-xl hover:bg-primary/30 transition-all"
+                className="px-8 py-4 cine-btn-accent font-bold"
               >
                 <span className="flex items-center gap-2">
                   <span className="material-symbols-outlined">auto_awesome</span>
@@ -235,7 +235,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               </button>
               <button 
                 onClick={onExit}
-                className="px-8 py-4 bg-primary text-background-dark font-bold rounded-xl hover:brightness-110 transition-all"
+                className="px-8 py-4 cine-btn-primary font-bold"
               >
                 创建雪花
               </button>
@@ -247,7 +247,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               <div 
                 key={record.id} 
                 onClick={() => handleViewSnowflake(record)}
-                className="group relative aspect-[4/5] rounded-3xl p-8 border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:-translate-y-2 cursor-pointer"
+                className="group relative aspect-[4/5] rounded-3xl p-8 cine-panel overflow-hidden transition-all duration-500 hover:border-primary/40 hover:-translate-y-2 cursor-pointer"
               >
                 <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
                 
@@ -312,7 +312,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
             {/* 添加新心语卡片 */}
             <div 
               onClick={onExit}
-              className="group relative aspect-[4/5] rounded-3xl p-8 border border-dashed border-primary/30 flex flex-col items-center justify-center text-center gap-6 hover:bg-primary/5 transition-all cursor-pointer"
+              className="group relative aspect-[4/5] rounded-3xl p-8 border border-dashed border-primary/30 bg-white/[0.02] flex flex-col items-center justify-center text-center gap-6 hover:bg-primary/5 transition-all cursor-pointer"
             >
               <div className="size-20 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center text-primary animate-pulse">
                 <span className="material-symbols-outlined text-4xl">add</span>
@@ -333,12 +333,12 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           onClick={handleCloseModal}
         >
           <div 
-            className="relative max-w-4xl w-full mx-8 bg-background-dark/90 border border-primary/20 rounded-3xl p-12"
+            className="relative max-w-4xl w-full mx-8 cine-panel-strong p-12"
             onClick={(e) => e.stopPropagation()}
           >
             <button 
               onClick={handleCloseModal}
-              className="absolute top-6 right-6 size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
+              className="absolute top-6 right-6 size-10 rounded-full cine-btn-ghost flex items-center justify-center"
             >
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -371,7 +371,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     }
                     handleCloseModal();
                   }}
-                  className="px-6 py-3 bg-primary/20 border border-primary/40 rounded-xl text-primary hover:bg-primary/30 transition-all"
+                  className="px-6 py-3 cine-btn-accent"
                 >
                   <span className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg">replay</span>
@@ -380,7 +380,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 </button>
                 <button
                   onClick={() => handleShareRecord(selectedRecord)}
-                  className="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
+                  className="px-6 py-3 cine-btn-ghost"
                 >
                   <span className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-lg">share</span>
@@ -395,7 +395,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
       </div>
 
       {/* Floating HUD */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 bg-background-dark/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl">
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 cine-panel-strong p-2">
         <div className="flex gap-1 border-r border-white/10 pr-2">
           <button 
             title="刷新画廊"
@@ -440,7 +440,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
             </span>
           </button>
         </div>
-        <button onClick={onExit} className="bg-primary text-background-dark font-bold py-3 px-8 rounded-xl flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all">
+        <button onClick={onExit} className="cine-btn-primary font-bold py-3 px-8 flex items-center gap-2 active:scale-95">
           <span className="material-symbols-outlined text-[20px]">add_comment</span>
           创建雪花
         </button>
@@ -455,9 +455,9 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
               placeholder="搜索心语..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-background-dark/90 backdrop-blur-xl border border-primary/20 rounded-2xl px-6 py-4 pr-12 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
-              autoFocus
-            />
+            className="w-full cine-panel-strong px-6 py-4 pr-12 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+            autoFocus
+          />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-primary/40">
               search
             </span>
@@ -482,7 +482,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
           }}
         >
           <div 
-            className="relative max-w-md w-full mx-8 bg-background-dark/90 border border-primary/20 rounded-3xl p-8"
+            className="relative max-w-md w-full mx-8 cine-panel-strong p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <button 
@@ -492,7 +492,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 setPassword("");
                 setDecryptError("");
               }}
-              className="absolute top-4 right-4 size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
+              className="absolute top-4 right-4 size-8 rounded-full cine-btn-ghost flex items-center justify-center"
             >
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
@@ -522,7 +522,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                         handleDecrypt();
                       }
                     }}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
+                    className="w-full cine-panel px-4 py-3 text-white placeholder:text-white/30 focus:border-primary/40 focus:outline-none transition-all"
                     autoFocus
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30 text-lg">
@@ -540,7 +540,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                 <button
                   onClick={handleDecrypt}
                   disabled={!password}
-                  className="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:brightness-110 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                  className="w-full cine-btn-primary font-bold py-3 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
                 >
                   解密查看
                 </button>

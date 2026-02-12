@@ -9,13 +9,21 @@ interface Props {
 const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
   return (
     <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center text-center px-6 py-10 md:py-12">
-      {/* Top Header */}
-      <div className="absolute top-6 md:top-8 left-1/2 -translate-x-1/2 opacity-30 tracking-[0.3em] text-[10px] font-light uppercase">
-        Snowflake Whisper
-      </div>
+      <header className="absolute top-5 md:top-7 left-1/2 -translate-x-1/2 w-[min(1200px,92vw)] px-4 md:px-5 py-3 cine-header flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-primary">ac_unit</span>
+          <div className="text-left">
+            <h2 className="text-sm font-bold tracking-wide text-white/90">雪花密语</h2>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-primary/60">Snowflake Whisper</p>
+          </div>
+        </div>
+        <button onClick={onEnterMuseum} className="cine-btn-ghost px-4 py-2 text-xs font-semibold tracking-[0.16em] uppercase">
+          心语画廊
+        </button>
+      </header>
 
       <div className="mb-7 md:mb-8 space-y-2 opacity-80">
-        <span className="text-primary text-xs tracking-widest font-medium uppercase">Ephemeral Message</span>
+        <span className="text-primary text-xs tracking-[0.24em] font-medium uppercase">Ephemeral Message</span>
         <p className="text-xl font-light italic text-glacial/80 font-serif">"心语凝结成雪，随风而逝..."</p>
       </div>
 
@@ -55,13 +63,9 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onEnterMuseum }) => {
         </div>
       </div>
 
-      {/* Floating Side Action */}
-      <div className="fixed left-6 bottom-6 flex flex-col gap-4 opacity-40 hover:opacity-100 transition-opacity">
-        <div className="w-px h-16 bg-gradient-to-t from-primary to-transparent mx-auto"></div>
-        <button onClick={onEnterMuseum} className="rotate-[-90deg] origin-center text-[10px] tracking-widest hover:text-primary transition-colors uppercase">
-          The Museum
-        </button>
-      </div>
+      <p className="absolute bottom-6 text-[10px] tracking-[0.2em] uppercase cine-muted">
+        Tap the core to begin
+      </p>
     </main>
   );
 };

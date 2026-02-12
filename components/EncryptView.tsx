@@ -65,48 +65,51 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   };
 
   return (
-    <main className="relative z-10 min-h-screen w-full flex flex-col items-center px-4 md:px-6 py-4 md:py-6 overflow-y-auto">
-      <header className="w-full max-w-5xl flex items-center justify-between px-0 md:px-4 py-2 mb-3 md:mb-4">
-        <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
-          <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
+    <main className="relative z-10 min-h-screen w-full flex flex-col items-center px-4 md:px-6 py-8 md:py-10 overflow-y-auto">
+      <div className="pointer-events-none absolute top-[20%] left-1/2 -translate-x-1/2 w-[620px] h-[620px] rounded-full bg-primary/10 blur-[160px]"></div>
+      <header className="relative z-10 w-full max-w-5xl flex items-center justify-between px-4 md:px-5 py-3 mb-6 md:mb-8 cine-header">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={onBack}>
+          <span className="material-symbols-outlined text-primary">ac_unit</span>
           <div className="flex flex-col">
             <h2 className="text-sm font-bold tracking-wide text-white/90">雪花密语</h2>
-            <span className="text-[8px] tracking-wider text-primary/60 uppercase">Snowflake Whisper</span>
+            <span className="text-[10px] tracking-[0.2em] text-primary/60 uppercase">Snowflake Whisper</span>
           </div>
         </div>
-        <button onClick={onBack} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all">
+        <button onClick={onBack} className="size-10 cine-btn-ghost flex items-center justify-center rounded-full">
           <span className="material-symbols-outlined text-white/70">close</span>
         </button>
       </header>
 
-      <div className="w-full max-w-5xl flex flex-col items-center pb-6">
-        <span className="text-primary/40 text-[10px] tracking-widest mb-2 uppercase">Whisper Phase</span>
-        <h1 className="text-glacial text-xl md:text-2xl tracking-wide font-light">写下你的心语...</h1>
+      <div className="relative z-10 w-full flex-1 flex items-start md:items-center justify-center">
+      <div className="w-full max-w-4xl flex flex-col items-center pb-10 md:pb-12">
+        <span className="text-primary/35 text-[10px] tracking-[0.35em] mb-4 uppercase">Whisper Phase</span>
+        <h1 className="text-glacial text-2xl md:text-3xl tracking-wide font-light">写下你的心语...</h1>
         
-        <div className="w-full relative mt-4 md:mt-5">
+        <div className="w-full relative mt-8 md:mt-10">
+          <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(56,218,250,0.12),transparent_68%)] blur-2xl"></div>
           <textarea 
-            className="w-full bg-white/[0.03] border border-white/10 rounded-2xl focus:ring-0 text-white/90 text-center text-3xl md:text-5xl font-light placeholder:text-white/20 resize-none min-h-[110px] md:min-h-[135px] leading-relaxed tracking-tight font-serif italic px-4 py-6"
+            className="relative w-full bg-white/[0.02] border border-white/10 rounded-3xl focus:ring-0 text-white/90 text-center text-4xl md:text-6xl font-light placeholder:text-white/15 resize-none min-h-[170px] md:min-h-[220px] leading-relaxed tracking-tight font-serif italic px-6 py-10 md:py-12 backdrop-blur-[2px]"
             placeholder="此刻的心语..."
             value={text}
             onChange={(e) => setText(e.target.value)}
             spellCheck={false}
           />
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-[3px] bg-primary blur-sm opacity-50"></div>
+          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-56 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-16 h-[3px] bg-primary blur-sm opacity-55"></div>
         </div>
 
-        <div className="mt-5 md:mt-6 flex flex-col items-center gap-3">
-          <span className="text-[10px] tracking-widest text-white/30 uppercase">Choose Your Essence</span>
-          <div className="bg-white/5 backdrop-blur-md p-1.5 rounded-full flex items-center gap-2 border border-white/5">
+        <div className="mt-10 md:mt-11 flex flex-col items-center gap-4">
+          <span className="text-[10px] tracking-[0.28em] text-white/30 uppercase">Choose Your Essence</span>
+          <div className="cine-pill backdrop-blur-md p-2 rounded-full flex items-center gap-2">
             <button 
               onClick={() => setEssence('aurora')}
-              className={`px-6 py-2.5 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_15px_rgba(56,218,250,0.2)]' : 'text-white/40 hover:text-white/70'}`}
+              className={`px-7 py-3 rounded-full text-[10px] tracking-widest font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_18px_rgba(56,218,250,0.24)]' : 'text-white/45 hover:text-white/75'}`}
             >
               极光之息
             </button>
             <button 
               onClick={() => setEssence('stardust')}
-              className={`px-6 py-2.5 rounded-full text-[10px] tracking-wide font-medium transition-all ${essence === 'stardust' ? 'bg-aurora-purple/20 text-aurora-purple shadow-[0_0_15px_rgba(203,115,252,0.2)]' : 'text-white/40 hover:text-white/70'}`}
+              className={`px-7 py-3 rounded-full text-[10px] tracking-widest font-medium transition-all ${essence === 'stardust' ? 'bg-aurora-purple/20 text-aurora-purple shadow-[0_0_18px_rgba(203,115,252,0.24)]' : 'text-white/45 hover:text-white/75'}`}
             >
               星尘之梦
             </button>
@@ -114,13 +117,13 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         {/* 时间选择器 */}
-        <div className="mt-4 w-full max-w-3xl">
+        <div className="mt-8 w-full max-w-3xl">
           <div className="flex flex-col items-center gap-3">
-            <span className="text-[10px] tracking-widest text-white/30 uppercase flex items-center gap-2">
+            <span className="text-[10px] tracking-[0.24em] text-white/30 uppercase flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">schedule</span>
               Time Limit
             </span>
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-2.5 justify-center">
               {[
                 { label: '30秒', value: 30 },
                 { label: '60秒', value: 60 },
@@ -132,7 +135,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
                 <button
                   key={option.value}
                   onClick={() => setTtl(option.value)}
-                    className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all ${
+                    className={`px-4 md:px-5 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all ${
                     ttl === option.value
                       ? option.value === -1
                         ? 'bg-green-500/20 border-2 border-green-500/60 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
@@ -147,7 +150,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         </div>
 
-        <div className={`mt-3 w-full max-w-3xl rounded-xl px-4 py-3 border text-xs ${
+        <div className={`mt-5 w-full max-w-3xl rounded-xl px-4 py-3 border text-xs ${
           ttl === -1
             ? 'bg-green-500/10 border-green-500/30 text-green-300'
             : 'bg-red-500/10 border-red-500/30 text-red-300'
@@ -157,11 +160,11 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             : '阅后即焚模式：到期自动融化，不会进入画廊。'}
         </div>
 
-        <div className="mt-3 w-full max-w-3xl">
+        <div className="mt-5 w-full max-w-3xl">
           <button
             type="button"
             onClick={() => setShowAdvanced(prev => !prev)}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-white/70 flex items-center justify-between hover:text-white transition-colors"
+            className="w-full cine-btn-ghost px-4 py-3 text-xs flex items-center justify-between"
           >
             <span className="flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">tune</span>
@@ -172,7 +175,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         {showAdvanced && (
-          <div className="mt-3 w-full max-w-3xl rounded-2xl p-4 bg-white/5 border border-white/10">
+          <div className="mt-5 w-full max-w-3xl rounded-2xl p-4 cine-panel">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-sm font-bold text-white/90 flex items-center gap-2">
@@ -238,11 +241,11 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         )}
 
-        <div className="mt-4 w-full max-w-sm sticky bottom-3 z-20">
+        <div className="mt-8 w-full max-w-md sticky bottom-4 md:bottom-6 z-20">
           <button 
             onClick={handleCrystallize}
             disabled={!text.trim() || isGenerating}
-            className="group relative w-full py-4 rounded-xl bg-gradient-to-r from-primary/80 to-primary text-white font-bold text-sm tracking-wide transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-[0_10px_30px_rgba(56,218,250,0.25)]"
+            className="group relative w-full py-4 cine-btn-primary text-sm font-bold tracking-[0.2em] disabled:opacity-30 disabled:pointer-events-none shadow-[0_16px_40px_rgba(56,218,250,0.28)]"
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
               {isGenerating ? (
@@ -259,6 +262,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             </span>
           </button>
         </div>
+      </div>
       </div>
     </main>
   );

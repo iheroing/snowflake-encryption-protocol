@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { buildShareUrl, getSnowflakeId } from '../utils/share';
 
@@ -13,18 +13,142 @@ interface Props {
   source?: 'local' | 'shared';
 }
 
+const MELT_DURATION_MS = 9000;
+
+interface AmbientAudioGraph {
+  ctx: AudioContext;
+  master: GainNode;
+  padA: OscillatorNode;
+  padB: OscillatorNode;
+  lfo: OscillatorNode;
+  lfoGain: GainNode;
+}
+
 const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExport, onOpenGallery, source = 'local' }) => {
   const [timeLeft, setTimeLeft] = useState(ttl);
   const [rotation, setRotation] = useState(0);
   const [isMelting, setIsMelting] = useState(false);
+  const [meltProgress, setMeltProgress] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const snowflakeRef = useRef<HTMLDivElement>(null);
+  const meltRafRef = useRef<number | null>(null);
+  const audioRef = useRef<AmbientAudioGraph | null>(null);
   
   // 是否永久保存
   const isPermanent = ttl === -1;
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
+  const meltEase = useMemo(() => 1 - Math.pow(1 - Math.min(1, meltProgress), 3), [meltProgress]);
   
   // 生成独特的雪花
   const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 800, signature), [message, signature]);
+
+  const initializeAmbientAudio = useCallback(async () => {
+    if (typeof window === 'undefined' || audioRef.current) {
+      return;
+    }
+    const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) {
+      return;
+    }
+
+    const ctx = new AudioCtx();
+    const master = ctx.createGain();
+    master.gain.value = 0;
+    master.connect(ctx.destination);
+
+    const padA = ctx.createOscillator();
+    padA.type = 'sine';
+    padA.frequency.value = 174;
+
+    const padB = ctx.createOscillator();
+    padB.type = 'triangle';
+    padB.frequency.value = 261.6;
+
+    const padGain = ctx.createGain();
+    padGain.gain.value = 0.008;
+    padA.connect(padGain);
+    padB.connect(padGain);
+    padGain.connect(master);
+
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.08;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.004;
+    lfo.connect(lfoGain);
+    lfoGain.connect(padGain.gain);
+
+    padA.start();
+    padB.start();
+    lfo.start();
+
+    audioRef.current = { ctx, master, padA, padB, lfo, lfoGain };
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+  }, []);
+
+  const triggerMeltSound = useCallback(() => {
+    const graph = audioRef.current;
+    if (!graph || !soundEnabled) {
+      return;
+    }
+    const { ctx, master } = graph;
+    const now = ctx.currentTime;
+
+    const tone = ctx.createOscillator();
+    tone.type = 'sine';
+    tone.frequency.setValueAtTime(720, now);
+    tone.frequency.exponentialRampToValueAtTime(110, now + 4.5);
+
+    const toneGain = ctx.createGain();
+    toneGain.gain.setValueAtTime(0.0001, now);
+    toneGain.gain.exponentialRampToValueAtTime(0.02, now + 0.25);
+    toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.8);
+
+    const airy = ctx.createOscillator();
+    airy.type = 'triangle';
+    airy.frequency.setValueAtTime(520, now);
+    airy.frequency.exponentialRampToValueAtTime(160, now + 3.4);
+
+    const airyGain = ctx.createGain();
+    airyGain.gain.setValueAtTime(0.0001, now);
+    airyGain.gain.exponentialRampToValueAtTime(0.012, now + 0.35);
+    airyGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
+
+    tone.connect(toneGain);
+    airy.connect(airyGain);
+    toneGain.connect(master);
+    airyGain.connect(master);
+
+    tone.start(now);
+    airy.start(now);
+    tone.stop(now + 5.2);
+    airy.stop(now + 4.2);
+  }, [soundEnabled]);
+
+  const startMelting = useCallback(() => {
+    if (isMelting) {
+      return;
+    }
+
+    setIsMelting(true);
+    setMeltProgress(0);
+    triggerMeltSound();
+
+    const startAt = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - startAt) / MELT_DURATION_MS, 1);
+      setMeltProgress(progress);
+      if (progress < 1) {
+        meltRafRef.current = window.requestAnimationFrame(tick);
+      } else {
+        onClose();
+      }
+    };
+
+    meltRafRef.current = window.requestAnimationFrame(tick);
+  }, [isMelting, onClose, triggerMeltSound]);
   
   // 截图功能 - 修复版本
   const handleScreenshot = async () => {
@@ -171,19 +295,23 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
   useEffect(() => {
     setTimeLeft(ttl);
     setIsMelting(false);
+    setMeltProgress(0);
+    if (meltRafRef.current !== null) {
+      cancelAnimationFrame(meltRafRef.current);
+      meltRafRef.current = null;
+    }
   }, [ttl, message, signature]);
 
   useEffect(() => {
     if (isPermanent) return; // 永久保存不需要倒计时
     
     if (timeLeft <= 0) {
-      setIsMelting(true);
-      setTimeout(() => onClose(), 2000);
+      startMelting();
       return;
     }
     const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, onClose, isPermanent]);
+  }, [timeLeft, isPermanent, startMelting]);
 
   // 雪花旋转动画
   useEffect(() => {
@@ -193,6 +321,74 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
     return () => clearInterval(rotationTimer);
   }, []);
 
+  useEffect(() => {
+    const setup = async () => {
+      if (!soundEnabled) {
+        return;
+      }
+      await initializeAmbientAudio();
+      const graph = audioRef.current;
+      if (!graph) {
+        return;
+      }
+      if (graph.ctx.state === 'suspended') {
+        await graph.ctx.resume();
+      }
+      graph.master.gain.setTargetAtTime(0.035, graph.ctx.currentTime, 1.2);
+    };
+    void setup();
+  }, [initializeAmbientAudio, soundEnabled]);
+
+  useEffect(() => {
+    if (soundEnabled) {
+      return;
+    }
+    const graph = audioRef.current;
+    if (!graph) {
+      return;
+    }
+    graph.master.gain.setTargetAtTime(0.0001, graph.ctx.currentTime, 0.4);
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      if (!soundEnabled) {
+        return;
+      }
+      void initializeAmbientAudio().then(async () => {
+        const graph = audioRef.current;
+        if (!graph) {
+          return;
+        }
+        if (graph.ctx.state === 'suspended') {
+          await graph.ctx.resume();
+        }
+        graph.master.gain.setTargetAtTime(0.035, graph.ctx.currentTime, 1.2);
+      });
+    };
+
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    return () => window.removeEventListener('pointerdown', unlockAudio);
+  }, [initializeAmbientAudio, soundEnabled]);
+
+  useEffect(() => {
+    return () => {
+      if (meltRafRef.current !== null) {
+        cancelAnimationFrame(meltRafRef.current);
+      }
+      const graph = audioRef.current;
+      if (!graph) {
+        return;
+      }
+      graph.master.gain.setTargetAtTime(0.0001, graph.ctx.currentTime, 0.2);
+      graph.padA.stop();
+      graph.padB.stop();
+      graph.lfo.stop();
+      void graph.ctx.close();
+      audioRef.current = null;
+    };
+  }, []);
+
   return (
     <main className="relative z-10 min-h-screen w-full px-4 md:px-8 py-4 md:py-6 overflow-y-auto md:overflow-hidden">
       {/* Background Blooms */}
@@ -200,7 +396,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
       <div className="absolute bottom-[18%] right-[16%] w-[500px] h-[500px] bg-aurora-purple/10 rounded-full blur-[140px] pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)] grid grid-rows-[auto_auto_1fr_auto] gap-3 md:gap-4">
-        <header className="w-full flex items-center justify-between">
+        <header className="w-full flex items-center justify-between px-4 md:px-5 py-3 cine-header">
           <div className="flex items-center gap-3">
             <div className="size-8 flex items-center justify-center bg-primary/20 rounded-lg border border-primary/40">
               <span className="material-symbols-outlined text-primary text-xl">ac_unit</span>
@@ -210,9 +406,21 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               <p className="text-[10px] text-primary/70 tracking-wider font-medium uppercase">Crystallized</p>
             </div>
           </div>
-          <button onClick={onClose} className="size-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-white/20 transition-all">
-            <span className="material-symbols-outlined">close</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSoundEnabled(prev => !prev)}
+              className="h-10 px-3 cine-btn-ghost rounded-full text-xs flex items-center gap-1"
+              title={soundEnabled ? '关闭环境音' : '开启环境音'}
+            >
+              <span className="material-symbols-outlined text-base">
+                {soundEnabled ? 'volume_up' : 'volume_off'}
+              </span>
+              {soundEnabled ? 'Ambient' : 'Muted'}
+            </button>
+            <button onClick={onClose} className="size-10 flex items-center justify-center rounded-full cine-btn-ghost">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
         </header>
 
         <div className={`w-full rounded-2xl border px-4 py-3 backdrop-blur-sm ${
@@ -243,19 +451,20 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
           <div className="relative z-10 w-full h-full max-h-[56vh] max-w-3xl aspect-square flex items-center justify-center">
             <img
               src={snowflakeURL}
-              className={`w-[72%] h-[72%] object-contain brightness-125 transition-all duration-2000 ${
-                isMelting ? 'opacity-0 scale-150 blur-xl' : 'opacity-100'
-              }`}
+              className="w-[72%] h-[72%] object-contain brightness-125 transition-all duration-300"
               alt="Fractal snowflake"
               style={{
-                transform: `rotate(${rotation}deg)`,
-                filter: isMelting ? 'blur(20px)' : 'drop-shadow(0 0 30px rgba(56, 218, 250, 0.6))'
+                opacity: 1 - meltEase * 0.95,
+                transform: `rotate(${rotation + meltEase * 140}deg) scale(${1 + meltEase * 0.45}) translateY(${meltEase * 36}px)`,
+                filter: `blur(${meltEase * 24}px) brightness(${1.25 - meltEase * 0.35}) drop-shadow(0 0 ${30 - meltEase * 18}px rgba(56, 218, 250, ${0.6 - meltEase * 0.35}))`
               }}
             />
 
-            <div className={`absolute inset-0 flex flex-col items-center justify-center px-8 md:px-14 transition-all duration-1000 ${
-              isMelting ? 'opacity-0 scale-90' : 'opacity-100'
-            }`}>
+            <div className="absolute inset-0 pointer-events-none" style={{ opacity: meltEase * 0.75 }}>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.22),rgba(56,218,250,0.07)_35%,transparent_65%)] blur-2xl" />
+            </div>
+
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-8 md:px-14 transition-all duration-300" style={{ opacity: 1 - meltEase * 1.1, transform: `translateY(${meltEase * 18}px) scale(${1 - meltEase * 0.12})` }}>
               <span className="text-primary text-[10px] tracking-widest font-bold opacity-60 mb-3 uppercase">
                 Crystallization Complete
               </span>
@@ -266,21 +475,31 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
                 {snowflakeId}
               </p>
             </div>
+
+            {isMelting && (
+              <div className="absolute bottom-6 text-[11px] tracking-[0.2em] uppercase text-primary/70 animate-pulse">
+                Melting Into Silence
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-background-dark/45 backdrop-blur-xl px-3 py-3 md:px-4 md:py-4">
+        <div className="rounded-2xl cine-panel-strong px-3 py-3 md:px-4 md:py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             {!isPermanent ? (
               <div className="min-w-[220px]">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[10px] uppercase tracking-widest text-primary/60">Melting in</span>
-                  <span className="text-2xl font-bold tabular-nums text-white">{timeLeft}s</span>
+                  <span className="text-[10px] uppercase tracking-widest text-primary/60">
+                    {isMelting ? 'Melting' : 'Melting in'}
+                  </span>
+                  <span className="text-2xl font-bold tabular-nums text-white">
+                    {isMelting ? `${Math.round(meltEase * 100)}%` : `${timeLeft}s`}
+                  </span>
                 </div>
                 <div className="w-full h-1.5 bg-white/10 mt-2 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-primary to-aurora-purple transition-all duration-1000"
-                    style={{ width: `${(timeLeft / ttl) * 100}%` }}
+                    style={{ width: `${isMelting ? meltEase * 100 : (timeLeft / ttl) * 100}%` }}
                   />
                 </div>
               </div>
@@ -291,7 +510,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
             <div className="flex flex-wrap gap-2 md:justify-end">
               <button
                 onClick={handleScreenshot}
-                className="flex items-center gap-2 px-4 py-2.5 bg-primary/20 border border-primary/40 rounded-xl text-primary hover:bg-primary/30 transition-all text-sm"
+                className="flex items-center gap-2 px-4 py-2.5 cine-btn-accent text-sm"
               >
                 <span className="material-symbols-outlined text-lg">screenshot</span>
                 保存此刻
@@ -299,7 +518,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
 
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 px-4 py-2.5 bg-aurora-purple/20 border border-aurora-purple/40 rounded-xl text-aurora-purple hover:bg-aurora-purple/30 transition-all text-sm"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-aurora-purple transition-all text-sm bg-aurora-purple/20 border border-aurora-purple/40 hover:bg-aurora-purple/30"
               >
                 <span className="material-symbols-outlined text-lg">share</span>
                 分享心语
@@ -307,7 +526,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
 
               <button
                 onClick={onExport}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all text-sm"
+                className="flex items-center gap-2 px-4 py-2.5 cine-btn-ghost text-sm"
               >
                 <span className="material-symbols-outlined text-lg">download</span>
                 珍藏永恒
@@ -316,7 +535,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               {isPermanent && onOpenGallery && (
                 <button
                   onClick={onOpenGallery}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-green-500/20 border border-green-500/40 rounded-xl text-green-300 hover:bg-green-500/30 transition-all text-sm"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-green-300 transition-all text-sm bg-green-500/20 border border-green-500/40 hover:bg-green-500/30"
                 >
                   <span className="material-symbols-outlined text-lg">collections</span>
                   前往画廊

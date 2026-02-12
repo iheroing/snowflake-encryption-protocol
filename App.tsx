@@ -41,6 +41,8 @@ const App: React.FC = () => {
     <div className="relative w-full min-h-screen bg-background-dark select-none">
       {/* Dynamic Background */}
       <div className="fixed inset-0 stardust-bg opacity-30 pointer-events-none z-0"></div>
+      <div className="fixed -top-24 -left-24 w-[520px] h-[520px] bg-primary/10 blur-[140px] rounded-full pointer-events-none z-0"></div>
+      <div className="fixed -bottom-24 -right-24 w-[560px] h-[560px] bg-aurora-purple/10 blur-[160px] rounded-full pointer-events-none z-0"></div>
       
       {currentView === View.LANDING && (
         <LandingView 

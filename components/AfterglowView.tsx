@@ -185,11 +185,11 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary rounded-full blur-[120px] opacity-10"></div>
       
-      <header className="relative z-50 flex items-center justify-between px-12 py-8 border-b border-white/5">
+      <header className="relative z-50 w-[min(1280px,94vw)] mx-auto mt-4 mb-4 flex items-center justify-between px-4 md:px-5 py-3 cine-header">
         <div className="flex items-center gap-6">
           <button onClick={onBack} className="flex items-center gap-2 text-primary hover:text-white transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-xs font-bold tracking-widest uppercase">Return</span>
+            <span className="text-xs font-bold tracking-[0.2em] uppercase">Return</span>
           </button>
           <div className="h-4 w-px bg-white/10"></div>
           <div className="flex items-center gap-3">
@@ -197,15 +197,15 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
             <h2 className="font-serif italic text-lg tracking-tight">雪花密语</h2>
           </div>
         </div>
-        <button onClick={onExit} className="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
+        <button onClick={onExit} className="size-10 rounded-full cine-btn-ghost flex items-center justify-center">
            <span className="material-symbols-outlined">close</span>
         </button>
       </header>
 
-      <main className="relative flex-1 flex px-12 pb-12 gap-12 overflow-hidden items-center justify-center">
+      <main className="relative flex-1 flex px-6 md:px-12 pb-12 gap-10 overflow-hidden items-center justify-center">
         {/* Preview Container */}
         <div className="flex-1 flex flex-col items-center justify-center">
-           <div ref={canvasRef} className="relative w-full max-w-2xl aspect-[1.6/1] bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center p-12 crystal-glow">
+           <div ref={canvasRef} className="relative w-full max-w-2xl aspect-[1.6/1] cine-panel-strong flex items-center justify-center p-12 crystal-glow">
               <div className="absolute inset-0 stardust-bg opacity-10"></div>
               <div className="relative z-10 w-full h-full flex flex-col items-center justify-center gap-8">
                  <img 
@@ -225,7 +225,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         </div>
 
         {/* Sidebar Controls */}
-        <aside className="w-[420px] h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col gap-10">
+        <aside className="w-[420px] h-full cine-panel-strong p-8 flex flex-col gap-10">
           <div>
             <h1 className="font-serif text-3xl font-bold mb-3">余晖</h1>
             <p className="text-white/40 text-sm leading-relaxed">将这一刻的美好，凝结成永恒的艺术品。</p>
@@ -253,7 +253,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
           </div>
 
           <div className="mt-auto space-y-6">
-             <button onClick={handleExport} className="w-full bg-primary text-background-dark font-bold py-5 rounded-2xl flex items-center justify-center gap-3 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+             <button onClick={handleExport} className="w-full cine-btn-primary font-bold py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] shadow-lg shadow-primary/20">
                 <span className="material-symbols-outlined">download</span>
                 导出艺术品
              </button>
@@ -262,7 +262,7 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
         </aside>
       </main>
 
-      <footer className="px-12 py-6 border-t border-white/5 bg-background-dark/80 flex items-center justify-between">
+      <footer className="px-6 md:px-12 py-6 border-t border-white/5 bg-background-dark/80 flex items-center justify-between">
          <div className="flex items-center gap-2">
             <span className="size-1.5 bg-primary rounded-full animate-pulse"></span>
             <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">Fractal Engine Online</span>
