@@ -192,12 +192,15 @@ const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper f
                     alt="Afterglow Fractal"
                  />
                  <div className="text-center">
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/45">{t('afterglow.secureNoText')}</p>
                     <p className="text-[10px] tracking-[0.4em] uppercase text-white/30 mt-4">
                       {t('afterglow.capturedAt')} {new Date().toLocaleTimeString(localeTag)} • {new Date().toLocaleDateString(localeTag)}
                     </p>
                     <p className="text-[10px] tracking-[0.25em] uppercase text-primary/50 mt-3">{snowflakeId}</p>
                  </div>
+              </div>
+              <div className="absolute bottom-4 right-5 md:right-6 max-w-[60%] text-right flex items-center justify-end gap-1.5 text-[9px] md:text-[10px] text-white/25 tracking-[0.12em] uppercase pointer-events-none">
+                <span className="material-symbols-outlined text-[12px]">shield_lock</span>
+                <span>{t('afterglow.secureNoText')}</span>
               </div>
            </div>
         </div>

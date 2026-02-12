@@ -285,12 +285,14 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               <span className="text-primary text-[10px] tracking-widest font-bold opacity-60 mb-3 uppercase">
                 {t('decrypt.completed')}
               </span>
-              <p className="text-xs md:text-sm text-white/55 tracking-[0.16em] uppercase">
-                {t('decrypt.secureNoText')}
-              </p>
-              <p className="mt-3 text-[10px] tracking-[0.2em] text-primary/60 uppercase">
+              <p className="text-[10px] tracking-[0.2em] text-primary/60 uppercase">
                 {snowflakeId}
               </p>
+            </div>
+
+            <div className="absolute bottom-4 right-6 md:right-8 flex items-center gap-1.5 text-[9px] md:text-[10px] text-white/25 tracking-[0.12em] uppercase pointer-events-none">
+              <span className="material-symbols-outlined text-[12px]">shield_lock</span>
+              <span>{t('decrypt.secureNoText')}</span>
             </div>
 
             {isMelting && (
