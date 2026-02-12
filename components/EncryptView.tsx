@@ -64,8 +64,8 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
   };
 
   return (
-    <main className="relative z-10 min-h-screen w-full flex flex-col items-center px-6 py-20 overflow-y-auto">
-      <header className="w-full flex items-center justify-between px-0 md:px-12 py-8 mb-8">
+    <main className="relative z-10 min-h-screen w-full flex flex-col items-center px-4 md:px-6 py-4 md:py-6 overflow-y-auto">
+      <header className="w-full max-w-5xl flex items-center justify-between px-0 md:px-4 py-2 mb-3 md:mb-4">
         <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
           <span className="material-symbols-outlined text-primary text-3xl">ac_unit</span>
           <div className="flex flex-col">
@@ -78,13 +78,13 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </button>
       </header>
 
-      <div className="w-full max-w-4xl flex flex-col items-center pb-20">
-        <span className="text-primary/40 text-[10px] tracking-widest mb-4 uppercase">Whisper Phase</span>
-        <h1 className="text-glacial text-2xl tracking-wide font-light">写下你的心语...</h1>
+      <div className="w-full max-w-5xl flex flex-col items-center pb-6">
+        <span className="text-primary/40 text-[10px] tracking-widest mb-2 uppercase">Whisper Phase</span>
+        <h1 className="text-glacial text-xl md:text-2xl tracking-wide font-light">写下你的心语...</h1>
         
-        <div className="w-full relative mt-12">
+        <div className="w-full relative mt-5 md:mt-6">
           <textarea 
-            className="w-full bg-transparent border-none focus:ring-0 text-white text-center text-4xl md:text-6xl font-light placeholder:text-white/5 resize-none min-h-[200px] leading-relaxed tracking-tight font-serif italic"
+            className="w-full bg-transparent border-none focus:ring-0 text-white text-center text-3xl md:text-5xl font-light placeholder:text-white/5 resize-none min-h-[120px] md:min-h-[150px] leading-relaxed tracking-tight font-serif italic"
             placeholder="此刻的心语..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -94,7 +94,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-[3px] bg-primary blur-sm opacity-50"></div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center gap-6">
+        <div className="mt-6 md:mt-8 flex flex-col items-center gap-4">
           <span className="text-[10px] tracking-widest text-white/30 uppercase">Choose Your Essence</span>
           <div className="bg-white/5 backdrop-blur-md p-1.5 rounded-full flex items-center gap-2 border border-white/5">
             <button 
@@ -112,14 +112,14 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         </div>
 
-        <div className="mt-8 w-full max-w-2xl rounded-2xl p-6 bg-white/5 border border-white/10">
+        <div className="mt-5 w-full max-w-3xl rounded-2xl p-4 md:p-5 bg-white/5 border border-white/10">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h3 className="text-sm font-bold text-white/90 flex items-center gap-2">
                 <span className="material-symbols-outlined text-base text-primary">lock</span>
                 密码保护（可选）
               </h3>
-              <p className="text-xs text-white/50 mt-1">
+              <p className="text-[11px] text-white/50 mt-1">
                 仅“永久保存”支持密码保护；画廊查看时需要输入密码解密。
               </p>
             </div>
@@ -143,7 +143,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
 
           {enablePassword && ttl === -1 && (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
               <input
                 type="password"
                 placeholder="设置密码（至少 6 位）"
@@ -178,13 +178,13 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         {/* 时间选择器 */}
-        <div className="mt-8 w-full max-w-2xl">
+        <div className="mt-5 w-full max-w-3xl">
           <div className="flex flex-col items-center gap-4">
             <span className="text-[10px] tracking-widest text-white/30 uppercase flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">schedule</span>
               Time Limit
             </span>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center">
               {[
                 { label: '30秒', value: 30 },
                 { label: '60秒', value: 60 },
@@ -196,7 +196,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
                 <button
                   key={option.value}
                   onClick={() => setTtl(option.value)}
-                  className={`px-6 py-3 rounded-xl text-sm font-medium transition-all ${
+                    className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all ${
                     ttl === option.value
                       ? option.value === -1
                         ? 'bg-green-500/20 border-2 border-green-500/60 text-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
@@ -212,7 +212,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         </div>
 
         {/* 阅后即焚警告 */}
-        <div className={`mt-8 w-full max-w-2xl rounded-2xl p-6 backdrop-blur-sm ${
+        <div className={`mt-5 w-full max-w-3xl rounded-2xl p-4 md:p-5 backdrop-blur-sm ${
           ttl === -1 
             ? 'bg-green-500/10 border border-green-500/30'
             : 'bg-red-500/10 border border-red-500/30'
@@ -226,16 +226,16 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
             <div className="flex-1">
               {ttl === -1 ? (
                 <>
-                  <h3 className="text-green-400 font-bold text-base mb-2">💚 永久保存</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">
+                  <h3 className="text-green-400 font-bold text-sm md:text-base mb-1">💚 永久保存</h3>
+                  <p className="text-white/60 text-xs md:text-sm leading-relaxed">
                     这片雪花将永久保存到画廊，你可以随时查看。<br/>
                     <span className="text-green-400/80">适合珍贵的回忆和重要的心语。</span>
                   </p>
                 </>
               ) : (
                 <>
-                  <h3 className="text-red-400 font-bold text-base mb-2">⚠️ 阅后即焚</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">
+                  <h3 className="text-red-400 font-bold text-sm md:text-base mb-1">⚠️ 阅后即焚</h3>
+                  <p className="text-white/60 text-xs md:text-sm leading-relaxed">
                     时间到期后，雪花将自动融化消散，心语将永远消失。<br/>
                     <span className="text-red-400/80">不会保存到画廊，请珍惜这短暂的美好时光。</span>
                   </p>
@@ -245,25 +245,27 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           </div>
         </div>
 
-        <button 
-          onClick={handleCrystallize}
-          disabled={!text.trim() || isGenerating}
-          className="mt-12 group relative w-full max-w-sm py-5 rounded-xl bg-gradient-to-r from-primary/80 to-primary text-white font-bold text-sm tracking-wide transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-        >
-          <span className="relative z-10 flex items-center justify-center gap-4">
-            {isGenerating ? (
-              <>
-                <span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>
-                凝结中...
-              </>
-            ) : (
-              <>
-                凝结心语
-                <span className="material-symbols-outlined text-lg">auto_fix_high</span>
-              </>
-            )}
-          </span>
-        </button>
+        <div className="mt-5 w-full max-w-sm sticky bottom-3 z-20">
+          <button 
+            onClick={handleCrystallize}
+            disabled={!text.trim() || isGenerating}
+            className="group relative w-full py-4 rounded-xl bg-gradient-to-r from-primary/80 to-primary text-white font-bold text-sm tracking-wide transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-[0_10px_30px_rgba(56,218,250,0.25)]"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-3">
+              {isGenerating ? (
+                <>
+                  <span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>
+                  凝结中...
+                </>
+              ) : (
+                <>
+                  凝结心语
+                  <span className="material-symbols-outlined text-lg">auto_fix_high</span>
+                </>
+              )}
+            </span>
+          </button>
+        </div>
       </div>
     </main>
   );
