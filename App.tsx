@@ -1,65 +1,124 @@
-import React, { useEffect, useRef, useState } from 'react';
-import LandingView from './components/LandingView';
-import DecryptView from './components/DecryptView';
-import GalleryView from './components/GalleryView';
-import EncryptView from './components/EncryptView';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AfterglowView from './components/AfterglowView';
-import { createSnowflakeSignature, parseShareUrl, removeShareParamFromUrl } from './utils/share';
-import { useSound } from './contexts/SoundContext';
-import type { SoundScene } from './utils/sound';
+import ComposeView, { type ComposePayload } from './components/ComposeView';
+import LandingView from './components/LandingView';
+import ReceiveView, { type ReceiveStatus } from './components/ReceiveView';
+import RevealView from './components/RevealView';
+import ShareReadyView, { type SealedWhisper } from './components/ShareReadyView';
 import { useI18n } from './contexts/I18nContext';
+import { useSound } from './contexts/SoundContext';
+import { verifyFragmentSecret } from './protocol/oneTimeWhisper';
+import {
+  consumeOneTimeWhisper,
+  consumeTokenFromLocation,
+  consistencyTokenFromLocation,
+  createOneTimeWhisper,
+  deleteOneTimeWhisper,
+  fragmentSecretFromLocation,
+  getWhisperStatus,
+  OneTimeWhisperApiError,
+  OneTimeWhisperConsumeUncertainError,
+} from './utils/oneTimeWhisper';
+import { createSnowflakeSignature } from './utils/signature';
+import type { SoundScene } from './utils/sound';
 
 enum View {
   LANDING = 'landing',
-  DECRYPT = 'decrypt',
-  GALLERY = 'gallery',
-  ENCRYPT = 'encrypt',
-  AFTERGLOW = 'afterglow'
+  COMPOSE = 'compose',
+  SHARE_READY = 'share-ready',
+  RECEIVE = 'receive',
+  REVEALED = 'revealed',
+  AFTERGLOW = 'afterglow',
+}
+
+interface RecipientRoute {
+  id: string;
+  fragmentSecret: string | null;
+  consumeToken: string | null;
+  consistencyToken: string | null;
+}
+
+const WHISPER_ROUTE = /^\/s\/([A-Za-z0-9_-]{22})\/?$/u;
+
+function recipientRouteFromLocation(): RecipientRoute | null {
+  const match = window.location.pathname.match(WHISPER_ROUTE);
+  if (!match) return null;
+  return {
+    id: match[1],
+    fragmentSecret: fragmentSecretFromLocation(),
+    consumeToken: consumeTokenFromLocation(),
+    consistencyToken: consistencyTokenFromLocation(),
+  };
 }
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>(View.LANDING);
-  const [message, setMessage] = useState<string>("");
-  const [ttl, setTtl] = useState<number>(60); // 时间限制
-  const [signature, setSignature] = useState<string>(createSnowflakeSignature());
-  const [decryptSource, setDecryptSource] = useState<'local' | 'shared'>('local');
+  const [recipient, setRecipient] = useState<RecipientRoute | null>(() => recipientRouteFromLocation());
+  const [currentView, setCurrentView] = useState<View>(() => recipient ? View.RECEIVE : View.LANDING);
+  const [sealedWhisper, setSealedWhisper] = useState<SealedWhisper | null>(null);
+  const [receiveStatus, setReceiveStatus] = useState<ReceiveStatus>(() => (
+    recipient?.fragmentSecret && recipient.consumeToken ? 'loading' : 'invalid'
+  ));
+  const [receiveExpiresAt, setReceiveExpiresAt] = useState<number>();
+  const [message, setMessage] = useState('');
+  const [signature, setSignature] = useState(createSnowflakeSignature);
+  const [afterglowReturn, setAfterglowReturn] = useState<View>(View.LANDING);
   const { setScene, play } = useSound();
   const { t, localeTag } = useI18n();
   const hasMountedRef = useRef(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const clearSensitiveState = useCallback(() => {
+    setMessage('');
+    setSealedWhisper(null);
+    setRecipient(null);
+    setSignature(createSnowflakeSignature());
+  }, []);
 
-    const applySharedPayload = async () => {
-      const sharedPayload = await parseShareUrl();
-      if (!sharedPayload || cancelled) {
+  const exitToLanding = useCallback(() => {
+    clearSensitiveState();
+    window.history.replaceState({}, '', '/');
+    setCurrentView(View.LANDING);
+  }, [clearSensitiveState]);
+
+  const loadRecipientStatus = useCallback(async () => {
+    if (!recipient?.fragmentSecret || !recipient.consumeToken) {
+      setReceiveStatus('invalid');
+      return;
+    }
+
+    setReceiveStatus('loading');
+    try {
+      const status = await getWhisperStatus(recipient.id, recipient.consistencyToken ?? undefined);
+      if (status.status === 'gone') {
+        setReceiveStatus('gone');
         return;
       }
 
-      setMessage(sharedPayload.message);
-      setTtl(-1);
-      setSignature(sharedPayload.signature);
-      setDecryptSource('shared');
-      setCurrentView(View.DECRYPT);
+      const isValidLink = await verifyFragmentSecret(status.keyEnvelope, recipient.fragmentSecret);
+      if (!isValidLink) {
+        setReceiveStatus('invalid');
+        return;
+      }
 
-      const cleanedUrl = removeShareParamFromUrl();
-      window.history.replaceState({}, '', cleanedUrl);
-    };
+      setSignature(status.keyEnvelope.signature);
+      setReceiveExpiresAt(status.expiresAt);
+      setReceiveStatus('sealed');
+    } catch {
+      setReceiveStatus('offline');
+    }
+  }, [recipient]);
 
-    void applySharedPayload();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  useEffect(() => {
+    if (recipient) void loadRecipientStatus();
+  }, [loadRecipientStatus, recipient]);
 
   useEffect(() => {
     const sceneMap: Record<View, SoundScene> = {
       [View.LANDING]: 'landing',
-      [View.ENCRYPT]: 'encrypt',
-      [View.DECRYPT]: 'decrypt',
-      [View.GALLERY]: 'gallery',
-      [View.AFTERGLOW]: 'afterglow'
+      [View.COMPOSE]: 'encrypt',
+      [View.SHARE_READY]: 'decrypt',
+      [View.RECEIVE]: 'decrypt',
+      [View.REVEALED]: 'decrypt',
+      [View.AFTERGLOW]: 'afterglow',
     };
     setScene(sceneMap[currentView]);
 
@@ -75,64 +134,152 @@ const App: React.FC = () => {
     document.documentElement.lang = localeTag;
   }, [localeTag, t]);
 
+  useEffect(() => {
+    if ([View.LANDING, View.COMPOSE].includes(currentView)) return;
+    window.scrollTo(0, 0);
+    let focusTimer: number | undefined;
+    const focusHeading = () => {
+      const heading = document.querySelector<HTMLElement>('[data-view-heading]');
+      if (heading && document.activeElement !== heading) heading.focus({ preventScroll: true });
+    };
+    const frame = window.requestAnimationFrame(() => {
+      focusHeading();
+      // A second guarded pass handles browsers that restore focus to <body>
+      // after the navigation-triggering button has unmounted.
+      focusTimer = window.setTimeout(focusHeading, 600);
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (focusTimer !== undefined) window.clearTimeout(focusTimer);
+    };
+  }, [currentView, receiveStatus]);
+
+  const createWhisper = async (payload: ComposePayload) => {
+    try {
+      const sealed = await createOneTimeWhisper(payload);
+      setSealedWhisper({
+        id: sealed.id,
+        signature: payload.signature,
+        shareUrl: sealed.shareUrl,
+        deleteToken: sealed.deleteToken,
+        expiresAt: sealed.expiresAt,
+      });
+      setSignature(payload.signature);
+      setCurrentView(View.SHARE_READY);
+    } catch {
+      throw new Error(t('compose.createFailed'));
+    }
+  };
+
+  const revealWhisper = async () => {
+    if (!recipient?.fragmentSecret || !recipient.consumeToken) {
+      setReceiveStatus('invalid');
+      return;
+    }
+
+    try {
+      const opened = await consumeOneTimeWhisper(
+        recipient.id,
+        recipient.fragmentSecret,
+        recipient.consumeToken,
+        recipient.consistencyToken ?? undefined,
+      );
+      setMessage(opened.message);
+      setSignature(opened.signature);
+      setRecipient(null);
+      window.history.replaceState({}, '', '/');
+      setCurrentView(View.REVEALED);
+    } catch (caught) {
+      if (caught instanceof OneTimeWhisperConsumeUncertainError) {
+        setReceiveStatus('uncertain');
+        return;
+      }
+      if (caught instanceof OneTimeWhisperApiError) {
+        if (caught.code === 'WHISPER_GONE') {
+          setReceiveStatus('gone');
+          return;
+        }
+        if (caught.code === 'INVALID_FRAGMENT_SECRET') {
+          setReceiveStatus('invalid');
+          return;
+        }
+        if (caught.code === 'INVALID_CONSUME_TOKEN') {
+          setReceiveStatus('invalid');
+          return;
+        }
+      }
+      setReceiveStatus('offline');
+      throw new Error(t('receive.openFailed'));
+    }
+  };
+
+  const openAfterglow = (returnView: View) => {
+    setAfterglowReturn(returnView);
+    setCurrentView(View.AFTERGLOW);
+  };
+
   return (
-    <div className="relative w-full min-h-[100svh] bg-background-dark select-none">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 stardust-bg opacity-30 pointer-events-none z-0"></div>
-      <div className="fixed -top-24 -left-24 w-[520px] h-[520px] bg-primary/10 blur-[140px] rounded-full pointer-events-none z-0"></div>
-      <div className="fixed -bottom-24 -right-24 w-[560px] h-[560px] bg-aurora-purple/10 blur-[160px] rounded-full pointer-events-none z-0"></div>
-      
+    <div className="relative w-full min-h-[100svh] bg-background-dark">
+      <div className="fixed inset-0 stardust-bg opacity-30 pointer-events-none z-0" />
+      <div className="fixed -top-24 -left-24 w-[520px] h-[520px] bg-primary/10 blur-[140px] rounded-full pointer-events-none z-0" />
+      <div className="fixed -bottom-24 -right-24 w-[560px] h-[560px] bg-aurora-purple/10 blur-[160px] rounded-full pointer-events-none z-0" />
+
       {currentView === View.LANDING && (
-        <LandingView 
-          onCrystallize={() => setCurrentView(View.ENCRYPT)} 
-          onEnterMuseum={() => setCurrentView(View.GALLERY)} 
-        />
+        <LandingView onCrystallize={() => setCurrentView(View.COMPOSE)} />
       )}
 
-      {currentView === View.ENCRYPT && (
-        <EncryptView 
-          onCrystallized={({ message: nextMessage, ttl: nextTtl, signature: nextSignature }) => {
-            setMessage(nextMessage);
-            setTtl(nextTtl);
-            setSignature(nextSignature);
-            setDecryptSource('local');
-            setCurrentView(View.DECRYPT);
+      {currentView === View.COMPOSE && (
+        <ComposeView onSubmit={createWhisper} onBack={exitToLanding} />
+      )}
+
+      {currentView === View.SHARE_READY && sealedWhisper && (
+        <ShareReadyView
+          whisper={sealedWhisper}
+          onCreateAnother={() => {
+            clearSensitiveState();
+            setCurrentView(View.COMPOSE);
           }}
-          onBack={() => setCurrentView(View.LANDING)}
+          onExport={() => openAfterglow(View.SHARE_READY)}
+          onRevoke={async (id, deleteToken) => {
+            try {
+              return await deleteOneTimeWhisper(id, deleteToken);
+            } catch {
+              throw new Error(t('shareReady.revokeFailed'));
+            }
+          }}
         />
       )}
 
-      {currentView === View.DECRYPT && (
-        <DecryptView 
+      {currentView === View.RECEIVE && recipient && (
+        <ReceiveView
+          id={recipient.id}
+          status={receiveStatus}
+          expiresAt={receiveExpiresAt}
+          signature={signature}
+          onExit={exitToLanding}
+          onRetry={loadRecipientStatus}
+          onReveal={revealWhisper}
+        />
+      )}
+
+      {currentView === View.REVEALED && (
+        <RevealView
           message={message}
           signature={signature}
-          ttl={ttl}
-          onClose={() => setCurrentView(View.LANDING)}
-          onExport={() => setCurrentView(View.AFTERGLOW)}
-          onOpenGallery={() => setCurrentView(View.GALLERY)}
-          source={decryptSource}
-        />
-      )}
-
-      {currentView === View.GALLERY && (
-        <GalleryView 
-          onExit={() => setCurrentView(View.LANDING)}
-          onViewSnowflake={({ message: nextMessage, signature: nextSignature }) => {
-            setMessage(nextMessage);
-            setTtl(60);
-            setSignature(nextSignature);
-            setDecryptSource('local');
-            setCurrentView(View.DECRYPT);
+          onClose={exitToLanding}
+          onExport={() => {
+            setMessage('');
+            openAfterglow(View.LANDING);
           }}
         />
       )}
 
       {currentView === View.AFTERGLOW && (
-        <AfterglowView 
-          message={message}
+        <AfterglowView
+          message={signature}
           signature={signature}
-          onBack={() => setCurrentView(View.DECRYPT)}
-          onExit={() => setCurrentView(View.LANDING)}
+          onBack={() => setCurrentView(afterglowReturn)}
+          onExit={exitToLanding}
         />
       )}
     </div>

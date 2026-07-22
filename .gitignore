@@ -27,3 +27,10 @@ dist-ssr
 .env
 .env.local
 .env.production
+.vercel
+
+# Local Finder duplicates from the original prototype; never ship these.
+/index 2.css
+/index 2.html
+/vite.config 2.ts
+/components/LandingView 2.tsx

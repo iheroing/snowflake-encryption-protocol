@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <title>雪花密语 - 调试工具</title>
   <style>
     body {
@@ -65,10 +68,10 @@
   </div>
 
   <div>
-    <button onclick="checkStorage()">🔍 检查存储</button>
-    <button onclick="clearStorage()">🗑️ 清空存储</button>
-    <button onclick="loadPresets()">✨ 加载预设</button>
-    <button onclick="window.location.href='/'">🏠 返回首页</button>
+    <button id="check-storage" type="button">🔍 检查存储</button>
+    <button id="clear-storage" type="button">🗑️ 清空存储</button>
+    <button id="load-presets" type="button">✨ 加载预设</button>
+    <button id="return-home" type="button">🏠 返回首页</button>
   </div>
 
   <div id="output"></div>
@@ -76,44 +79,73 @@
   <script>
     const STORAGE_KEY = 'snowflake_whispers';
 
+    function createPanel(title, lines, className = 'info', details) {
+      const panel = document.createElement('div');
+      panel.className = className;
+
+      const heading = document.createElement('h3');
+      heading.textContent = title;
+      panel.appendChild(heading);
+
+      for (const line of lines) {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = line;
+        panel.appendChild(paragraph);
+      }
+
+      if (details !== undefined) {
+        const pre = document.createElement('pre');
+        pre.textContent = details;
+        panel.appendChild(pre);
+      }
+
+      return panel;
+    }
+
+    function showPanels(...panels) {
+      document.getElementById('output').replaceChildren(...panels);
+    }
+
     function checkStorage() {
-      const output = document.getElementById('output');
       const data = localStorage.getItem(STORAGE_KEY);
       
       if (!data) {
-        output.innerHTML = '<div class="info error"><h3>❌ 存储为空</h3><p>localStorage 中没有数据</p></div>';
+        showPanels(createPanel('❌ 存储为空', ['localStorage 中没有数据'], 'info error'));
         updateStatus(0, '无预设');
         return;
       }
 
       try {
         const records = JSON.parse(data);
-        const presetCount = records.filter(r => r.id.startsWith('preset_')).length;
+        if (!Array.isArray(records)) {
+          throw new TypeError('存储数据不是记录数组');
+        }
+
+        const presetCount = records.filter(record =>
+          typeof record?.id === 'string' && record.id.startsWith('preset_')
+        ).length;
         const userCount = records.length - presetCount;
         
-        output.innerHTML = `
-          <div class="info success">
-            <h3>✅ 存储状态</h3>
-            <p>总记录数: ${records.length}</p>
-            <p>预设数量: ${presetCount}</p>
-            <p>用户创建: ${userCount}</p>
-          </div>
-          <div class="info">
-            <h3>📝 数据详情</h3>
-            <pre>${JSON.stringify(records, null, 2)}</pre>
-          </div>
-        `;
+        showPanels(
+          createPanel('✅ 存储状态', [
+            `总记录数: ${records.length}`,
+            `预设数量: ${presetCount}`,
+            `用户创建: ${userCount}`,
+          ], 'info success'),
+          createPanel('📝 数据详情', [], 'info', JSON.stringify(records, null, 2)),
+        );
         
         updateStatus(records.length, presetCount > 0 ? '已加载' : '未加载');
       } catch (error) {
-        output.innerHTML = `<div class="info error"><h3>❌ 解析错误</h3><p>${error.message}</p></div>`;
+        const message = error instanceof Error ? error.message : '未知错误';
+        showPanels(createPanel('❌ 解析错误', [message], 'info error'));
       }
     }
 
     function clearStorage() {
       if (confirm('确定要清空所有存储吗？这将删除所有雪花记录（包括预设）。')) {
         localStorage.removeItem(STORAGE_KEY);
-        document.getElementById('output').innerHTML = '<div class="info success"><h3>✅ 已清空</h3><p>localStorage 已清空，刷新页面后预设会自动加载。</p></div>';
+        showPanels(createPanel('✅ 已清空', ['localStorage 已清空，刷新页面后预设会自动加载。'], 'info success'));
         updateStatus(0, '已清空');
       }
     }
@@ -137,13 +169,10 @@
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(presetRecords));
       
-      document.getElementById('output').innerHTML = `
-        <div class="info success">
-          <h3>✅ 预设已加载</h3>
-          <p>成功加载 ${presetRecords.length} 条预设心语</p>
-          <p>请返回首页查看画廊</p>
-        </div>
-      `;
+      showPanels(createPanel('✅ 预设已加载', [
+        `成功加载 ${presetRecords.length} 条预设心语`,
+        '请返回首页查看画廊',
+      ], 'info success'));
       
       updateStatus(presetRecords.length, '已加载');
     }
@@ -153,8 +182,13 @@
       document.getElementById('preset-status').textContent = presetStatus;
     }
 
-    // 页面加载时自动检查
-    window.onload = checkStorage;
+    document.getElementById('check-storage').addEventListener('click', checkStorage);
+    document.getElementById('clear-storage').addEventListener('click', clearStorage);
+    document.getElementById('load-presets').addEventListener('click', loadPresets);
+    document.getElementById('return-home').addEventListener('click', () => {
+      window.location.assign('/');
+    });
+    window.addEventListener('load', checkStorage, { once: true });
   </script>
 </body>
 </html>

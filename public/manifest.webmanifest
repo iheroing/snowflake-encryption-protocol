@@ -1,0 +1,19 @@
+{
+  "name": "雪花密语 · Snowflake Whisper",
+  "short_name": "雪花密语",
+  "description": "一封在浏览器中加密、只能被主动揭开一次的雪信。",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#05070c",
+  "theme_color": "#080b11",
+  "icons": [
+    {
+      "src": "/icon-512.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}

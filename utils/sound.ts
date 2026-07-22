@@ -45,9 +45,9 @@ class SoundManager {
 
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      this.enabled = raw !== '0';
+      this.enabled = raw === '1';
     } catch {
-      this.enabled = true;
+      this.enabled = false;
     }
 
     if (this.enabled) {
@@ -287,9 +287,9 @@ class SoundManager {
 
     const tick = (now: number) => {
       const elapsed = now - startAt;
-      const t = Math.min(1, durationMs <= 0 ? 1 : elapsed / durationMs);
+      const t = Math.max(0, Math.min(1, durationMs <= 0 ? 1 : elapsed / durationMs));
       const eased = 1 - Math.pow(1 - t, 3);
-      bgm.volume = startVolume + (target - startVolume) * eased;
+      bgm.volume = Math.max(0, Math.min(1, startVolume + (target - startVolume) * eased));
 
       if (t < 1) {
         this.bgmFadeRaf = window.requestAnimationFrame(tick);

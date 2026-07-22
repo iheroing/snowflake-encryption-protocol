@@ -1,11 +1,12 @@
-
-import React, { useState, useMemo, useRef } from 'react';
-import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
-import { getSnowflakeId } from '../utils/share';
-import SoundToggleButton from './SoundToggleButton';
-import { useSound } from '../contexts/SoundContext';
-import LanguageToggleButton from './LanguageToggleButton';
+import React, { useMemo, useState } from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import { useSound } from '../contexts/SoundContext';
+import { generateSnowflakeDataURL, hashString } from '../utils/snowflakeGenerator';
+import { getSnowflakeId } from '../utils/signature';
+import Icon from './Icon';
+import LanguageToggleButton from './LanguageToggleButton';
+import SoundToggleButton from './SoundToggleButton';
+import './AfterglowView.css';
 
 interface Props {
   onBack: () => void;
@@ -14,247 +15,338 @@ interface Props {
   signature?: string;
 }
 
-const AfterglowView: React.FC<Props> = ({ onBack, onExit, message = "A whisper from the void", signature = "afterglow_default" }) => {
-  const [selectedCanvas, setSelectedCanvas] = useState('postcard');
-  const canvasRef = useRef<HTMLDivElement>(null);
+type CanvasKind = 'postcard' | 'desktop' | 'mobile';
+
+interface CanvasOption {
+  id: CanvasKind;
+  labelKey: string;
+  width: number;
+  height: number;
+  fileLabel: string;
+}
+
+const CANVAS_OPTIONS: readonly CanvasOption[] = [
+  {
+    id: 'postcard',
+    labelKey: 'afterglow.optionPostcard',
+    width: 1600,
+    height: 1000,
+    fileLabel: 'postcard'
+  },
+  {
+    id: 'desktop',
+    labelKey: 'afterglow.optionDesktop',
+    width: 2560,
+    height: 1440,
+    fileLabel: 'wallpaper'
+  },
+  {
+    id: 'mobile',
+    labelKey: 'afterglow.optionMobile',
+    width: 1080,
+    height: 1920,
+    fileLabel: 'lockscreen'
+  }
+] as const;
+
+function seededUnit(seed: number, index: number): number {
+  const value = Math.sin(seed * 0.0001 + index * 12.9898) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+function drawStardust(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number): void {
+  const count = Math.max(80, Math.round((width * height) / 30_000));
+
+  ctx.save();
+  for (let index = 0; index < count; index += 1) {
+    const x = seededUnit(seed, index * 3) * width;
+    const y = seededUnit(seed, index * 3 + 1) * height;
+    const radius = 0.6 + seededUnit(seed, index * 3 + 2) * 1.6;
+    const alpha = 0.05 + seededUnit(seed, index * 5 + 3) * 0.16;
+
+    ctx.fillStyle = `rgba(225, 246, 255, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function loadImage(source: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Snowflake artwork could not be loaded'));
+    image.src = source;
+  });
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error('PNG export returned an empty result'));
+      }
+    }, 'image/png', 1);
+  });
+}
+
+const AfterglowView: React.FC<Props> = ({
+  onBack,
+  onExit,
+  message = 'A whisper from the void',
+  signature = 'afterglow_default'
+}) => {
+  const [selectedCanvas, setSelectedCanvas] = useState<CanvasKind>('postcard');
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
   const { play } = useSound();
   const { t, localeTag } = useI18n();
-  
-  const snowflakeURL = useMemo(() => generateSnowflakeDataURL(message, 1200, signature), [message, signature]);
+
+  const capturedAt = useMemo(() => new Date(), []);
+  const snowflakeURL = useMemo(
+    () => generateSnowflakeDataURL(message, 1200, signature),
+    [message, signature]
+  );
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
-  
+  const selectedOption = CANVAS_OPTIONS.find((option) => option.id === selectedCanvas) ?? CANVAS_OPTIONS[0];
+
+  const capturedLabel = useMemo(
+    () => capturedAt.toLocaleString(localeTag, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    [capturedAt, localeTag]
+  );
+
   const handleExport = async () => {
+    if (isExporting) {
+      return;
+    }
+
+    setIsExporting(true);
+    setExportError('');
+
     try {
-      // 创建一个高分辨率的canvas
+      const { width, height, fileLabel } = selectedOption;
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      // 根据选择的画布类型设置尺寸
-      let width, height;
-      switch (selectedCanvas) {
-        case 'postcard':
-          width = 1600;
-          height = 1000;
-          break;
-        case 'desktop':
-          width = 2560;
-          height = 1440;
-          break;
-        case 'mobile':
-          width = 1080;
-          height = 1920;
-          break;
-        default:
-          width = 1600;
-          height = 1000;
+
+      if (!ctx) {
+        throw new Error('Canvas is unavailable');
       }
-      
+
       canvas.width = width;
       canvas.height = height;
-      
-      // 绘制深色背景
-      const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/2);
-      gradient.addColorStop(0, '#0a0d15');
-      gradient.addColorStop(1, '#050608');
-      ctx.fillStyle = gradient;
+
+      const background = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.42,
+        0,
+        width * 0.5,
+        height * 0.5,
+        Math.max(width, height) * 0.72
+      );
+      background.addColorStop(0, '#142536');
+      background.addColorStop(0.42, '#0b121d');
+      background.addColorStop(1, '#040609');
+      ctx.fillStyle = background;
       ctx.fillRect(0, 0, width, height);
-      
-      // 添加星尘背景效果
-      ctx.save();
-      ctx.globalAlpha = 0.05;
-      for (let i = 0; i < 100; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const size = Math.random() * 2;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-      
-      // 添加光晕效果
-      ctx.save();
-      ctx.globalAlpha = 0.1;
-      const glowGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width * 0.4);
-      glowGradient.addColorStop(0, '#38dafa');
-      glowGradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = glowGradient;
+
+      drawStardust(ctx, width, height, hashString(signature));
+
+      const glow = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.45,
+        0,
+        width * 0.5,
+        height * 0.45,
+        Math.min(width, height) * 0.48
+      );
+      glow.addColorStop(0, 'rgba(99, 219, 255, 0.16)');
+      glow.addColorStop(0.48, 'rgba(99, 219, 255, 0.05)');
+      glow.addColorStop(1, 'rgba(99, 219, 255, 0)');
+      ctx.fillStyle = glow;
       ctx.fillRect(0, 0, width, height);
+
+      const image = await loadImage(snowflakeURL);
+      const snowflakeSize = Math.min(width, height) * (selectedCanvas === 'mobile' ? 0.58 : 0.52);
+      const snowflakeX = (width - snowflakeSize) / 2;
+      const snowflakeY = selectedCanvas === 'mobile'
+        ? height * 0.18
+        : (height - snowflakeSize) / 2 - height * 0.06;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(76, 219, 255, 0.34)';
+      ctx.shadowBlur = Math.min(width, height) * 0.045;
+      ctx.drawImage(image, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
       ctx.restore();
-      
-      // 加载并绘制雪花
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = snowflakeURL;
-      
-      img.onload = () => {
-        // 计算雪花大小和位置
-        const snowflakeSize = Math.min(width, height) * 0.5;
-        const snowflakeX = (width - snowflakeSize) / 2;
-        const snowflakeY = selectedCanvas === 'mobile' 
-          ? height * 0.25 
-          : (height - snowflakeSize) / 2 - 80;
-        
-        // 绘制雪花
-        ctx.drawImage(img, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
-        
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#D1DCE3';
-        ctx.font = `500 ${Math.max(12, width * 0.012)}px "Space Grotesk", sans-serif`;
-        ctx.fillText(snowflakeId, width / 2, selectedCanvas === 'mobile' ? height * 0.7 : height * 0.78);
-        
-        // 添加顶部标题
-        ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
-        ctx.font = `300 ${width * 0.012}px "Space Grotesk", sans-serif`;
-        ctx.fillText(t('common.appSubtitle'), width / 2, height * 0.05);
-        
-        // 添加底部时间戳
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.font = `300 ${width * 0.01}px "Space Grotesk", sans-serif`;
-        const timestamp = new Date().toLocaleString(localeTag, {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        ctx.fillText(`${t('afterglow.stampPrefix')} ${timestamp}`, width / 2, height * 0.95);
-        
-        // 添加底部装饰文字
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.font = `300 ${width * 0.008}px "Space Grotesk", sans-serif`;
-        ctx.fillText(t('afterglow.footerEngine').toUpperCase(), width * 0.2, height * 0.97);
-        ctx.fillText(`${t('afterglow.footerRender')}: ${width} x ${height}`, width * 0.8, height * 0.97);
-        
-        // 导出为 PNG
-        canvas.toBlob((blob) => {
-          if (blob) {
-            play('export');
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            const canvasType = selectedCanvas === 'postcard' ? 'postcard' : 
-                              selectedCanvas === 'desktop' ? 'wallpaper' : 'lockscreen';
-            link.download = `snowflake-whisper-${canvasType}-${Date.now()}.png`;
-            link.href = url;
-            link.click();
-            URL.revokeObjectURL(url);
-          }
-        }, 'image/png', 1.0);
-      };
-      
-      img.onerror = () => {
-        console.error('Failed to load snowflake image');
-        alert(t('afterglow.exportFailed'));
-      };
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert(t('afterglow.exportFailed'));
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `600 ${Math.max(16, width * 0.012)}px system-ui, -apple-system, sans-serif`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.0025)}px`;
+      ctx.fillStyle = 'rgba(226, 242, 249, 0.76)';
+      ctx.fillText(
+        snowflakeId,
+        width / 2,
+        selectedCanvas === 'mobile' ? height * 0.70 : height * 0.78
+      );
+
+      ctx.font = `600 ${Math.max(14, width * 0.011)}px system-ui, -apple-system, sans-serif`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.0018)}px`;
+      ctx.fillStyle = 'rgba(132, 225, 255, 0.58)';
+      ctx.fillText(t('common.appSubtitle'), width / 2, height * 0.055);
+
+      ctx.font = `400 ${Math.max(12, width * 0.009)}px system-ui, -apple-system, sans-serif`;
+      ctx.letterSpacing = `${Math.max(0.5, width * 0.001)}px`;
+      ctx.fillStyle = 'rgba(226, 242, 249, 0.38)';
+      ctx.fillText(`${t('afterglow.stampPrefix')} ${capturedLabel}`, width / 2, height * 0.94);
+
+      ctx.textAlign = 'left';
+      ctx.font = `500 ${Math.max(10, width * 0.0075)}px system-ui, -apple-system, sans-serif`;
+      ctx.fillStyle = 'rgba(226, 242, 249, 0.22)';
+      ctx.fillText(t('afterglow.footerEngine').toUpperCase(), width * 0.05, height * 0.972);
+
+      ctx.textAlign = 'right';
+      ctx.fillText(`${t('afterglow.footerRender')}: ${width} x ${height}`, width * 0.95, height * 0.972);
+
+      const blob = await canvasToBlob(canvas);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `snowflake-whisper-${fileLabel}-${Date.now()}.png`;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      play('export');
+    } catch {
+      setExportError(t('afterglow.exportFailed'));
+    } finally {
+      setIsExporting(false);
     }
   };
 
   return (
-    <div className="relative z-10 cine-page w-full flex flex-col overflow-hidden bg-background-dark px-4 md:px-8">
-      <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary rounded-full blur-[120px] opacity-10"></div>
-      
-      <div className="cine-stage cine-fold flex flex-col">
-      <header className="relative z-50 w-full mx-auto mb-4 flex items-center justify-between px-4 md:px-5 py-3 cine-header">
-        <div className="flex items-center gap-6">
-          <button onClick={onBack} className="flex items-center gap-2 text-primary hover:text-white transition-colors">
-            <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-xs font-bold tracking-[0.2em] uppercase">{t('afterglow.return')}</span>
-          </button>
-          <div className="h-4 w-px bg-white/10"></div>
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-primary">ac_unit</span>
-            <h2 className="font-serif italic text-lg tracking-tight">{t('common.appName')}</h2>
-          </div>
+    <section className="afterglow-view" aria-labelledby="afterglow-title">
+      <div className="afterglow-ambient" aria-hidden="true" />
+
+      <header className="afterglow-header">
+        <button type="button" className="afterglow-back" onClick={onBack}>
+          <Icon name="arrow-left" size={18} />
+          <span>{t('afterglow.return')}</span>
+        </button>
+
+        <div className="afterglow-brand" aria-label={t('common.appName')}>
+          <Icon name="snowflake" size={19} />
+          <span>{t('common.appName')}</span>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="afterglow-utilities">
           <LanguageToggleButton compact />
           <SoundToggleButton compact />
-          <button onClick={onExit} className="size-10 rounded-full cine-btn-ghost flex items-center justify-center">
-             <span className="material-symbols-outlined">close</span>
+          <button
+            type="button"
+            className="afterglow-close"
+            onClick={onExit}
+            aria-label={t('common.close')}
+            title={t('common.close')}
+          >
+            <Icon name="close" size={19} />
           </button>
         </div>
       </header>
 
-      <main className="relative flex-1 min-h-0 flex pb-8 md:pb-10 gap-10 overflow-hidden items-center justify-center">
-        <div className="flex-1 flex flex-col items-center justify-center">
-           <div ref={canvasRef} className="relative w-full max-w-2xl aspect-[1.6/1] cine-panel-strong flex items-center justify-center p-12 crystal-glow">
-              <div className="absolute inset-0 stardust-bg opacity-10"></div>
-              <div className="relative z-10 w-full h-full flex flex-col items-center justify-center gap-8">
-                 <img 
-                    src={snowflakeURL}
-                    className="w-48 h-48 md:w-64 md:h-64 object-contain drop-shadow-[0_0_40px_rgba(56,218,250,0.5)] animate-[spin_20s_linear_infinite]"
-                    alt="Afterglow Fractal"
-                 />
-                 <div className="text-center">
-                    <p className="text-[10px] tracking-[0.4em] uppercase text-white/30 mt-4">
-                      {t('afterglow.capturedAt')} {new Date().toLocaleTimeString(localeTag)} • {new Date().toLocaleDateString(localeTag)}
-                    </p>
-                    <p className="text-[10px] tracking-[0.25em] uppercase text-primary/50 mt-3">{snowflakeId}</p>
-                 </div>
-              </div>
-              <div className="absolute bottom-4 right-5 md:right-6 max-w-[60%] text-right flex items-center justify-end gap-1.5 text-[9px] md:text-[10px] text-white/25 tracking-[0.12em] uppercase pointer-events-none">
-                <span className="material-symbols-outlined text-[12px]">shield_lock</span>
-                <span>{t('afterglow.secureNoText')}</span>
-              </div>
-           </div>
-        </div>
+      <main className="afterglow-main">
+        <section className="afterglow-preview-region" aria-label={t('afterglow.title')}>
+          <figure className="afterglow-art" data-canvas={selectedCanvas}>
+            <div className="afterglow-art-stars" aria-hidden="true" />
+            <img className="afterglow-snowflake" src={snowflakeURL} alt="" />
 
-        {/* Sidebar Controls */}
-        <aside className="w-[420px] h-full cine-panel-strong p-8 flex flex-col gap-10">
-          <div>
-            <h1 className="font-serif text-3xl font-bold mb-3">{t('afterglow.title')}</h1>
-            <p className="text-white/40 text-sm leading-relaxed">{t('afterglow.desc')}</p>
-          </div>
+            <figcaption className="afterglow-art-meta">
+              <span>{t('afterglow.capturedAt')} {capturedLabel}</span>
+              <strong>{snowflakeId}</strong>
+            </figcaption>
 
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-bold tracking-widest text-white/40 uppercase">{t('afterglow.canvasSelection')}</h3>
-            <div className="flex flex-col gap-3">
-              {[
-                { id: 'postcard', label: t('afterglow.optionPostcard'), icon: 'drafts' },
-                { id: 'desktop', label: t('afterglow.optionDesktop'), icon: 'desktop_windows' },
-                { id: 'mobile', label: t('afterglow.optionMobile'), icon: 'smartphone' }
-              ].map(opt => (
-                <div 
-                  key={opt.id}
-                  onClick={() => setSelectedCanvas(opt.id)}
-                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedCanvas === opt.id ? 'bg-primary/20 border-primary shadow-[0_0_15px_rgba(56,218,250,0.2)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
-                >
-                  <span className="material-symbols-outlined opacity-60">{opt.icon}</span>
-                  <span className="text-sm font-medium">{opt.label}</span>
-                  {selectedCanvas === opt.id && <span className="material-symbols-outlined ml-auto text-primary text-sm">check_circle</span>}
-                </div>
-              ))}
+            <div className="afterglow-privacy-mark">
+              <Icon name="shield" size={15} />
+              <span>{t('afterglow.secureNoText')}</span>
             </div>
+          </figure>
+        </section>
+
+        <aside className="afterglow-controls" aria-labelledby="afterglow-title">
+          <div className="afterglow-copy">
+            <span className="afterglow-kicker">{t('common.appSubtitle')}</span>
+            <h1 id="afterglow-title" data-view-heading tabIndex={-1} autoFocus>{t('afterglow.title')}</h1>
+            <p>{t('afterglow.desc')}</p>
           </div>
 
-          <div className="mt-auto space-y-6">
-             <button onClick={handleExport} className="w-full cine-btn-primary font-bold py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] shadow-lg shadow-primary/20">
-                <span className="material-symbols-outlined">download</span>
-                {t('afterglow.export')}
-             </button>
-             <p className="text-[10px] text-center text-white/30 tracking-widest uppercase">{t('afterglow.hiRes')}</p>
+          <fieldset className="afterglow-options">
+            <legend>{t('afterglow.canvasSelection')}</legend>
+            <div className="afterglow-option-list">
+              {CANVAS_OPTIONS.map((option) => {
+                const isSelected = selectedCanvas === option.id;
+
+                return (
+                  <label className="afterglow-option" data-selected={isSelected} key={option.id}>
+                    <input
+                      className="afterglow-option-input"
+                      type="radio"
+                      name="afterglow-canvas"
+                      value={option.id}
+                      checked={isSelected}
+                      onChange={() => setSelectedCanvas(option.id)}
+                    />
+                    <span className="afterglow-option-mark" aria-hidden="true">
+                      {isSelected ? <Icon name="check" size={15} /> : null}
+                    </span>
+                    <span className="afterglow-option-label">{t(option.labelKey)}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <div className="afterglow-export-group">
+            <button
+              type="button"
+              className="afterglow-export"
+              onClick={handleExport}
+              disabled={isExporting}
+              aria-busy={isExporting}
+            >
+              {isExporting ? (
+                <span className="activity-indicator" aria-hidden="true" />
+              ) : (
+                <Icon name="download" size={19} />
+              )}
+              <span>{isExporting ? t('afterglow.exporting') : t('afterglow.export')}</span>
+            </button>
+            <p role="status" aria-live="polite">
+              {selectedOption.width} × {selectedOption.height} · {t('afterglow.hiRes')}
+            </p>
+            {exportError && (
+              <p className="afterglow-export-error" role="alert">{exportError}</p>
+            )}
           </div>
         </aside>
       </main>
 
-      <footer className="px-2 md:px-4 py-5 border-t border-white/5 bg-background-dark/80 flex items-center justify-between">
-         <div className="flex items-center gap-2">
-            <span className="size-1.5 bg-primary rounded-full animate-pulse"></span>
-            <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">{t('afterglow.footerEngine')}</span>
-         </div>
-         <div className="flex gap-8 text-[10px] text-white/30 tracking-widest">
-            <span>{t('afterglow.footerRender')}: 4096 x 2304</span>
-            <span>{t('afterglow.footerComplexity')}: 8.4M poly</span>
-         </div>
+      <footer className="afterglow-footer" aria-label={t('afterglow.footerEngine')}>
+        <span className="afterglow-engine">
+          <span className="afterglow-engine-dot" aria-hidden="true" />
+          {t('afterglow.footerEngine')}
+        </span>
+        <span>{t('afterglow.footerRender')}: {selectedOption.width} × {selectedOption.height}</span>
       </footer>
-      </div>
-    </div>
+    </section>
   );
 };
 

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "algorithm": "A256GCM-HKDF-SHA256",
+  "plaintext": "Snow falls once.",
+  "fragmentSecret": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+  "contentKey": "QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl8",
+  "derivedKek": "d_ro-6CPTgUREddz4Mdrk5pjZyOss-pVQOfc-hv53wc",
+  "aad": "{\"version\":1,\"algorithm\":\"A256GCM-HKDF-SHA256\",\"id\":\"AAECAwQFBgcICQoLDA0ODw\",\"ttlSeconds\":86400,\"signature\":\"vector-v1\"}",
+  "envelope": {
+    "version": 1,
+    "algorithm": "A256GCM-HKDF-SHA256",
+    "id": "AAECAwQFBgcICQoLDA0ODw",
+    "ttlSeconds": 86400,
+    "signature": "vector-v1",
+    "hkdfSalt": "YGFiY2RlZmdoaWprbG1ubw",
+    "wrapIv": "cHFyc3R1dnd4eXp7",
+    "wrappedKey": "SY5oHw-DVHgGkrI4p9g9FcwpkCkqFEQ-xdaPUCyN8siyTTDBn8kHYcS1bQmw86oE",
+    "contentIv": "gIGCg4SFhoeIiYqL",
+    "ciphertext": "fjDRsAISS-8EGbBHHMHwDNxUxhbVPpz6qwteWhzzYNc"
+  }
+}

@@ -7,19 +7,23 @@ interface Props {
 
 const LanguageToggleButton: React.FC<Props> = ({ compact = false }) => {
   const { t, toggleLocale } = useI18n();
+  const label = t('common.switchLanguage');
 
   return (
     <button
+      type="button"
       onClick={toggleLocale}
-      className={`cine-btn-ghost rounded-full flex items-center justify-center ${
-        compact ? 'h-10 px-3 text-xs' : 'h-10 px-4 text-sm'
+      className={`cine-btn-ghost inline-flex min-h-11 items-center justify-center rounded-full ${
+        compact ? 'min-w-11 px-3 text-xs' : 'px-4 text-sm'
       }`}
-      title={t('common.switchLanguage')}
+      title={label}
+      aria-label={label}
     >
-      <span className="font-semibold tracking-wide">{t('common.language')}</span>
+      <span className="font-semibold tracking-[0.08em]" aria-hidden="true">
+        {t('common.language')}
+      </span>
     </button>
   );
 };
 
 export default LanguageToggleButton;
-

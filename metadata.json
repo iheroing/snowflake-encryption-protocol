@@ -1,7 +1,5 @@
 {
-  "name": "Snowflake Encryption Protocol",
-  "description": "A high-end, ephemeral messaging and cryptographic visualization app inspired by the aesthetic of delicate crystal fractals and quantum-secure communication.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "name": "Snowflake Whisper",
+  "description": "A one-time snow letter encrypted locally in the browser.",
+  "requestFramePermissions": []
 }

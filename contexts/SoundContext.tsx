@@ -16,10 +16,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => soundManager.subscribe(setSoundEnabled), []);
 
   useEffect(() => {
-    soundManager.prime();
-  }, []);
-
-  useEffect(() => {
     const unlock = () => {
       void soundManager.unlock();
     };

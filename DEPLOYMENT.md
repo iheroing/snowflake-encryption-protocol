@@ -1,131 +1,61 @@
-# 🚀 部署指南
+# 生产部署
 
-## 部署到 Vercel (推荐)
+当前后端是 Vercel Functions + Upstash Redis。纯静态托管无法提供一次性消费语义，因此不要将当前版本直接部署到 GitHub Pages。
 
-Vercel 是最简单的部署方式，完全免费。
+仓库通过 `package.json` 固定 Node.js 24.x，并让 Vercel 使用 `npm ci` 按锁文件安装；不要在控制台用不同的 Install Command 覆盖它。
 
-### 步骤：
+## 1. 准备 Redis
 
-1. 将代码推送到 GitHub
-2. 访问 [vercel.com](https://vercel.com)
-3. 点击 "Import Project"
-4. 选择你的 GitHub 仓库
-5. Vercel 会自动检测 Vite 配置
-6. 点击 "Deploy"
+1. 在 Upstash 创建 Redis 数据库，区域尽量接近 Vercel Functions 的主要访问区域。
+2. 复制 REST URL；优先创建只允许所需命令与 `snow:*` key 的 ACL REST Token。ACL 不可用时应使用项目独立数据库并记录这一风险。
+3. 为生产、预览和本地环境使用不同数据库或至少不同凭证。
 
-完成！你的应用会在几分钟内上线。
+## 2. 配置 Vercel
 
-### 自定义域名
+推荐在 Vercel Marketplace 中创建并连接 Upstash for Redis；集成会自动设置：
 
-在 Vercel 项目设置中可以添加自定义域名。
-
----
-
-## 部署到 Netlify
-
-### 步骤：
-
-1. 将代码推送到 GitHub
-2. 访问 [netlify.com](https://netlify.com)
-3. 点击 "Add new site" → "Import an existing project"
-4. 选择你的 GitHub 仓库
-5. 构建设置会自动从 `netlify.toml` 读取
-6. 点击 "Deploy site"
-
----
-
-## 部署到 GitHub Pages
-
-### 步骤：
-
-1. 修改 `vite.config.ts`，添加 base 路径：
-```typescript
-export default defineConfig({
-  base: '/your-repo-name/',
-  // ... 其他配置
-})
+```dotenv
+KV_REST_API_URL=https://your-database.upstash.io
+KV_REST_API_TOKEN=...
+RATE_LIMIT_SALT=...
 ```
 
-2. 构建项目：
+若使用直接在 Upstash Console 管理的数据库，也兼容
+`UPSTASH_REDIS_REST_URL` 与 `UPSTASH_REDIS_REST_TOKEN`。两套凭据无需同时配置。
+
+`RATE_LIMIT_SALT` 应是独立的高熵值：
+
 ```bash
+openssl rand -base64 32
+```
+
+不要使用 `VITE_` 前缀，也不要把这些值写入前端配置。
+
+## 3. 发布门禁
+
+```bash
+npm ci
+npm run type-check
+npm test
 npm run build
+npm audit
 ```
 
-3. 部署到 gh-pages 分支：
-```bash
-npm install -g gh-pages
-gh-pages -d dist
-```
+发布后验证：
 
-4. 在 GitHub 仓库设置中启用 GitHub Pages，选择 gh-pages 分支
+1. 创建一封测试雪信，确认生成 `/s/{id}#k=...&c=...&r=...` 链接；本地内存 API 可以没有 `r`。
+2. 另开一个无痕窗口，确认进入收信页但未自动显示正文。
+3. 刷新收信页，确认仍可揭开。
+4. 点击揭开，确认正文解密成功。
+5. 再次打开原链接，确认返回「已揭开或已过期」，不泄露具体原因。
+6. 检查响应头中的 CSP、`Referrer-Policy: no-referrer`、HSTS 和 `X-Content-Type-Options: nosniff`。
+7. 检查 Vercel 日志：不得出现正文、fragment secret、撤回令牌或完整请求体。
+8. 使用隔离的生产同构 Redis 做 25 路并发消费、错误 token、真实 TTL、撤回和跨函数立即读取测试；只有一个请求可以成功。
 
----
+## 4. 运维边界
 
-## 部署到自己的服务器
-
-### 步骤：
-
-1. 构建项目：
-```bash
-npm run build
-```
-
-2. 将 `dist` 文件夹上传到服务器
-
-3. 配置 Nginx：
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    root /path/to/dist;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-4. 重启 Nginx：
-```bash
-sudo systemctl restart nginx
-```
-
----
-
-## 环境变量
-
-如果需要使用 Gemini API（可选功能），在部署平台设置环境变量：
-
-```
-GEMINI_API_KEY=your_api_key_here
-```
-
----
-
-## 性能优化建议
-
-1. **启用 Gzip 压缩**: 大多数托管平台默认启用
-2. **CDN 加速**: Vercel 和 Netlify 自带全球 CDN
-3. **图片优化**: 考虑使用 WebP 格式
-4. **代码分割**: Vite 已自动处理
-
----
-
-## 故障排查
-
-### 页面刷新 404
-
-确保配置了 SPA 路由重定向（已在 `vercel.json` 和 `netlify.toml` 中配置）
-
-### 样式不显示
-
-检查 Tailwind CDN 是否正常加载，或考虑使用本地 Tailwind 配置
-
-### 字体加载失败
-
-确保 Google Fonts 链接可访问，或使用本地字体文件
-
----
-
-*祝部署顺利！❄️*
+- Redis 数据是临时密文，不应启用用于内容恢复的长期备份。
+- 分析和错误监控不得采集 URL fragment、请求体或剪贴板。
+- 密文在到期前占用 Redis 空间；需监控总条数、失败率、限流率与 API 延迟，但不记录内容。
+- 轮换 Redis Token 会立即影响所有 API，应通过 Vercel 环境变量更新并重新部署。
+- Upstash 的复制模型是最终一致；URL 中的一致性检查点覆盖常规跨函数 read-your-writes，但不能把基础设施故障描述为严格线性一致。
