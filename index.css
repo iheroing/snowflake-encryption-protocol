@@ -18,7 +18,7 @@
   --cine-primary-soft: rgba(114, 220, 241, 0.16);
   --cine-danger-soft: rgba(248, 113, 113, 0.16);
   --cine-ui-font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --cine-letter-font: ui-serif, "Iowan Old Style", "Songti SC", STSong, "Times New Roman", serif;
+  --cine-letter-font: "Noto Serif SC Variable", "Source Han Serif SC", "Songti SC", STSong, serif;
 }
 
 .no-script-message,
@@ -122,6 +122,7 @@ body {
   font-family: var(--cine-ui-font);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
 
 button,
@@ -346,10 +347,12 @@ button {
 .landing-title {
   max-width: 760px;
   color: rgba(244, 249, 251, 0.92);
+  font-family: var(--cine-letter-font);
   font-size: 3.75rem;
-  font-weight: 300;
-  letter-spacing: 0.035em;
-  line-height: 1.15;
+  font-weight: 360;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .landing-title span,
@@ -360,8 +363,8 @@ button {
 .landing-title em {
   margin-top: 0.22em;
   color: #bceef6;
-  font-family: var(--cine-letter-font);
-  font-weight: 400;
+  font-weight: 500;
+  font-style: normal;
 }
 
 .landing-quote {
@@ -369,8 +372,10 @@ button {
   color: rgba(230, 238, 241, 0.5);
   font-family: var(--cine-letter-font);
   font-size: 1.08rem;
-  font-style: italic;
-  letter-spacing: 0.04em;
+  font-weight: 360;
+  font-style: normal;
+  letter-spacing: 0.02em;
+  line-height: 1.85;
 }
 
 .landing-seal {
@@ -660,9 +665,10 @@ button {
   color: rgba(249, 252, 253, 0.94);
   font-family: var(--cine-letter-font);
   font-size: 4rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.12;
+  font-weight: 430;
+  letter-spacing: -0.018em;
+  line-height: 1.18;
+  text-wrap: balance;
 }
 
 .compose-lead {
@@ -685,8 +691,10 @@ button {
   padding: 1.35rem 1.4rem 2.4rem;
   color: rgba(255, 255, 255, 0.92);
   font-family: var(--cine-letter-font);
-  font-size: 1.55rem;
-  line-height: 1.7;
+  font-size: 1.5rem;
+  font-weight: 380;
+  letter-spacing: 0.015em;
+  line-height: 1.82;
   resize: vertical;
   caret-color: #a6efff;
   background: rgba(255, 255, 255, 0.035);
@@ -1388,9 +1396,16 @@ button {
   color: rgba(249, 252, 253, 0.94);
   font-family: var(--cine-letter-font);
   font-size: 3.65rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.14;
+  font-weight: 430;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.receive-state:not(.sealed) h1 {
+  max-width: 560px;
+  font-size: clamp(2.4rem, 4.4vw, 3.15rem);
+  line-height: 1.26;
 }
 
 .sealed-lead,
@@ -1914,9 +1929,9 @@ button {
   color: rgba(250, 252, 253, 0.94);
   font-family: var(--cine-letter-font);
   font-size: 3rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.5;
+  font-weight: 390;
+  letter-spacing: 0.015em;
+  line-height: 1.62;
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: pre-wrap;
@@ -1973,9 +1988,10 @@ button {
   color: rgba(247, 251, 252, 0.94);
   font-family: var(--cine-letter-font);
   font-size: clamp(2.6rem, 5.5vw, 5rem);
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.08;
+  font-weight: 430;
+  letter-spacing: -0.018em;
+  line-height: 1.16;
+  text-wrap: balance;
 }
 
 .gallery-intro p {

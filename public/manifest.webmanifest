@@ -1,7 +1,7 @@
 {
   "name": "雪花密语 · Snowflake Whisper",
   "short_name": "雪花密语",
-  "description": "一封在浏览器中加密、只能被主动揭开一次的雪信。",
+  "description": "把一句心语凝成独一无二、只为一人盛开一次的雪信。",
   "lang": "zh-CN",
   "start_url": "/snowflake/",
   "scope": "/snowflake/",

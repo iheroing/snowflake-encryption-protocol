@@ -24,6 +24,7 @@ import { createSnowflakeSignature } from './utils/signature';
 import { collectKeepsake, hasKeepsake, type KeepsakeOrigin } from './utils/keepsakeGallery';
 import type { SoundScene } from './utils/sound';
 import { isWhisperPath, withAppBase } from './utils/appPaths';
+import { retryTransient } from './utils/retryTransient';
 
 enum View {
   LANDING = 'landing',
@@ -90,7 +91,9 @@ const App: React.FC = () => {
 
     setReceiveStatus('loading');
     try {
-      const status = await getWhisperStatus(recipient.id, recipient.consistencyToken ?? undefined);
+      const status = await retryTransient(() => (
+        getWhisperStatus(recipient.id, recipient.consistencyToken ?? undefined)
+      ));
       if (status.status === 'gone') {
         setReceiveStatus('gone');
         return;
