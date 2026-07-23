@@ -76,11 +76,6 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
           </p>
         </section>
 
-        <footer className="landing-footer" aria-hidden="true">
-          <span>01</span>
-          <span className="landing-footer-line" />
-          <span>· SNOW LETTER ·</span>
-        </footer>
       </div>
     </main>
   );

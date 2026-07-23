@@ -12,4 +12,20 @@ describe('Chinese experience copy', () => {
     expect(receive.description).not.toMatch(/原子|服务端|密文|解密/u);
     expect(receive.consumeDisclosure).toContain('仍可能被截图留住');
   });
+
+  it('keeps every visible line poetic and free from protocol jargon', () => {
+    const flatten = (value: unknown): string[] => {
+      if (typeof value === 'string') return [value];
+      if (!value || typeof value !== 'object') return [];
+      return Object.values(value).flatMap(flatten);
+    };
+
+    const chineseCopy = flatten(translations.zh).join('\n');
+    const englishCopy = flatten(translations.en).join('\n');
+
+    expect(chineseCopy).not.toMatch(/原子|密文|服务端|解密/u);
+    expect(englishCopy).not.toMatch(/atomically|ciphertext|server record|fractal engine/iu);
+    expect(`${chineseCopy}\n${englishCopy}`).not.toMatch(/[—–]/u);
+    expect(`${chineseCopy}\n${englishCopy}`).not.toMatch(/·\s*0[12]/u);
+  });
 });

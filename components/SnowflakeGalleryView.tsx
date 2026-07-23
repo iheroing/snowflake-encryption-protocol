@@ -20,6 +20,7 @@ const SnowflakeGalleryView: React.FC<Props> = ({ onBack, onCreate }) => {
   const { t, localeTag } = useI18n();
   const [keepsakes, setKeepsakes] = useState(getKeepsakes);
   const [selected, setSelected] = useState<SnowflakeKeepsake | null>(null);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const dialogRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ const SnowflakeGalleryView: React.FC<Props> = ({ onBack, onCreate }) => {
 
   useEffect(() => {
     if (!selected) return;
+    setIsConfirmingDelete(false);
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const handleDialogKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -65,8 +67,9 @@ const SnowflakeGalleryView: React.FC<Props> = ({ onBack, onCreate }) => {
     : '', [selected]);
 
   const removeSelected = () => {
-    if (!selected || !window.confirm(t('gallery.deleteConfirm'))) return;
+    if (!selected) return;
     removeKeepsake(selected.signature);
+    setIsConfirmingDelete(false);
     setSelected(null);
   };
 
@@ -132,8 +135,8 @@ const SnowflakeGalleryView: React.FC<Props> = ({ onBack, onCreate }) => {
                 <span className="specimen-meta">
                   <strong>{item.id}</strong>
                   <small>
-                    {t(`gallery.origin${item.origin === 'sent' ? 'Sent' : 'Received'}`)} · {' '}
-                    {new Date(item.collectedAt).toLocaleDateString(localeTag, { month: 'short', day: 'numeric' })}
+                    <span>{t(`gallery.origin${item.origin === 'sent' ? 'Sent' : 'Received'}`)}</span>
+                    <span>{new Date(item.collectedAt).toLocaleDateString(localeTag, { month: 'short', day: 'numeric' })}</span>
                   </small>
                 </span>
               </button>
@@ -166,9 +169,23 @@ const SnowflakeGalleryView: React.FC<Props> = ({ onBack, onCreate }) => {
                 <div><dt>{t('gallery.collectedAt')}</dt><dd>{new Date(selected.collectedAt).toLocaleString(localeTag, { dateStyle: 'medium', timeStyle: 'short' })}</dd></div>
               </dl>
               <p className="specimen-no-text"><Icon name="shield" size={17} />{t('gallery.noText')}</p>
-              <button type="button" className="quiet-action specimen-delete" onClick={removeSelected}>
-                <Icon name="trash" size={17} />{t('gallery.delete')}
-              </button>
+              {isConfirmingDelete ? (
+                <div className="specimen-delete-confirm" role="group" aria-label={t('gallery.deleteConfirm')}>
+                  <p>{t('gallery.deleteConfirm')}</p>
+                  <div>
+                    <button type="button" onClick={() => setIsConfirmingDelete(false)} autoFocus>
+                      {t('gallery.deleteCancel')}
+                    </button>
+                    <button type="button" className="specimen-delete-action" onClick={removeSelected}>
+                      {t('gallery.deleteAction')}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" className="quiet-action specimen-delete" onClick={() => setIsConfirmingDelete(true)}>
+                  <Icon name="trash" size={17} />{t('gallery.delete')}
+                </button>
+              )}
             </div>
           </section>
         </div>

@@ -189,7 +189,7 @@ const AfterglowView: React.FC<Props> = ({
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = `600 ${Math.max(16, width * 0.012)}px system-ui, -apple-system, sans-serif`;
+      ctx.font = `600 ${Math.max(16, width * 0.012)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       ctx.letterSpacing = `${Math.max(1, width * 0.0025)}px`;
       ctx.fillStyle = 'rgba(226, 242, 249, 0.76)';
       ctx.fillText(
@@ -198,20 +198,20 @@ const AfterglowView: React.FC<Props> = ({
         selectedCanvas === 'mobile' ? height * 0.70 : height * 0.78
       );
 
-      ctx.font = `600 ${Math.max(14, width * 0.011)}px system-ui, -apple-system, sans-serif`;
+      ctx.font = `600 ${Math.max(14, width * 0.011)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       ctx.letterSpacing = `${Math.max(1, width * 0.0018)}px`;
       ctx.fillStyle = 'rgba(132, 225, 255, 0.58)';
       ctx.fillText(t('common.appSubtitle'), width / 2, height * 0.055);
 
-      ctx.font = `400 ${Math.max(12, width * 0.009)}px system-ui, -apple-system, sans-serif`;
+      ctx.font = `400 ${Math.max(12, width * 0.009)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       ctx.letterSpacing = `${Math.max(0.5, width * 0.001)}px`;
       ctx.fillStyle = 'rgba(226, 242, 249, 0.38)';
       ctx.fillText(`${t('afterglow.stampPrefix')} ${capturedLabel}`, width / 2, height * 0.94);
 
       ctx.textAlign = 'left';
-      ctx.font = `500 ${Math.max(10, width * 0.0075)}px system-ui, -apple-system, sans-serif`;
+      ctx.font = `500 ${Math.max(10, width * 0.0075)}px system-ui, sans-serif`;
       ctx.fillStyle = 'rgba(226, 242, 249, 0.22)';
-      ctx.fillText(t('afterglow.footerEngine').toUpperCase(), width * 0.05, height * 0.972);
+      ctx.fillText(t('afterglow.footerEngine'), width * 0.05, height * 0.972);
 
       ctx.textAlign = 'right';
       ctx.fillText(`${t('afterglow.footerRender')}: ${width} x ${height}`, width * 0.95, height * 0.972);
@@ -330,7 +330,7 @@ const AfterglowView: React.FC<Props> = ({
               <span>{isExporting ? t('afterglow.exporting') : t('afterglow.export')}</span>
             </button>
             <p role="status" aria-live="polite">
-              {selectedOption.width} × {selectedOption.height} · {t('afterglow.hiRes')}
+              {selectedOption.width} × {selectedOption.height}, {t('afterglow.hiRes')}
             </p>
             {exportError && (
               <p className="afterglow-export-error" role="alert">{exportError}</p>
@@ -341,7 +341,6 @@ const AfterglowView: React.FC<Props> = ({
 
       <footer className="afterglow-footer" aria-label={t('afterglow.footerEngine')}>
         <span className="afterglow-engine">
-          <span className="afterglow-engine-dot" aria-hidden="true" />
           {t('afterglow.footerEngine')}
         </span>
         <span>{t('afterglow.footerRender')}: {selectedOption.width} × {selectedOption.height}</span>

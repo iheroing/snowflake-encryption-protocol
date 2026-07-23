@@ -69,7 +69,9 @@ const ReceiveView: React.FC<Props> = ({
     if (status === 'loading') {
       return (
         <div className="receive-state" role="status">
-          <span className="activity-indicator large" aria-hidden="true" />
+          <div className="status-snowflake is-listening" aria-hidden="true">
+            <Icon name="snowflake" size={30} />
+          </div>
           <h1 data-view-heading tabIndex={-1} autoFocus>{t('receive.checking')}</h1>
           <p>{t('receive.checkingBody')}</p>
         </div>

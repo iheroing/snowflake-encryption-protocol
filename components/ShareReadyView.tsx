@@ -67,6 +67,12 @@ const ShareReadyView: React.FC<Props> = ({
   }, [play]);
 
   useEffect(() => {
+    if (!feedback || feedback.kind === 'error') return;
+    const timer = window.setTimeout(() => setFeedback(null), 4500);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
+  useEffect(() => {
     const dialog = revokeDialogRef.current;
     if (!dialog) return;
     if (isConfirmingRevoke && !dialog.open) dialog.showModal();

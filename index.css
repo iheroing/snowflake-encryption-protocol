@@ -169,6 +169,12 @@ button {
 .cine-stage {
   width: var(--cine-stage-width);
   margin-inline: auto;
+  animation: view-arrive 420ms cubic-bezier(.2,.76,.22,1) both;
+}
+
+@keyframes view-arrive {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .cine-fold {
@@ -331,6 +337,7 @@ button {
 
 .landing-intro {
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
 }
@@ -539,22 +546,6 @@ button {
   width: 22px;
   height: 1px;
   background: rgba(158, 238, 255, 0.26);
-}
-
-.landing-footer {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 4px 4px;
-  color: rgba(255, 255, 255, 0.24);
-  font-size: 8px;
-  letter-spacing: 0.28em;
-}
-
-.landing-footer-line {
-  width: 34px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.16);
 }
 
 /* Shared product flow: compose, seal, receive, reveal. */
@@ -1528,6 +1519,12 @@ button {
   color: #baf5d9;
   font-size: 12px;
   line-height: 1.55;
+  animation: feedback-arrive 220ms ease-out both;
+}
+
+@keyframes feedback-arrive {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .action-feedback.is-error {
@@ -1546,6 +1543,16 @@ button {
   border: 1px solid rgba(255, 177, 184, 0.2);
   border-radius: 24px;
   box-shadow: 0 28px 100px rgba(0, 0, 0, 0.62);
+}
+
+.revoke-dialog[open],
+.qr-dialog[open] {
+  animation: dialog-arrive 240ms cubic-bezier(.2,.76,.22,1) both;
+}
+
+@keyframes dialog-arrive {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .revoke-dialog::backdrop {
@@ -1753,9 +1760,42 @@ button {
   max-width: 610px;
 }
 
-.receive-state > .activity-indicator {
+.status-snowflake {
+  position: relative;
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
   margin-bottom: 1.4rem;
   color: #a6efff;
+  border: 1px solid rgba(158, 238, 255, 0.2);
+  border-radius: 50%;
+}
+
+.status-snowflake::before {
+  position: absolute;
+  inset: -1px;
+  content: '';
+  border: 1px solid rgba(158, 238, 255, 0.16);
+  border-radius: inherit;
+}
+
+.status-snowflake.is-listening svg {
+  animation: snow-listen 1800ms ease-in-out infinite;
+}
+
+.status-snowflake.is-listening::before {
+  animation: snow-listen-halo 1800ms ease-out infinite;
+}
+
+@keyframes snow-listen {
+  0%, 100% { opacity: 0.52; transform: scale(0.92) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.04) rotate(6deg); }
+}
+
+@keyframes snow-listen-halo {
+  0% { opacity: 0.6; transform: scale(0.9); }
+  70%, 100% { opacity: 0; transform: scale(1.45); }
 }
 
 .receive-state .gone-mark {
@@ -2173,6 +2213,9 @@ button {
 }
 
 .specimen-meta small {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
   color: rgba(255, 255, 255, 0.36);
   font-size: 10px;
 }
@@ -2343,6 +2386,47 @@ button {
   margin-top: 1rem;
   padding-inline: 0;
   color: rgba(255, 177, 184, 0.68);
+}
+
+.specimen-delete-confirm {
+  margin-top: 1.15rem;
+  padding: 0.9rem;
+  background: rgba(255, 126, 139, 0.045);
+  border: 1px solid rgba(255, 126, 139, 0.14);
+  border-radius: 16px;
+  animation: feedback-arrive 220ms ease-out both;
+}
+
+.specimen-delete-confirm > p {
+  margin: 0;
+  color: rgba(255, 218, 222, 0.72);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.specimen-delete-confirm > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 0.8rem;
+}
+
+.specimen-delete-confirm button {
+  min-height: 42px;
+  color: rgba(239, 248, 251, 0.68);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+}
+
+.specimen-delete-confirm .specimen-delete-action {
+  color: #210a0d;
+  font-weight: 700;
+  background: #ffb1b8;
+  border-color: transparent;
 }
 
 @keyframes specimen-arrive {
@@ -2524,6 +2608,10 @@ button {
 }
 
 @media (max-width: 640px) {
+  .landing-stage {
+    width: 100%;
+  }
+
   .compose-page,
   .sealed-page,
   .receive-page,
@@ -2739,10 +2827,15 @@ button {
   }
 
   .landing-title {
+    width: 100%;
+    padding-inline: 0.25rem;
     font-size: 2.15rem;
+    line-height: 1.28;
   }
 
   .landing-quote {
+    width: 100%;
+    padding-inline: 0.5rem;
     font-size: 0.95rem;
   }
 
@@ -2754,9 +2847,8 @@ button {
     display: none;
   }
 
-  .landing-gallery-link {
-    max-width: 88px;
-    line-height: 1.25;
+  .landing-brand p {
+    display: none;
   }
 
   .landing-tools {
@@ -2764,10 +2856,20 @@ button {
   }
 
   .landing-gallery-link {
-    max-width: 94px;
-    padding-inline: 0.45rem;
-    font-size: 9px;
-    line-height: 1.2;
+    width: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .landing-gallery-link span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .landing-hero {
