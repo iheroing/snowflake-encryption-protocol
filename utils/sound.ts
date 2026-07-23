@@ -1,5 +1,5 @@
 export type SoundScene = 'landing' | 'encrypt' | 'decrypt' | 'gallery' | 'afterglow' | 'idle';
-export type SoundCue = 'tap' | 'crystallize' | 'share' | 'melt' | 'export' | 'switch';
+export type SoundCue = 'tap' | 'crystallize' | 'sealed' | 'share' | 'melt' | 'export' | 'switch';
 
 const STORAGE_KEY = 'snowflake:audio-enabled';
 const BGM_PATH = '/ambience.mp3';
@@ -192,6 +192,12 @@ class SoundManager {
     if (cue === 'crystallize') {
       this.playTone(420, 880, 1.1, 0.022, 'sine', now);
       this.playTone(520, 760, 0.7, 0.014, 'triangle', now + 0.08);
+      return;
+    }
+
+    if (cue === 'sealed') {
+      this.playTone(660, 1040, 0.54, 0.015, 'triangle', now);
+      this.playTone(880, 1320, 0.7, 0.012, 'sine', now + 0.08);
       return;
     }
 

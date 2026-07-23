@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../contexts/I18nContext';
-import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { playHaptic } from '../utils/haptics';
+import { generateSnowflakeDataURL, generateSnowflakeParams } from '../utils/snowflakeGenerator';
 import { getSnowflakeId } from '../utils/signature';
 import Icon from './Icon';
 import LanguageToggleButton from './LanguageToggleButton';
@@ -29,8 +30,15 @@ const RevealView: React.FC<Props> = ({
     () => generateSnowflakeDataURL(message, 900, signature),
     [message, signature],
   );
+  const revealMotion = useMemo(() => {
+    const family = generateSnowflakeParams(message, signature).family;
+    if (family === 'hex-plate' || family === 'needle-rosette') return 'thaw';
+    if (family === 'split-star') return 'fracture';
+    return 'bloom';
+  }, [message, signature]);
 
   useEffect(() => {
+    playHaptic('reveal');
     const closeOnce = () => {
       if (didCloseRef.current) return;
       didCloseRef.current = true;
@@ -81,7 +89,7 @@ const RevealView: React.FC<Props> = ({
         </header>
 
         <section className="reveal-layout" aria-labelledby="revealed-title">
-          <div className="reveal-art" aria-hidden="true">
+          <div className="reveal-art" data-reveal-motion={revealMotion} aria-hidden="true">
             <div className="reveal-art-halo" />
             <img src={snowflakeUrl} alt="" />
             <span>{getSnowflakeId(signature)}</span>

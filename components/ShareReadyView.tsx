@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import { useSound } from '../contexts/SoundContext';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import { getSnowflakeId } from '../utils/signature';
+import { playHaptic } from '../utils/haptics';
+import CrystallizationCeremony from './CrystallizationCeremony';
+import CrystallizationEffect from './CrystallizationEffect';
 import Icon from './Icon';
 import LanguageToggleButton from './LanguageToggleButton';
 import SoundToggleButton from './SoundToggleButton';
@@ -25,6 +29,7 @@ type Feedback = { message: string; kind: 'success' | 'error' | 'neutral' };
 
 const ShareReadyView: React.FC<Props> = ({ whisper, onCreateAnother, onExport, onRevoke }) => {
   const { t, localeTag } = useI18n();
+  const { play } = useSound();
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
   const [revokeOutcome, setRevokeOutcome] = useState<'deleted' | 'gone' | null>(null);
@@ -46,6 +51,11 @@ const ShareReadyView: React.FC<Props> = ({ whisper, onCreateAnother, onExport, o
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  useEffect(() => {
+    play('sealed');
+    playHaptic('sealed');
+  }, [play]);
 
   useEffect(() => {
     const dialog = revokeDialogRef.current;
@@ -156,9 +166,10 @@ const ShareReadyView: React.FC<Props> = ({ whisper, onCreateAnother, onExport, o
         </header>
 
         <section className="sealed-layout" aria-labelledby="sealed-title">
-          <div className="sealed-art" aria-hidden="true">
+          <div className="sealed-art is-newly-sealed" aria-hidden="true">
             <div className="sealed-art-halo" />
             <img src={snowflakeUrl} alt="" />
+            <CrystallizationEffect phase="sealed" />
             <span>{getSnowflakeId(whisper.signature)}</span>
           </div>
 
@@ -252,6 +263,12 @@ const ShareReadyView: React.FC<Props> = ({ whisper, onCreateAnother, onExport, o
           </div>
         </section>
       </div>
+
+      <CrystallizationCeremony
+        imageUrl={snowflakeUrl}
+        label={t('shareReady.title')}
+        phase="sealed"
+      />
 
       <dialog
         ref={revokeDialogRef}

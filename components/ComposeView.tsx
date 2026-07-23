@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import { useSound } from '../contexts/SoundContext';
+import { playHaptic } from '../utils/haptics';
 import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
 import {
   createSnowflakeSignature,
@@ -7,6 +9,8 @@ import {
   deriveSnowflakeSignature,
 } from '../utils/signature';
 import Icon from './Icon';
+import CrystallizationEffect from './CrystallizationEffect';
+import CrystallizationCeremony from './CrystallizationCeremony';
 import LanguageToggleButton from './LanguageToggleButton';
 import SoundToggleButton from './SoundToggleButton';
 
@@ -26,6 +30,7 @@ const TTL_OPTIONS: ComposePayload['ttlSeconds'][] = [3600, 86400, 604800];
 
 const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
   const { t } = useI18n();
+  const { play } = useSound();
   const [message, setMessage] = useState('');
   const [ttlSeconds, setTtlSeconds] = useState<ComposePayload['ttlSeconds']>(86400);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,6 +64,8 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
 
     setError('');
     setIsSubmitting(true);
+    play('crystallize');
+    playHaptic('crystallize');
     try {
       const signature = await deriveSnowflakeSignature(trimmedMessage, visualSaltRef.current);
       setVisualSignature(signature);
@@ -96,7 +103,7 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
           </div>
         </header>
 
-        <form className="compose-layout" onSubmit={handleSubmit}>
+        <form className={`compose-layout${isSubmitting ? ' is-crystallizing' : ''}`} onSubmit={handleSubmit}>
           <section className="compose-editor" aria-labelledby="compose-title">
             <div className="section-kicker">{t('compose.kicker')}</div>
             <h1 id="compose-title" className="compose-title">{t('compose.title')}</h1>
@@ -176,12 +183,13 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
 
           <aside className="compose-preview" aria-label={t('compose.previewLabel')}>
             <div className="preview-orbit" aria-hidden="true" />
-            <div className="preview-card">
+            <div className={`preview-card${isSubmitting ? ' is-crystallizing' : ''}`}>
               <div className="preview-card-meta">
                 <span>{t('compose.previewEyebrow')}</span>
                 <Icon name="lock" size={16} />
               </div>
               <img src={snowflakeUrl} alt={t('compose.previewAlt')} />
+              {isSubmitting && <CrystallizationEffect phase="forming" />}
               <div className="preview-caption">
                 <small>{t('compose.previewCaption')}</small>
                 <strong>{trimmedMessage ? t('compose.uniqueReady') : t('compose.waiting')}</strong>
@@ -190,6 +198,14 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
           </aside>
         </form>
       </div>
+      {isSubmitting && (
+        <CrystallizationCeremony
+          imageUrl={snowflakeUrl}
+          label={t('compose.sealing')}
+          phase="forming"
+          sourceText={trimmedMessage}
+        />
+      )}
     </main>
   );
 };

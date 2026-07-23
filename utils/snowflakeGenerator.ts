@@ -14,16 +14,29 @@ export interface SnowflakeLevel {
   split: number;
 }
 
+export const SNOWFLAKE_FAMILIES = [
+  'stellar-dendrite',
+  'fern-dendrite',
+  'hex-plate',
+  'needle-rosette',
+  'split-star',
+] as const;
+
+export type SnowflakeFamily = typeof SNOWFLAKE_FAMILIES[number];
+
 export interface SnowflakeParams {
   branches: 6;
   complexity: number;
   symmetry: 1;
+  family: SnowflakeFamily;
   /** Compatibility seed for callers that only need one deterministic word. */
   seed: number;
   /** 128 bits of deterministic state; do not collapse this for rendering. */
   seedWords: readonly [number, number, number, number];
   seedKey: string;
   coreRadius: number;
+  innerRing: number;
+  facetWidth: number;
   tipLength: number;
   tipAngle: number;
   levels: readonly SnowflakeLevel[];
@@ -95,17 +108,27 @@ function round(value: number): number {
 
 export function generateSnowflakeParams(text: string, signature = ''): SnowflakeParams {
   const seedSource = signature.trim() || text.trim() || 'snowflake';
-  const seedWords = hashStringWords(`snow-whisper:crystal:v2:${seedSource}`);
+  const seedWords = hashStringWords(`snow-whisper:crystal:v3:${seedSource}`);
   const rng = new SeededRandom(seedWords);
+  const family = SNOWFLAKE_FAMILIES[Math.floor(rng.next() * SNOWFLAKE_FAMILIES.length)];
   const complexity = 4 + Math.floor(rng.next() * 3);
   const levels: SnowflakeLevel[] = [];
+
+  const familyRange: Record<SnowflakeFamily, { length: [number, number]; angle: [number, number] }> = {
+    'stellar-dendrite': { length: [0.13, 0.255], angle: [37, 55] },
+    'fern-dendrite': { length: [0.16, 0.285], angle: [31, 47] },
+    'hex-plate': { length: [0.09, 0.165], angle: [48, 60] },
+    'needle-rosette': { length: [0.065, 0.13], angle: [25, 38] },
+    'split-star': { length: [0.14, 0.27], angle: [29, 46] },
+  };
+  const range = familyRange[family];
 
   for (let index = 0; index < complexity; index += 1) {
     const progress = complexity === 1 ? 0 : index / (complexity - 1);
     levels.push({
       position: round(0.22 + progress * 0.57 + (rng.next() - 0.5) * 0.025),
-      length: round(0.13 + progress * 0.09 + rng.next() * 0.045),
-      angle: round((37 + rng.next() * 18) * Math.PI / 180),
+      length: round(range.length[0] + progress * (range.length[1] - range.length[0]) * 0.72 + rng.next() * (range.length[1] - range.length[0]) * 0.28),
+      angle: round((range.angle[0] + rng.next() * (range.angle[1] - range.angle[0])) * Math.PI / 180),
       split: round(0.48 + rng.next() * 0.18),
     });
   }
@@ -114,10 +137,13 @@ export function generateSnowflakeParams(text: string, signature = ''): Snowflake
     branches: 6,
     complexity,
     symmetry: 1,
+    family,
     seed: seedWords[0],
     seedWords,
     seedKey: seedWords.map((word) => word.toString(16).padStart(8, '0')).join(''),
     coreRadius: round(0.045 + rng.next() * 0.025),
+    innerRing: round(0.19 + rng.next() * 0.1),
+    facetWidth: round(0.055 + rng.next() * 0.045),
     tipLength: round(0.12 + rng.next() * 0.05),
     tipAngle: round((40 + rng.next() * 15) * Math.PI / 180),
     levels,
@@ -135,7 +161,7 @@ function line(
   return `<line x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke-width="${round(width)}" opacity="${round(opacity)}"/>`;
 }
 
-function generateArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+function generateStellarArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
   const pieces: string[] = [];
   const trunkStart = center + radius * params.coreRadius * 0.35;
   const tipX = center + radius;
@@ -181,11 +207,154 @@ function generateArm(params: SnowflakeParams, center: number, radius: number, st
   return pieces.join('');
 }
 
+function generateFernArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+  const pieces = [line(center + radius * params.coreRadius * 0.25, center, center + radius, center, stroke)];
+
+  for (const level of params.levels) {
+    const nodeX = center + radius * level.position;
+    const branchLength = radius * level.length;
+    const endX = nodeX + Math.cos(level.angle) * branchLength;
+    const offsetY = Math.sin(level.angle) * branchLength;
+    const width = stroke * (0.62 - level.position * 0.12);
+    pieces.push(line(nodeX, center, endX, center - offsetY, width, 0.94));
+    pieces.push(line(nodeX, center, endX, center + offsetY, width, 0.94));
+
+    for (const direction of [-1, 1]) {
+      for (const fraction of [0.42, 0.7]) {
+        const stemX = nodeX + (endX - nodeX) * fraction;
+        const stemY = center + direction * offsetY * fraction;
+        const twigLength = branchLength * (0.18 + (1 - fraction) * 0.11);
+        const twigAngle = level.angle * (0.35 + fraction * 0.18);
+        pieces.push(line(
+          stemX,
+          stemY,
+          stemX + Math.cos(twigAngle) * twigLength,
+          stemY + direction * Math.sin(twigAngle) * twigLength,
+          width * 0.52,
+          0.72,
+        ));
+      }
+    }
+  }
+
+  return pieces.join('');
+}
+
+function generatePlateArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+  const start = center + radius * params.coreRadius * 0.2;
+  const shoulder = center + radius * (0.48 + params.innerRing * 0.2);
+  const outer = center + radius * 0.91;
+  const halfWidth = radius * params.facetWidth;
+  const pieces = [
+    `<polygon points="${round(start)},${round(center)} ${round(shoulder)},${round(center - halfWidth)} ${round(outer)},${round(center)} ${round(shoulder)},${round(center + halfWidth)}" stroke-width="${round(stroke * 0.72)}" fill="url(#snow-gradient)" fill-opacity="0.055" opacity="0.92"/>`,
+    line(start, center, center + radius, center, stroke * 0.78, 0.92),
+  ];
+
+  for (const level of params.levels) {
+    const x = center + radius * level.position;
+    const rib = radius * level.length * 0.42;
+    pieces.push(line(x, center - rib, x, center + rib, stroke * 0.42, 0.58));
+  }
+
+  return pieces.join('');
+}
+
+function generateNeedleArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+  const pieces = [
+    line(center + radius * params.coreRadius * 0.2, center, center + radius, center, stroke * 0.72, 0.96),
+    line(center + radius * 0.18, center - stroke * 1.7, center + radius * 0.92, center - stroke * 0.7, stroke * 0.32, 0.46),
+    line(center + radius * 0.18, center + stroke * 1.7, center + radius * 0.92, center + stroke * 0.7, stroke * 0.32, 0.46),
+  ];
+
+  for (const level of params.levels) {
+    const nodeX = center + radius * level.position;
+    const needle = radius * level.length;
+    const x = nodeX + Math.cos(level.angle) * needle;
+    const y = Math.sin(level.angle) * needle;
+    pieces.push(line(nodeX, center, x, center - y, stroke * 0.42, 0.74));
+    pieces.push(line(nodeX, center, x, center + y, stroke * 0.42, 0.74));
+  }
+
+  return pieces.join('');
+}
+
+function generateSplitStarArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+  const pieces = [line(center + radius * params.coreRadius * 0.2, center, center + radius, center, stroke)];
+
+  for (const level of params.levels) {
+    const nodeX = center + radius * level.position;
+    const branchLength = radius * level.length;
+    const endX = nodeX + Math.cos(level.angle) * branchLength;
+    const offsetY = Math.sin(level.angle) * branchLength;
+    const width = stroke * (0.68 - level.position * 0.15);
+    pieces.push(line(nodeX, center, endX, center - offsetY, width, 0.92));
+    pieces.push(line(nodeX, center, endX, center + offsetY, width, 0.92));
+
+    const forkLength = branchLength * 0.36;
+    const forkAngle = level.angle * 0.58;
+    pieces.push(line(endX, center - offsetY, endX + Math.cos(forkAngle) * forkLength, center - offsetY - Math.sin(forkAngle) * forkLength, width * 0.58, 0.76));
+    pieces.push(line(endX, center - offsetY, endX + forkLength, center - offsetY, width * 0.5, 0.64));
+    pieces.push(line(endX, center + offsetY, endX + Math.cos(forkAngle) * forkLength, center + offsetY + Math.sin(forkAngle) * forkLength, width * 0.58, 0.76));
+    pieces.push(line(endX, center + offsetY, endX + forkLength, center + offsetY, width * 0.5, 0.64));
+  }
+
+  return pieces.join('');
+}
+
+function generateArm(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+  switch (params.family) {
+    case 'fern-dendrite':
+      return generateFernArm(params, center, radius, stroke);
+    case 'hex-plate':
+      return generatePlateArm(params, center, radius, stroke);
+    case 'needle-rosette':
+      return generateNeedleArm(params, center, radius, stroke);
+    case 'split-star':
+      return generateSplitStarArm(params, center, radius, stroke);
+    default:
+      return generateStellarArm(params, center, radius, stroke);
+  }
+}
+
 function hexagonPoints(center: number, radius: number): string {
   return Array.from({ length: 6 }, (_, index) => {
     const angle = index * Math.PI / 3;
     return `${round(center + Math.cos(angle) * radius)},${round(center + Math.sin(angle) * radius)}`;
   }).join(' ');
+}
+
+function familyDecoration(params: SnowflakeParams, center: number, radius: number, stroke: number): string {
+  const innerRadius = radius * params.innerRing;
+  if (params.family === 'hex-plate') {
+    return `
+      <polygon points="${hexagonPoints(center, radius * 0.57)}" fill="url(#snow-gradient)" fill-opacity="0.035" stroke-width="${round(stroke * 0.5)}" opacity="0.62"/>
+      <polygon points="${hexagonPoints(center, radius * 0.36)}" stroke-width="${round(stroke * 0.42)}" opacity="0.5"/>
+    `;
+  }
+  if (params.family === 'needle-rosette') {
+    return `
+      <circle cx="${round(center)}" cy="${round(center)}" r="${round(innerRadius * 0.82)}" stroke-width="${round(stroke * 0.44)}" opacity="0.52"/>
+      <polygon points="${hexagonPoints(center, innerRadius * 0.46)}" fill="url(#snow-gradient)" fill-opacity="0.08" stroke-width="${round(stroke * 0.38)}" opacity="0.68"/>
+    `;
+  }
+  if (params.family === 'split-star') {
+    return `<polygon points="${hexagonPoints(center, innerRadius)}" stroke-width="${round(stroke * 0.48)}" opacity="0.56"/>`;
+  }
+  if (params.family === 'fern-dendrite') {
+    return `<circle cx="${round(center)}" cy="${round(center)}" r="${round(innerRadius * 0.72)}" stroke-width="${round(stroke * 0.36)}" opacity="0.4"/>`;
+  }
+  return '';
+}
+
+function familyPalette(family: SnowflakeFamily): readonly [string, string, string] {
+  const palettes: Record<SnowflakeFamily, readonly [string, string, string]> = {
+    'stellar-dendrite': ['#79e8ff', '#f4fdff', '#b991ec'],
+    'fern-dendrite': ['#8ae4ff', '#f2feff', '#8fc5ff'],
+    'hex-plate': ['#a8e9f5', '#ffffff', '#cad7ed'],
+    'needle-rosette': ['#6ff0dc', '#efffff', '#8aafff'],
+    'split-star': ['#b9a7ff', '#fbfdff', '#6edff4'],
+  };
+  return palettes[family];
 }
 
 export function generateSnowflakeSVG(params: SnowflakeParams, size = 400): string {
@@ -197,17 +366,19 @@ export function generateSnowflakeSVG(params: SnowflakeParams, size = 400): strin
   const stroke = Math.max(1.15, renderedSize / 255);
   const coreRadius = radius * params.coreRadius;
   const arm = generateArm(params, center, radius, stroke);
+  const decoration = familyDecoration(params, center, radius, stroke);
+  const palette = familyPalette(params.family);
   const rotations = Array.from({ length: params.branches }, (_, index) => (
     `<use href="#snow-arm" transform="rotate(${index * 60} ${round(center)} ${round(center)})"/>`
   )).join('');
 
   return `
-    <svg width="${renderedSize}" height="${renderedSize}" viewBox="0 0 ${renderedSize} ${renderedSize}" xmlns="http://www.w3.org/2000/svg" data-snowflake-version="2" data-seed="${params.seedKey}">
+    <svg width="${renderedSize}" height="${renderedSize}" viewBox="0 0 ${renderedSize} ${renderedSize}" xmlns="http://www.w3.org/2000/svg" data-snowflake-version="3" data-family="${params.family}" data-seed="${params.seedKey}">
       <defs>
         <linearGradient id="snow-gradient" gradientUnits="userSpaceOnUse" x1="${round(renderedSize * 0.16)}" y1="${round(renderedSize * 0.18)}" x2="${round(renderedSize * 0.84)}" y2="${round(renderedSize * 0.82)}">
-          <stop offset="0" stop-color="#7deaff"/>
-          <stop offset="0.48" stop-color="#f4fdff"/>
-          <stop offset="1" stop-color="#b991ec"/>
+          <stop offset="0" stop-color="${palette[0]}"/>
+          <stop offset="0.48" stop-color="${palette[1]}"/>
+          <stop offset="1" stop-color="${palette[2]}"/>
         </linearGradient>
         <filter id="snow-glow" x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="${round(renderedSize / 250)}"/>
@@ -218,6 +389,7 @@ export function generateSnowflakeSVG(params: SnowflakeParams, size = 400): strin
       <g fill="none" stroke="url(#snow-gradient)" stroke-linecap="round" stroke-linejoin="round">
         <use href="#snowflake-geometry" filter="url(#snow-glow)" opacity="0.24" stroke-width="${round(stroke * 2.4)}"/>
         <use href="#snowflake-geometry"/>
+        ${decoration}
         <polygon points="${hexagonPoints(center, coreRadius)}" stroke-width="${round(stroke * 0.78)}" opacity="0.92"/>
         <circle cx="${round(center)}" cy="${round(center)}" r="${round(coreRadius * 0.34)}" stroke-width="${round(stroke * 0.6)}" opacity="0.72"/>
       </g>
