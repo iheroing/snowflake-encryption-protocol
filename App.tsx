@@ -23,6 +23,7 @@ import {
 import { createSnowflakeSignature } from './utils/signature';
 import { collectKeepsake, hasKeepsake, type KeepsakeOrigin } from './utils/keepsakeGallery';
 import type { SoundScene } from './utils/sound';
+import { isWhisperPath, withAppBase } from './utils/appPaths';
 
 enum View {
   LANDING = 'landing',
@@ -41,10 +42,8 @@ interface RecipientRoute {
   consistencyToken: string | null;
 }
 
-const WHISPER_ROUTE = /^\/s\/([A-Za-z0-9_-]{22})\/?$/u;
-
 function recipientRouteFromLocation(): RecipientRoute | null {
-  const match = window.location.pathname.match(WHISPER_ROUTE);
+  const match = isWhisperPath(window.location.pathname);
   if (!match) return null;
   return {
     id: match[1],
@@ -79,7 +78,7 @@ const App: React.FC = () => {
 
   const exitToLanding = useCallback(() => {
     clearSensitiveState();
-    window.history.replaceState({}, '', '/');
+    window.history.replaceState({}, '', withAppBase());
     setCurrentView(View.LANDING);
   }, [clearSensitiveState]);
 
@@ -192,7 +191,7 @@ const App: React.FC = () => {
       setMessage(opened.message);
       setSignature(opened.signature);
       setRecipient(null);
-      window.history.replaceState({}, '', '/');
+      window.history.replaceState({}, '', withAppBase());
       setCurrentView(View.REVEALED);
     } catch (caught) {
       if (caught instanceof OneTimeWhisperConsumeUncertainError) {

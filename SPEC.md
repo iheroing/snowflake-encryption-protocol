@@ -55,7 +55,7 @@ JSON string escaping follows `JSON.stringify`. Changing any authenticated field 
 The share URL is:
 
 ```text
-https://origin.example/s/<id>#k=<fragment-secret>&c=<consume-token>&r=<sync-token>
+https://origin.example/snowflake/s/<id>#k=<fragment-secret>&c=<consume-token>&r=<sync-token>
 ```
 
 The URL fragment holds two capabilities and an optional consistency checkpoint. `k` decrypts but is never sent to the server. `c` authorizes the destructive consume request but cannot decrypt the ciphertext. `r` is the non-secret Upstash read-your-writes sync token returned after creation. None may enter query parameters, analytics, or referrers; only `c` and `r` are sent in the destructive API body.
@@ -64,13 +64,13 @@ When the sender explicitly requests a cross-device QR code, the browser encodes 
 
 ## 5. Status and local preflight
 
-`POST /api/snow/status` is non-consuming. A sealed response includes the envelope without `contentIv` and `ciphertext`. The client attempts to unwrap the CEK locally. If that fails, it must not call consume; a corrupted or incomplete link therefore does not destroy the message.
+`POST /snowflake/api/snow/status` is non-consuming. The public mount forwards this path to the deployment's `/api/snow/status` function. A sealed response includes the envelope without `contentIv` and `ciphertext`. The client attempts to unwrap the CEK locally. If that fails, it must not call consume; a corrupted or incomplete link therefore does not destroy the message.
 
 This preflight allows offline guessing by anyone who already possesses the high-entropy URL secret. V1 has no human password, so the secret has 256 bits of random entropy and is not guessable in practice.
 
 ## 6. Atomic consume
 
-`POST /api/snow/consume` hashes the supplied consume token, then runs one Redis Lua operation that loads `snow:v1:<id>`, checks absolute expiry, compares the stored verifier, and only on a match deletes and returns the record. Under a healthy Redis leader session, one authorized concurrent request wins; an ID-only or wrong-token request cannot delete it. Later requests return `410 WHISPER_GONE`.
+`POST /snowflake/api/snow/consume` hashes the supplied consume token, then runs one Redis Lua operation that loads `snow:v1:<id>`, checks absolute expiry, compares the stored verifier, and only on a match deletes and returns the record. The public mount forwards this path to the deployment's `/api/snow/consume` function. Under a healthy Redis leader session, one authorized concurrent request wins; an ID-only or wrong-token request cannot delete it. Later requests return `410 WHISPER_GONE`.
 
 The Upstash SDK is configured with zero network retries for destructive operations. If Redis may have consumed the record but the HTTP response is unavailable or unreadable, the client reports an unknown outcome instead of claiming the message is still sealed. Upstash replication is eventually consistent; the `r` checkpoint prevents ordinary cross-function stale reads, but V1 does not claim strict linearizability during leader failover or network partitions.
 
@@ -84,10 +84,10 @@ All operations use JSON, require `version: 1`, reject request bodies above 8 KiB
 
 | Method and path | Request | Success |
 | --- | --- | --- |
-| `POST /api/snow/create` | `{version,envelope,consumeTokenHash,deleteTokenHash}` | `201 {version,id,expiresAt,consistencyToken?}` |
-| `POST /api/snow/status` | `{version,id,consistencyToken?}` | `200` sealed/gone status with refreshed checkpoint |
-| `POST /api/snow/consume` | `{version,id,consumeToken,consistencyToken?}` + `X-Snow-Intent: reveal` | `200 {version,status:"consumed",expiresAt,envelope}` |
-| `POST` or `DELETE /api/snow/delete` | `{version,id,deleteToken}` + `X-Snow-Intent: revoke` | `200 {version,status:"deleted"|"gone"}` |
+| `POST /snowflake/api/snow/create` | `{version,envelope,consumeTokenHash,deleteTokenHash}` | `201 {version,id,expiresAt,consistencyToken?}` |
+| `POST /snowflake/api/snow/status` | `{version,id,consistencyToken?}` | `200` sealed/gone status with refreshed checkpoint |
+| `POST /snowflake/api/snow/consume` | `{version,id,consumeToken,consistencyToken?}` + `X-Snow-Intent: reveal` | `200 {version,status:"consumed",expiresAt,envelope}` |
+| `POST` or `DELETE /snowflake/api/snow/delete` | `{version,id,deleteToken}` + `X-Snow-Intent: revoke` | `200 {version,status:"deleted"|"gone"}` |
 
 Stable error codes include `INVALID_BODY`, `BODY_TOO_LARGE`, `INVALID_ID`, `INVALID_ENVELOPE`, `UNSUPPORTED_VERSION`, `ID_CONFLICT`, `INVALID_CONSUME_TOKEN`, `INVALID_DELETE_TOKEN`, `WHISPER_GONE`, `RATE_LIMITED`, and `STORAGE_UNAVAILABLE`.
 

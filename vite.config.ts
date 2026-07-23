@@ -33,6 +33,7 @@ function snowflakeTailwindEntry(): Plugin {
         @source "./components/ReceiveView.tsx";
         @source "./components/RevealView.tsx";
         @source "./components/ShareReadyView.tsx";
+        @source "./components/SnowflakeGalleryView.tsx";
         @source "./components/SoundToggleButton.tsx";
 
         @theme {
@@ -79,6 +80,7 @@ function snowflakeTailwindEntry(): Plugin {
 }
 
 export default defineConfig({
+  base: '/snowflake/',
   server: {
     port: 3000,
     host: '127.0.0.1',

@@ -70,9 +70,9 @@ describe('one-time whisper client utilities', () => {
     });
 
     expect(result.shareUrl).toMatch(new RegExp(
-      `^https://snow\\.example/s/${WHISPER_ID}#k=[A-Za-z0-9_-]+&c=[A-Za-z0-9_-]+$`,
+      `^https://snow\\.example/snowflake/s/${WHISPER_ID}#k=[A-Za-z0-9_-]+&c=[A-Za-z0-9_-]+$`,
     ));
-    expect(fetchMock).toHaveBeenCalledWith('/api/snow/create', expect.objectContaining({
+    expect(fetchMock).toHaveBeenCalledWith('/snowflake/api/snow/create', expect.objectContaining({
       method: 'POST',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
@@ -93,7 +93,7 @@ describe('one-time whisper client utilities', () => {
     await getWhisperStatus(WHISPER_ID);
 
     const [, options] = fetchMock.mock.calls[0];
-    expect(fetchMock.mock.calls[0][0]).toBe('/api/snow/status');
+    expect(fetchMock.mock.calls[0][0]).toBe('/snowflake/api/snow/status');
     expect(JSON.parse(String(options?.body))).toEqual({
       version: ONE_TIME_WHISPER_VERSION,
       id: WHISPER_ID,

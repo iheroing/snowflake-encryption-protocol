@@ -1,5 +1,5 @@
 User-agent: *
-Allow: /
-Disallow: /s/
+Allow: /snowflake/
+Disallow: /snowflake/s/
 
-Sitemap: https://snowflake-encryption-protocol.vercel.app/sitemap.xml
+Sitemap: https://www.liyi.online/snowflake/sitemap.xml

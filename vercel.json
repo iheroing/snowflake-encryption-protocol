@@ -63,9 +63,42 @@
           "value": "noindex, nofollow, noarchive"
         }
       ]
+    },
+    {
+      "source": "/snowflake/s/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
     }
   ],
   "rewrites": [
+    {
+      "source": "/snowflake/api/snow/:path*",
+      "destination": "/api/snow/:path*"
+    },
+    {
+      "source": "/snowflake/s/:id",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/snowflake",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/snowflake/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/snowflake/:path*",
+      "destination": "/:path*"
+    },
     {
       "source": "/s/:id",
       "destination": "/index.html"

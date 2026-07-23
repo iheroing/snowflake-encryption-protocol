@@ -7,6 +7,7 @@ import {
   type OneTimeWhisperEnvelope,
 } from '../protocol/oneTimeWhisper';
 import type { WhisperStatus } from '../api/_lib/contracts';
+import { APP_BASE_PATH, withAppBase } from './appPaths';
 
 interface ApiErrorResponse {
   error?: { code?: string; message?: string };
@@ -32,7 +33,7 @@ export class OneTimeWhisperConsumeUncertainError extends Error {
 async function postJson<T>(path: string, body: unknown, intent?: 'reveal' | 'revoke'): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (intent) headers['X-Snow-Intent'] = intent;
-  const response = await fetch(path, {
+  const response = await fetch(withAppBase(path), {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -61,7 +62,11 @@ async function postJson<T>(path: string, body: unknown, intent?: 'reveal' | 'rev
 function appBaseUrl(explicit?: string): string {
   const value = explicit ?? (typeof window !== 'undefined' ? window.location.origin : '');
   if (!value) throw new Error('baseUrl is required outside a browser');
-  return value.replace(/\/$/u, '');
+  const url = new URL(value);
+  url.hash = '';
+  url.search = '';
+  url.pathname = APP_BASE_PATH;
+  return url.toString().replace(/\/$/u, '');
 }
 
 export async function createOneTimeWhisper(input: {

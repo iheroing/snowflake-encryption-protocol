@@ -11,6 +11,7 @@ import {
 } from '../api/_lib/service';
 import { MAX_REQUEST_BYTES, RequestValidationError } from '../api/_lib/validation';
 import type { ApiResult } from '../api/_lib/contracts';
+import { withAppBase } from '../utils/appPaths';
 
 const developmentStore = new InMemorySnowStore();
 
@@ -20,6 +21,10 @@ const routeHandlers = new Map<string, (body: unknown) => Promise<ApiResult>>([
   ['/api/snow/consume', (body) => consumeWhisper(developmentStore, body)],
   ['/api/snow/delete', (body) => deleteWhisper(developmentStore, body)],
 ]);
+
+for (const [path, handler] of [...routeHandlers]) {
+  routeHandlers.set(withAppBase(path), handler);
+}
 
 function sendJson(response: ServerResponse, result: ApiResult): void {
   response.statusCode = result.status;
