@@ -22,12 +22,21 @@ interface Props {
   whisper: SealedWhisper;
   onCreateAnother: () => void;
   onExport: () => void;
+  isCollected: boolean;
+  onCollect: () => void;
   onRevoke: (id: string, deleteToken: string) => Promise<'deleted' | 'gone'>;
 }
 
 type Feedback = { message: string; kind: 'success' | 'error' | 'neutral' };
 
-const ShareReadyView: React.FC<Props> = ({ whisper, onCreateAnother, onExport, onRevoke }) => {
+const ShareReadyView: React.FC<Props> = ({
+  whisper,
+  onCreateAnother,
+  onExport,
+  isCollected,
+  onCollect,
+  onRevoke,
+}) => {
   const { t, localeTag } = useI18n();
   const { play } = useSound();
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -232,6 +241,18 @@ const ShareReadyView: React.FC<Props> = ({ whisper, onCreateAnother, onExport, o
             </div>
 
             <div className="sealed-secondary-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  onCollect();
+                  play('share');
+                  setFeedback({ message: t('shareReady.collectedFeedback'), kind: 'success' });
+                }}
+                disabled={isCollected}
+              >
+                <Icon name={isCollected ? 'check' : 'snowflake'} size={17} />
+                {isCollected ? t('shareReady.collected') : t('shareReady.collect')}
+              </button>
               <button type="button" onClick={() => void showQrCode()} disabled={isUnavailable}>
                 <Icon name="qr-code" size={17} />
                 {t('shareReady.qr')}

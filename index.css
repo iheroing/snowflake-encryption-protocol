@@ -313,6 +313,11 @@ button {
 }
 
 .landing-gallery-link {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 0.75rem;
   color: rgba(255, 255, 255, 0.58);
   background: transparent;
   border-color: transparent;
@@ -1938,6 +1943,397 @@ button {
   flex: 0 1 auto;
 }
 
+.keepsake-boundary {
+  margin-top: 0.65rem;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+/* Local, message-free snowflake cabinet. */
+.gallery-stage {
+  min-height: var(--cine-viewport);
+  padding-bottom: clamp(3rem, 7vh, 6rem);
+}
+
+.gallery-intro {
+  display: flex;
+  max-width: 1120px;
+  gap: 2rem;
+  align-items: end;
+  justify-content: space-between;
+  margin: clamp(3.2rem, 8vh, 6.5rem) auto 0;
+}
+
+.gallery-intro > div:first-child {
+  max-width: 760px;
+}
+
+.gallery-intro h1 {
+  color: rgba(247, 251, 252, 0.94);
+  font-family: var(--cine-letter-font);
+  font-size: clamp(2.6rem, 5.5vw, 5rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.gallery-intro p {
+  max-width: 620px;
+  margin-top: 1rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.gallery-count {
+  display: flex;
+  min-width: 104px;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-bottom: 0.35rem;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.gallery-count strong {
+  color: #b8f2fb;
+  font-family: var(--cine-letter-font);
+  font-size: 2.7rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.gallery-count span {
+  margin-top: 6px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.gallery-privacy-note {
+  display: flex;
+  max-width: 1120px;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 2rem auto 0;
+  padding: 0.9rem 1rem;
+  color: rgba(184, 241, 251, 0.66);
+  background: rgba(114, 220, 241, 0.045);
+  border: 1px solid rgba(114, 220, 241, 0.12);
+  border-radius: 14px;
+}
+
+.gallery-privacy-note svg {
+  flex: 0 0 auto;
+}
+
+.gallery-privacy-note p {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.gallery-privacy-note strong {
+  color: rgba(238, 252, 255, 0.86);
+}
+
+.gallery-empty {
+  display: flex;
+  width: min(100%, 560px);
+  min-height: 430px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 2.5rem auto 0;
+  text-align: center;
+}
+
+.gallery-empty-mark {
+  display: grid;
+  width: 116px;
+  aspect-ratio: 1;
+  place-items: center;
+  color: rgba(171, 239, 251, 0.62);
+  background: radial-gradient(circle, rgba(114, 220, 241, 0.1), transparent 68%);
+  border: 1px solid rgba(160, 233, 247, 0.14);
+  border-radius: 50%;
+  box-shadow: 0 0 60px rgba(114, 220, 241, 0.08);
+}
+
+.gallery-empty h2 {
+  margin-top: 1.7rem;
+  color: rgba(250, 252, 253, 0.9);
+  font-family: var(--cine-letter-font);
+  font-size: 2.25rem;
+  font-weight: 400;
+}
+
+.gallery-empty p {
+  max-width: 430px;
+  margin-top: 0.7rem;
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.gallery-empty .primary-action {
+  width: auto;
+  margin-top: 1.6rem;
+}
+
+.specimen-grid {
+  display: grid;
+  max-width: 1120px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem auto 0;
+}
+
+.specimen-card {
+  position: relative;
+  display: flex;
+  min-height: 390px;
+  flex-direction: column;
+  padding: 1rem;
+  overflow: hidden;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(255, 255, 255, 0.105);
+  border-radius: 26px;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.19);
+  animation: specimen-arrive 620ms cubic-bezier(.2,.76,.22,1) var(--specimen-delay, 0ms) both;
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.specimen-card::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(118deg, transparent 38%, rgba(255, 255, 255, 0.07) 49%, transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-80%);
+  transition: opacity 180ms ease, transform 520ms ease;
+}
+
+.specimen-orbit {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: 72%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(134, 222, 239, 0.09);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.specimen-card img {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 0 30px rgba(114, 220, 241, 0.2));
+  transition: filter 220ms ease, transform 260ms cubic-bezier(.2,.76,.22,1);
+}
+
+.specimen-meta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0.8rem 0.35rem 0.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+.specimen-meta strong {
+  color: rgba(242, 250, 252, 0.76);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.specimen-meta small {
+  color: rgba(255, 255, 255, 0.36);
+  font-size: 10px;
+}
+
+.specimen-card.is-create {
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: rgba(215, 248, 253, 0.66);
+  text-align: center;
+  background: rgba(114, 220, 241, 0.018);
+  border-style: dashed;
+}
+
+.specimen-card.is-create > span {
+  display: grid;
+  width: 58px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(158, 238, 255, 0.19);
+  border-radius: 50%;
+}
+
+.specimen-card.is-create strong {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+@media (hover: hover) {
+  .specimen-card:hover {
+    background-color: rgba(114, 220, 241, 0.025);
+    border-color: rgba(158, 238, 255, 0.24);
+    transform: translateY(-4px);
+  }
+
+  .specimen-card:hover::after {
+    opacity: 1;
+    transform: translateX(80%);
+  }
+
+  .specimen-card:hover img {
+    filter: drop-shadow(0 0 42px rgba(114, 220, 241, 0.32));
+    transform: scale(1.025) rotate(0.5deg);
+  }
+}
+
+.specimen-dialog-backdrop {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  display: grid;
+  padding: 1.25rem;
+  overflow-y: auto;
+  place-items: center;
+  background: rgba(2, 7, 12, 0.82);
+  backdrop-filter: blur(20px) saturate(115%);
+  animation: ceremony-arrive 180ms ease-out both;
+}
+
+.specimen-dialog {
+  position: relative;
+  display: grid;
+  width: min(100%, 880px);
+  grid-template-columns: minmax(280px, 1.08fr) minmax(280px, 0.92fr);
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(19, 32, 43, 0.98), rgba(7, 13, 20, 0.99));
+  border: 1px solid rgba(174, 235, 247, 0.16);
+  border-radius: 30px;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.54);
+  animation: reveal-card-materialize 360ms cubic-bezier(.2,.76,.22,1) both;
+}
+
+.specimen-close {
+  position: absolute;
+  z-index: 2;
+  top: 1rem;
+  right: 1rem;
+}
+
+.specimen-dialog-art {
+  position: relative;
+  display: grid;
+  min-height: 500px;
+  padding: 1.8rem;
+  place-items: center;
+  background: rgba(114, 220, 241, 0.025);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.specimen-dialog-art > span {
+  position: absolute;
+  width: 76%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(154, 231, 246, 0.11);
+  border-radius: 50%;
+  box-shadow: 0 0 70px rgba(114, 220, 241, 0.07);
+}
+
+.specimen-dialog-art img {
+  position: relative;
+  width: min(100%, 440px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 0 44px rgba(114, 220, 241, 0.24));
+}
+
+.specimen-dialog-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 3.8rem);
+}
+
+.specimen-dialog-copy > p:first-child {
+  color: rgba(159, 232, 246, 0.66);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.specimen-dialog-copy h2 {
+  margin-top: 0.65rem;
+  color: rgba(248, 252, 253, 0.92);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.specimen-dialog-copy dl {
+  margin-top: 2rem;
+}
+
+.specimen-dialog-copy dl > div {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.specimen-dialog-copy dt,
+.specimen-dialog-copy dd {
+  font-size: 11px;
+}
+
+.specimen-dialog-copy dt {
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.specimen-dialog-copy dd {
+  color: rgba(255, 255, 255, 0.7);
+  text-align: right;
+}
+
+.specimen-no-text {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 1.5rem;
+  color: rgba(174, 245, 212, 0.62);
+  font-size: 10px;
+}
+
+.specimen-delete {
+  align-self: flex-start;
+  margin-top: 1rem;
+  padding-inline: 0;
+  color: rgba(255, 177, 184, 0.68);
+}
+
+@keyframes specimen-arrive {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @keyframes gallery-fall {
   0% {
     transform: translate3d(0, -10vh, 0) rotate(0deg);
@@ -2094,6 +2490,21 @@ button {
   .reveal-layout .letter-card {
     order: -1;
   }
+
+  .specimen-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .specimen-dialog {
+    width: min(100%, 620px);
+    grid-template-columns: 1fr;
+  }
+
+  .specimen-dialog-art {
+    min-height: 330px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
 }
 
 @media (max-width: 640px) {
@@ -2144,6 +2555,75 @@ button {
 
   .product-header-tools {
     gap: 4px;
+  }
+
+  .gallery-page {
+    padding-inline: 14px;
+  }
+
+  .gallery-intro {
+    gap: 1rem;
+    align-items: flex-end;
+    margin-top: 2.8rem;
+  }
+
+  .gallery-intro h1 {
+    font-size: 2.45rem;
+  }
+
+  .gallery-intro p {
+    font-size: 12px;
+  }
+
+  .gallery-count {
+    min-width: 54px;
+  }
+
+  .gallery-count strong {
+    font-size: 2.15rem;
+  }
+
+  .gallery-privacy-note {
+    margin-top: 1.4rem;
+  }
+
+  .specimen-grid {
+    grid-template-columns: 1fr;
+    margin-top: 1.25rem;
+  }
+
+  .specimen-card {
+    width: min(100%, 380px);
+    min-height: 370px;
+    margin-inline: auto;
+  }
+
+  .specimen-dialog-backdrop {
+    padding: 0;
+    place-items: end center;
+  }
+
+  .specimen-dialog {
+    max-height: calc(100svh - 18px);
+    overflow-y: auto;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .specimen-dialog-art {
+    min-height: 290px;
+    padding: 1rem;
+  }
+
+  .specimen-dialog-art img {
+    width: min(88%, 310px);
+  }
+
+  .specimen-dialog-copy {
+    padding: 1.6rem 1.35rem 2rem;
+  }
+
+  .letter-actions .keepsake-action {
+    flex-basis: 100%;
   }
 
   .compose-layout,
@@ -2265,6 +2745,13 @@ button {
 
   .landing-tools {
     gap: 4px;
+  }
+
+  .landing-gallery-link {
+    max-width: 94px;
+    padding-inline: 0.45rem;
+    font-size: 9px;
+    line-height: 1.2;
   }
 
   .landing-hero {

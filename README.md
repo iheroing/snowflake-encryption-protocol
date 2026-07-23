@@ -10,6 +10,7 @@
 - 1 小时、24 小时、7 天三种未读有效期。
 - 链接预览与状态检查不消耗阅读机会；只有用户点击「揭开雪信」才会消费。
 - 每封信用本地随机私盐与文字派生高熵视觉签名，再从星枝、蕨枝、六角板、针晶、分叉星五类晶型中生成稳定的六重对称雪花；相同文字在不同信中也拥有不同雪印。
+- 可在封存后或揭开后主动把雪花收入本机标本馆；收藏只保存视觉签名、晶型、来源和时间，不保存正文、密钥或分享链接，也不跨设备同步。
 - 支持复制、系统分享和按需生成的跨设备二维码；二维码完全在浏览器内生成，不经过第三方服务。
 - 中英文、键盘操作、减弱动效、高对比度与 320px 起的响应式界面。
 
@@ -59,8 +60,9 @@ npm audit
 components/                 核心界面
 protocol/oneTimeWhisper.ts  浏览器加解密协议
 utils/oneTimeWhisper.ts     前端 API 客户端
+utils/keepsakeGallery.ts    无明文的本机雪花收藏
 api/snow/                   Vercel Functions 路由
 api/_lib/                   验证、服务和 Redis 适配器
 ```
 
-`components/EncryptView.tsx`、`GalleryView.tsx` 等旧组件仅作为历史原型保留，不在生产主链路中加载。仓库中较早的中文说明文档记录原型演进，不代表当前产品承诺。
+`components/EncryptView.tsx`、旧 `GalleryView.tsx` 等组件仅作为历史原型保留，不在生产主链路中加载；生产入口使用不读取正文的 `SnowflakeGalleryView.tsx`。仓库中较早的中文说明文档记录原型演进，不代表当前产品承诺。

@@ -13,6 +13,8 @@ interface Props {
   displaySeconds?: number;
   onClose: () => void;
   onExport: () => void;
+  isCollected: boolean;
+  onCollect: () => void;
 }
 
 const RevealView: React.FC<Props> = ({
@@ -21,6 +23,8 @@ const RevealView: React.FC<Props> = ({
   displaySeconds = 60,
   onClose,
   onExport,
+  isCollected,
+  onCollect,
 }) => {
   const { t } = useI18n();
   const [remainingMs, setRemainingMs] = useState(displaySeconds * 1000);
@@ -119,6 +123,15 @@ const RevealView: React.FC<Props> = ({
             </div>
 
             <div className="letter-actions">
+              <button
+                type="button"
+                className="secondary-action keepsake-action"
+                onClick={onCollect}
+                disabled={isCollected}
+              >
+                <Icon name={isCollected ? 'check' : 'snowflake'} size={18} />
+                {isCollected ? t('reveal.collected') : t('reveal.collect')}
+              </button>
               <button type="button" className="secondary-action" onClick={onExport}>
                 <Icon name="download" size={18} />
                 {t('reveal.saveArt')}
@@ -127,6 +140,7 @@ const RevealView: React.FC<Props> = ({
                 {t('reveal.closeNow')}
               </button>
             </div>
+            <p className="keepsake-boundary">{t('reveal.collectBoundary')}</p>
           </article>
         </section>
       </div>

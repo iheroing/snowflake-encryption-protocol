@@ -20,6 +20,7 @@ Only the current `main` branch and protocol v1 receive security fixes. This proj
 - One-time deletion does not prove secure erasure from hardware, transient platform logs, browser memory, network buffers, or provider backups.
 - Anyone with the complete share link has the read capability. V1 does not add identity verification or a second password factor.
 - A displayed QR code encodes that complete share link, including both URL-fragment capabilities. It is generated locally on explicit request, but screenshots or cameras can copy it; treat it exactly like the link itself.
+- The optional keepsake gallery is local to one browser and stores only a versioned visual signature, derived crystal family, origin, and collection time. It is not an account backup and is lost when site data is cleared.
 - Availability is not guaranteed. Redis loss, provider failure, rate limiting, or a lost link can make a message unrecoverable.
 - Upstash Redis is eventually consistent across replicas. A fragment-carried sync token provides cross-function read-your-writes behavior, but leader failover or a partition can still expose stale state. V1's one-time guarantee is application-level, not a claim of strict linearizability under infrastructure failure.
 - A destructive request can succeed at Redis while its HTTP response is lost. Transparent SDK retries are disabled and the UI reports this as an unknown outcome; the recipient may still lose the unread plaintext.
@@ -28,6 +29,7 @@ Only the current `main` branch and protocol v1 receive security fixes. This proj
 
 - Serve production only over HTTPS and retain the repository CSP and security headers.
 - Do not add third-party analytics, session replay, tag managers, CDN scripts, remote fonts, or error capture that records URLs or request bodies.
+- Never persist plaintext, ciphertext, fragment capabilities, share URLs, revoke tokens, or server message IDs in the keepsake gallery. Do not automatically import the legacy prototype gallery.
 - Keep Upstash and Vercel credentials server-side without a `VITE_` prefix. Use an independent high-entropy rate-limit salt and, where available, an ACL token restricted to the required commands and `snow:*` keys. Rotate credentials after any suspected exposure.
 - Do not enable content recovery backups for the temporary Redis dataset.
 - Treat a spike in create/consume errors, CSP violations, unexpected outbound requests, or dependency advisories as a security event.

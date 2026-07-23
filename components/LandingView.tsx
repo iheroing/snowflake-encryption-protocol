@@ -3,12 +3,14 @@ import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
 import LanguageToggleButton from './LanguageToggleButton';
 import { useI18n } from '../contexts/I18nContext';
+import Icon from './Icon';
 
 interface Props {
   onCrystallize: () => void;
+  onOpenGallery: () => void;
 }
 
-const LandingView: React.FC<Props> = ({ onCrystallize }) => {
+const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
   const { play } = useSound();
   const { t } = useI18n();
 
@@ -34,6 +36,10 @@ const LandingView: React.FC<Props> = ({ onCrystallize }) => {
           </div>
 
           <div className="landing-tools flex shrink-0 items-center gap-2">
+            <button type="button" className="cine-btn-ghost landing-gallery-link" onClick={onOpenGallery}>
+              <Icon name="snowflake" size={16} />
+              <span>{t('landing.museum')}</span>
+            </button>
             <LanguageToggleButton compact />
             <SoundToggleButton compact />
           </div>

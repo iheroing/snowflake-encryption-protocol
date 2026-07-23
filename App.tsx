@@ -5,6 +5,7 @@ import LandingView from './components/LandingView';
 import ReceiveView, { type ReceiveStatus } from './components/ReceiveView';
 import RevealView from './components/RevealView';
 import ShareReadyView, { type SealedWhisper } from './components/ShareReadyView';
+import SnowflakeGalleryView from './components/SnowflakeGalleryView';
 import { useI18n } from './contexts/I18nContext';
 import { useSound } from './contexts/SoundContext';
 import { verifyFragmentSecret } from './protocol/oneTimeWhisper';
@@ -20,6 +21,7 @@ import {
   OneTimeWhisperConsumeUncertainError,
 } from './utils/oneTimeWhisper';
 import { createSnowflakeSignature } from './utils/signature';
+import { collectKeepsake, hasKeepsake, type KeepsakeOrigin } from './utils/keepsakeGallery';
 import type { SoundScene } from './utils/sound';
 
 enum View {
@@ -28,6 +30,7 @@ enum View {
   SHARE_READY = 'share-ready',
   RECEIVE = 'receive',
   REVEALED = 'revealed',
+  GALLERY = 'gallery',
   AFTERGLOW = 'afterglow',
 }
 
@@ -62,6 +65,7 @@ const App: React.FC = () => {
   const [message, setMessage] = useState('');
   const [signature, setSignature] = useState(createSnowflakeSignature);
   const [afterglowReturn, setAfterglowReturn] = useState<View>(View.LANDING);
+  const [, setCollectionRevision] = useState(0);
   const { setScene, play } = useSound();
   const { t, localeTag } = useI18n();
   const hasMountedRef = useRef(false);
@@ -118,6 +122,7 @@ const App: React.FC = () => {
       [View.SHARE_READY]: 'decrypt',
       [View.RECEIVE]: 'decrypt',
       [View.REVEALED]: 'decrypt',
+      [View.GALLERY]: 'gallery',
       [View.AFTERGLOW]: 'afterglow',
     };
     setScene(sceneMap[currentView]);
@@ -218,6 +223,11 @@ const App: React.FC = () => {
     setCurrentView(View.AFTERGLOW);
   };
 
+  const saveKeepsake = (nextSignature: string, origin: KeepsakeOrigin) => {
+    collectKeepsake(nextSignature, origin);
+    setCollectionRevision((revision) => revision + 1);
+  };
+
   return (
     <div className="relative w-full min-h-[100svh] bg-background-dark">
       <div className="fixed inset-0 stardust-bg opacity-30 pointer-events-none z-0" />
@@ -225,7 +235,10 @@ const App: React.FC = () => {
       <div className="fixed -bottom-24 -right-24 w-[560px] h-[560px] bg-aurora-purple/10 blur-[160px] rounded-full pointer-events-none z-0" />
 
       {currentView === View.LANDING && (
-        <LandingView onCrystallize={() => setCurrentView(View.COMPOSE)} />
+        <LandingView
+          onCrystallize={() => setCurrentView(View.COMPOSE)}
+          onOpenGallery={() => setCurrentView(View.GALLERY)}
+        />
       )}
 
       {currentView === View.COMPOSE && (
@@ -240,6 +253,8 @@ const App: React.FC = () => {
             setCurrentView(View.COMPOSE);
           }}
           onExport={() => openAfterglow(View.SHARE_READY)}
+          isCollected={hasKeepsake(sealedWhisper.signature)}
+          onCollect={() => saveKeepsake(sealedWhisper.signature, 'sent')}
           onRevoke={async (id, deleteToken) => {
             try {
               return await deleteOneTimeWhisper(id, deleteToken);
@@ -267,10 +282,19 @@ const App: React.FC = () => {
           message={message}
           signature={signature}
           onClose={exitToLanding}
+          isCollected={hasKeepsake(signature)}
+          onCollect={() => saveKeepsake(signature, 'received')}
           onExport={() => {
             setMessage('');
             openAfterglow(View.LANDING);
           }}
+        />
+      )}
+
+      {currentView === View.GALLERY && (
+        <SnowflakeGalleryView
+          onBack={() => setCurrentView(View.LANDING)}
+          onCreate={() => setCurrentView(View.COMPOSE)}
         />
       )}
 
