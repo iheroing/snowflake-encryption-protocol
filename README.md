@@ -2,7 +2,7 @@
 
 一封只能被主动揭开一次的雪信。写信人的文字在浏览器中加密，服务端只保存限时密文；收信人主动揭开后，密文会被原子地读取并删除。
 
-生产入口：[https://www.liyi.online/snowflake/](https://www.liyi.online/snowflake/)。应用以 `/snowflake/` 为公开路径前缀，历史 `/s/{id}` 分享链接继续兼容。
+生产入口：[https://www.liyi.online/snowflake](https://www.liyi.online/snowflake)。应用以 `/snowflake/` 为资源路径前缀，历史 `/s/{id}` 分享链接继续兼容。
 
 ## 产品特性
 
