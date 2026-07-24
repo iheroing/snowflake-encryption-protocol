@@ -22,7 +22,7 @@
 .afterglow-ambient {
   position: absolute;
   z-index: -1;
-  inset: -20%;
+  inset: 0;
   pointer-events: none;
   background:
     radial-gradient(circle at 28% 43%, rgba(196, 219, 240, 0.09) 0 0.08rem, transparent 0.12rem),
