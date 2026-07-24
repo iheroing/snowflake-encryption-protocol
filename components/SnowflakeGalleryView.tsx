@@ -168,6 +168,10 @@ const SnowflakeGalleryView: React.FC<Props> = ({ onBack, onCreate }) => {
                 <div><dt>{t('gallery.familyLabel')}</dt><dd>{t(`gallery.families.${selected.family}`)}</dd></div>
                 <div><dt>{t('gallery.collectedAt')}</dt><dd>{new Date(selected.collectedAt).toLocaleString(localeTag, { dateStyle: 'medium', timeStyle: 'short' })}</dd></div>
               </dl>
+              <figure className="specimen-lore">
+                <figcaption>{t('gallery.loreLabel')}</figcaption>
+                <p>{t(`gallery.lore.${selected.family}`)}</p>
+              </figure>
               <p className="specimen-no-text"><Icon name="shield" size={17} />{t('gallery.noText')}</p>
               {isConfirmingDelete ? (
                 <div className="specimen-delete-confirm" role="group" aria-label={t('gallery.deleteConfirm')}>

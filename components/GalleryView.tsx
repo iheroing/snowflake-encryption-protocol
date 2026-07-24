@@ -303,7 +303,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
             </div>
           ) : entryMode === 'fall' ? (
             <section className="relative min-h-[calc(var(--cine-viewport)-13rem)] overflow-hidden rounded-[28px] cine-panel-strong">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,218,250,0.2),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(56,218,250,0.1),transparent_46%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(200,222,242,0.2),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(200,222,242,0.1),transparent_46%)]" />
 
               <div className="absolute inset-0">
                 {entryFlakes.map((flake) => (
@@ -324,7 +324,7 @@ const GalleryView: React.FC<Props> = ({ onExit, onViewSnowflake }) => {
                     <img
                       src={generateSnowflakeDataURL(flake.record.encryptedMessage ?? flake.record.message, 260, flake.record.id)}
                       alt="falling snowflake"
-                      className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(56,218,250,0.35)]"
+                      className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(200,222,242,0.35)]"
                       onError={(event) => handleSnowflakeImageError(event, flake.record.id, 260)}
                     />
                   </button>

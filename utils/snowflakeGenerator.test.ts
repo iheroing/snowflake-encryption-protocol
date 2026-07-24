@@ -19,8 +19,9 @@ describe('snowflake visual engine', () => {
     const armUses = [...svg.matchAll(/<use href="#snow-arm" transform="rotate\((\d+) /gu)]
       .map((match) => Number(match[1]));
     expect(armUses).toEqual([0, 60, 120, 180, 240, 300]);
-    expect(svg).toContain('data-snowflake-version="3"');
-    expect(svg).toMatch(/data-family="(?:stellar-dendrite|fern-dendrite|hex-plate|needle-rosette|split-star)"/u);
+    expect(svg).toContain('data-snowflake-version="5"');
+    const familyRegex = new RegExp(`data-family="(?:${SNOWFLAKE_FAMILIES.join('|')})"`);
+    expect(svg).toMatch(familyRegex);
     expect(svg).not.toMatch(/NaN|Infinity|undefined/u);
   });
 
@@ -56,6 +57,13 @@ describe('snowflake visual engine', () => {
       'hex-plate': { length: [0.09, 0.165], angle: [48, 60] },
       'needle-rosette': { length: [0.065, 0.13], angle: [25, 38] },
       'split-star': { length: [0.14, 0.27], angle: [29, 46] },
+      'sectored-plate': { length: [0.1, 0.19], angle: [48, 60] },
+      'stellar-plate': { length: [0.09, 0.17], angle: [44, 60] },
+      'broad-branch': { length: [0.12, 0.22], angle: [30, 45] },
+      'twelve-branch': { length: [0.13, 0.255], angle: [37, 55] },
+      'column': { length: [0.05, 0.1], angle: [50, 60] },
+      'capped-column': { length: [0.06, 0.12], angle: [50, 60] },
+      'bullet-rosette': { length: [0.065, 0.13], angle: [25, 38] },
     } as const;
 
     for (let index = 0; index < 512; index += 1) {

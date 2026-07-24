@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../contexts/I18nContext';
 import { useSound } from '../contexts/SoundContext';
 import { playHaptic } from '../utils/haptics';
-import { generateSnowflakeDataURL } from '../utils/snowflakeGenerator';
+import { generateSnowflakeDataURL, generateSnowflakeParams } from '../utils/snowflakeGenerator';
 import {
   createSnowflakeSignature,
   createSnowflakeVisualSalt,
@@ -38,23 +38,38 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
   const baseSignatureRef = useRef(createSnowflakeSignature());
   const visualSaltRef = useRef(createSnowflakeVisualSalt());
   const [visualSignature, setVisualSignature] = useState(baseSignatureRef.current);
+  const [isTyping, setIsTyping] = useState(false);
   const trimmedMessage = message.trim();
   const snowflakeUrl = useMemo(
-    () => generateSnowflakeDataURL(trimmedMessage || 'sealed snow letter', 760, visualSignature),
+    () => generateSnowflakeDataURL(trimmedMessage || 'sealed snow letter', 640, visualSignature),
     [trimmedMessage, visualSignature],
   );
+  const specimen = useMemo(() => {
+    const params = generateSnowflakeParams(trimmedMessage || 'sealed snow letter', visualSignature);
+    return { family: params.family, no: params.seedKey.slice(0, 6).toUpperCase() };
+  }, [trimmedMessage, visualSignature]);
 
+  // Re-derive the seal only after typing settles. Regenerating a fresh SVG on
+  // every keystroke made the preview <img> swap its data-URL constantly, and
+  // each swap flashed while the browser re-decoded the crystal.
   useEffect(() => {
     if (!trimmedMessage) {
       setVisualSignature(baseSignatureRef.current);
+      setIsTyping(false);
       return;
     }
     let active = true;
-    void deriveSnowflakeSignature(trimmedMessage, visualSaltRef.current).then((next) => {
-      if (active) setVisualSignature(next);
-    });
+    const timer = window.setTimeout(() => {
+      void deriveSnowflakeSignature(trimmedMessage, visualSaltRef.current).then((next) => {
+        if (active) {
+          setVisualSignature(next);
+          setIsTyping(false);
+        }
+      });
+    }, 480);
     return () => {
       active = false;
+      window.clearTimeout(timer);
     };
   }, [trimmedMessage]);
 
@@ -116,6 +131,7 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
                 onChange={(event) => {
                   setMessage(event.target.value.slice(0, MAX_LENGTH));
                   setError('');
+                  setIsTyping(true);
                 }}
                 placeholder={t('compose.placeholder')}
                 maxLength={MAX_LENGTH}
@@ -188,8 +204,20 @@ const ComposeView: React.FC<Props> = ({ onBack, onSubmit }) => {
                 <span>{t('compose.previewEyebrow')}</span>
                 <Icon name="lock" size={16} />
               </div>
-              <img src={snowflakeUrl} alt={t('compose.previewAlt')} />
+              <div className="preview-dish">
+                <img 
+                  src={snowflakeUrl} 
+                  alt={t('compose.previewAlt')} 
+                  decoding="async" 
+                  className={isTyping ? 'is-typing' : ''}
+                />
+              </div>
               {isSubmitting && <CrystallizationEffect phase="forming" />}
+              <p className="preview-specimen" aria-hidden="true">
+                <span className="preview-specimen-no">№ {specimen.no}</span>
+                <span className="preview-specimen-divider" />
+                <span>{t(`gallery.families.${specimen.family}`)}</span>
+              </p>
               <div className="preview-caption">
                 <small>{t('compose.previewCaption')}</small>
                 <strong>{trimmedMessage ? t('compose.uniqueReady') : t('compose.waiting')}</strong>

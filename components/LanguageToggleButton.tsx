@@ -6,22 +6,20 @@ interface Props {
 }
 
 const LanguageToggleButton: React.FC<Props> = ({ compact = false }) => {
-  const { t, toggleLocale } = useI18n();
+  const { t, locale, toggleLocale } = useI18n();
   const label = t('common.switchLanguage');
 
   return (
     <button
       type="button"
       onClick={toggleLocale}
-      className={`cine-btn-ghost inline-flex min-h-11 items-center justify-center rounded-full ${
-        compact ? 'min-w-11 px-3 text-xs' : 'px-4 text-sm'
-      }`}
+      className={`lang-switch${compact ? ' is-compact' : ''}`}
       title={label}
       aria-label={label}
     >
-      <span className="font-semibold tracking-[0.08em]" aria-hidden="true">
-        {t('common.language')}
-      </span>
+      <span className={locale === 'zh' ? 'is-active' : ''} aria-hidden="true">中</span>
+      <span className="lang-switch-divider" aria-hidden="true" />
+      <span className={locale === 'en' ? 'is-active' : ''} aria-hidden="true">EN</span>
     </button>
   );
 };

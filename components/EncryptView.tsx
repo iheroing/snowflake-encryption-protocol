@@ -98,7 +98,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         <h1 className="text-glacial text-2xl md:text-3xl tracking-wide font-light">{t('encrypt.title')}</h1>
         
         <div className="w-full relative mt-6 md:mt-8">
-          <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(56,218,250,0.12),transparent_68%)] blur-2xl"></div>
+          <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,rgba(200,222,242,0.12),transparent_68%)] blur-2xl"></div>
           <textarea 
             className="relative w-full bg-white/[0.02] border border-white/10 rounded-3xl focus:ring-0 text-white/90 text-center text-4xl md:text-6xl font-light placeholder:text-white/15 resize-none min-h-[136px] md:min-h-[170px] leading-relaxed tracking-tight font-serif italic px-6 py-8 md:py-9 backdrop-blur-[2px]"
             placeholder={t('encrypt.placeholder')}
@@ -115,7 +115,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
           <div className="cine-pill backdrop-blur-md p-2 rounded-full flex items-center gap-2">
             <button 
               onClick={() => setEssence('aurora')}
-              className={`px-7 py-3 rounded-full text-[10px] tracking-widest font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_18px_rgba(56,218,250,0.24)]' : 'text-white/45 hover:text-white/75'}`}
+              className={`px-7 py-3 rounded-full text-[10px] tracking-widest font-medium transition-all ${essence === 'aurora' ? 'bg-primary/20 text-primary shadow-[0_0_18px_rgba(200,222,242,0.24)]' : 'text-white/45 hover:text-white/75'}`}
             >
               {t('encrypt.aurora')}
             </button>
@@ -260,7 +260,7 @@ const EncryptView: React.FC<Props> = ({ onCrystallized, onBack }) => {
         <button
           onClick={handleCrystallize}
           disabled={!text.trim() || isGenerating}
-          className="group relative w-full py-4 cine-btn-primary text-sm font-bold tracking-[0.2em] disabled:opacity-30 disabled:pointer-events-none shadow-[0_16px_40px_rgba(56,218,250,0.28)]"
+          className="group relative w-full py-4 cine-btn-primary text-sm font-bold tracking-[0.2em] disabled:opacity-30 disabled:pointer-events-none shadow-[0_16px_40px_rgba(200,222,242,0.28)]"
         >
           <span className="relative z-10 flex items-center justify-center gap-3">
             {isGenerating ? (

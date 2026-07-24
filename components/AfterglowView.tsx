@@ -64,7 +64,7 @@ function drawStardust(ctx: CanvasRenderingContext2D, width: number, height: numb
     const radius = 0.6 + seededUnit(seed, index * 3 + 2) * 1.6;
     const alpha = 0.05 + seededUnit(seed, index * 5 + 3) * 0.16;
 
-    ctx.fillStyle = `rgba(225, 246, 255, ${alpha})`;
+    ctx.fillStyle = `rgba(234, 242, 250, ${alpha})`;
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
     ctx.fill();
@@ -168,9 +168,9 @@ const AfterglowView: React.FC<Props> = ({
         height * 0.45,
         Math.min(width, height) * 0.48
       );
-      glow.addColorStop(0, 'rgba(99, 219, 255, 0.16)');
-      glow.addColorStop(0.48, 'rgba(99, 219, 255, 0.05)');
-      glow.addColorStop(1, 'rgba(99, 219, 255, 0)');
+      glow.addColorStop(0, 'rgba(196, 219, 240, 0.16)');
+      glow.addColorStop(0.48, 'rgba(196, 219, 240, 0.05)');
+      glow.addColorStop(1, 'rgba(196, 219, 240, 0)');
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, width, height);
 
@@ -182,7 +182,7 @@ const AfterglowView: React.FC<Props> = ({
         : (height - snowflakeSize) / 2 - height * 0.06;
 
       ctx.save();
-      ctx.shadowColor = 'rgba(76, 219, 255, 0.34)';
+      ctx.shadowColor = 'rgba(184, 210, 235, 0.34)';
       ctx.shadowBlur = Math.min(width, height) * 0.045;
       ctx.drawImage(image, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
       ctx.restore();
@@ -200,7 +200,7 @@ const AfterglowView: React.FC<Props> = ({
 
       ctx.font = `600 ${Math.max(14, width * 0.011)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       ctx.letterSpacing = `${Math.max(1, width * 0.0018)}px`;
-      ctx.fillStyle = 'rgba(132, 225, 255, 0.58)';
+      ctx.fillStyle = 'rgba(203, 223, 242, 0.58)';
       ctx.fillText(t('common.appSubtitle'), width / 2, height * 0.055);
 
       ctx.font = `400 ${Math.max(12, width * 0.009)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;

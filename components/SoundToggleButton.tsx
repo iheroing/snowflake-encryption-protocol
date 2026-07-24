@@ -15,35 +15,30 @@ const SoundToggleButton: React.FC<Props> = ({ compact = false }) => {
     <button
       type="button"
       onClick={toggleSound}
-      className={`cine-btn-ghost inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full ${
-        compact ? 'min-w-11 px-0' : 'px-3 text-xs'
-      }`}
+      className={`sound-orb${compact ? ' is-compact' : ''}`}
       title={label}
       aria-label={label}
       aria-pressed={soundEnabled}
     >
       <svg
         viewBox="0 0 24 24"
-        width="18"
-        height="18"
+        width="17"
+        height="17"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
       >
-        <path d="M5 9.5h3L12 6v12l-4-3.5H5z" />
+        <path d="M5.5 9.6h2.8L12 6.4v11.2l-3.7-3.2H5.5z" />
         {soundEnabled ? (
-          <>
-            <path d="M15 9a4 4 0 0 1 0 6" />
-            <path d="M17.5 6.5a7.4 7.4 0 0 1 0 11" />
-          </>
+          <g className="sound-orb-waves">
+            <path d="M15 9.4a3.7 3.7 0 0 1 0 5.2" />
+            <path d="M17.4 7.2a6.9 6.9 0 0 1 0 9.6" />
+          </g>
         ) : (
-          <>
-            <path d="m15.5 10 4 4" />
-            <path d="m19.5 10-4 4" />
-          </>
+          <path d="M15.4 10.2 19 13.8m0-3.6-3.6 3.6" />
         )}
       </svg>
       {!compact && <span aria-hidden="true">{soundEnabled ? t('sound.ambient') : t('sound.muted')}</span>}

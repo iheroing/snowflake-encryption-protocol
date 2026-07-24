@@ -108,7 +108,7 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
       ctx.fillText(snowflakeId, width / 2, 1040);
         
         // 添加顶部标题
-        ctx.fillStyle = 'rgba(56, 218, 250, 0.6)';
+        ctx.fillStyle = 'rgba(200, 222, 242, 0.6)';
         ctx.font = '300 16px "Space Grotesk", sans-serif';
         ctx.fillText(t('common.appSubtitle'), width / 2, 60);
         
@@ -273,12 +273,12 @@ const DecryptView: React.FC<Props> = ({ message, signature, ttl, onClose, onExpo
               style={{
                 opacity: 1 - meltEase * 0.95,
                 transform: `rotate(${rotation + meltEase * 140}deg) scale(${1 + meltEase * 0.45}) translateY(${meltEase * 36}px)`,
-                filter: `blur(${meltEase * 24}px) brightness(${1.25 - meltEase * 0.35}) drop-shadow(0 0 ${30 - meltEase * 18}px rgba(56, 218, 250, ${0.6 - meltEase * 0.35}))`
+                filter: `blur(${meltEase * 24}px) brightness(${1.25 - meltEase * 0.35}) drop-shadow(0 0 ${30 - meltEase * 18}px rgba(200, 222, 242, ${0.6 - meltEase * 0.35}))`
               }}
             />
 
             <div className="absolute inset-0 pointer-events-none" style={{ opacity: meltEase * 0.75 }}>
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.22),rgba(56,218,250,0.07)_35%,transparent_65%)] blur-2xl" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.22),rgba(200,222,242,0.07)_35%,transparent_65%)] blur-2xl" />
             </div>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center px-8 md:px-14 transition-all duration-300" style={{ opacity: 1 - meltEase * 1.1, transform: `translateY(${meltEase * 18}px) scale(${1 - meltEase * 0.12})` }}>

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
 import LanguageToggleButton from './LanguageToggleButton';
 import { useI18n } from '../contexts/I18nContext';
 import Icon from './Icon';
+import { createSnowflakeSignature } from '../utils/signature';
+import { generateSnowflakeDataURL, generateSnowflakeParams } from '../utils/snowflakeGenerator';
 
 interface Props {
   onCrystallize: () => void;
@@ -13,6 +15,17 @@ interface Props {
 const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
   const { play } = useSound();
   const { t } = useI18n();
+
+  // 每次到访都落下一片新的雪：临时签名只用于门面标本，不参与任何信件。
+  const specimen = useMemo(() => {
+    const signature = createSnowflakeSignature();
+    const params = generateSnowflakeParams('landing-specimen', signature);
+    return {
+      url: generateSnowflakeDataURL('landing-specimen', 640, signature),
+      family: params.family,
+      no: params.seedKey.slice(0, 6).toUpperCase(),
+    };
+  }, []);
 
   const handleCrystallize = () => {
     play('crystallize');
@@ -61,13 +74,19 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
             className="landing-seal"
             aria-describedby="landing-action-hint"
           >
-            <span className="landing-seal-ring" aria-hidden="true" />
-            <span className="landing-seal-core" aria-hidden="true">
-              <span className="landing-envelope-fold" />
-              <span className="landing-snow-mark">❄</span>
+            <span className="landing-seal-ring" aria-hidden="true">
+              <i />
+              <i />
             </span>
+            <img className="landing-seal-flake" src={specimen.url} alt="" aria-hidden="true" />
             <span className="sr-only">{t('landing.hint')}</span>
           </button>
+
+          <p className="landing-specimen-label" aria-hidden="true">
+            <span className="landing-specimen-no">№ {specimen.no}</span>
+            <span className="landing-specimen-divider" />
+            <span>{t(`gallery.families.${specimen.family}`)}</span>
+          </p>
 
           <p id="landing-action-hint" className="landing-hint">
             <span aria-hidden="true" />
@@ -76,6 +95,10 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
           </p>
         </section>
 
+        <footer className="landing-homage">
+          <span className="landing-homage-mark" aria-hidden="true">❋</span>
+          <p>{t('landing.bentley')}</p>
+        </footer>
       </div>
     </main>
   );

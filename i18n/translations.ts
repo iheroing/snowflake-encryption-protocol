@@ -31,7 +31,8 @@ export const translations: Record<Locale, TranslationDict> = {
       quote: '“有些话，落进一场雪里，便有了自己的形状。”',
       line1: '写一封',
       line2: '只为一人盛开的雪信',
-      hint: '轻触封印，让心语开始凝结'
+      hint: '轻触封印，让心语开始凝结',
+      bentley: '谨记 Wilson A. Bentley（1865-1931）：他一生在显微镜下拍下五千余片雪，只为证明没有两片相同。'
     },
     compose: {
       step: '写下心语',
@@ -167,7 +168,29 @@ export const translations: Record<Locale, TranslationDict> = {
         'fern-dendrite': '蕨枝晶',
         'hex-plate': '六角冰片',
         'needle-rosette': '针束晶',
-        'split-star': '裂星晶'
+        'split-star': '裂星晶',
+        'sectored-plate': '扇棱晶',
+        'stellar-plate': '星盘晶',
+        'broad-branch': '宽枝晶',
+        'twelve-branch': '十二瓣晶',
+        'column': '柱晶',
+        'capped-column': '冠柱晶',
+        'bullet-rosette': '弹簇晶'
+      },
+      loreLabel: '晶型小志',
+      lore: {
+        'stellar-dendrite': '六臂舒展如星，是雪最经典的模样，生于约零下十五度的湿润天空。',
+        'fern-dendrite': '枝上生枝，繁复如蕨，只有最湿冷的云，才舒展得出这般细密。',
+        'hex-plate': '一枚素净的六角薄片，凝于更冷更干的高空，简单却完美对称。',
+        'needle-rosette': '一束纤细的冰针，成于约零下五度，短暂、锋利，转瞬成花。',
+        'split-star': '六臂在生长中裂开又聚拢，像一颗迟疑着绽放的星。',
+        'sectored-plate': '宽阔的扇面被一道道棱脊分成小格，像一柄细工雕出的冰扇。',
+        'stellar-plate': '短而厚的六臂各托起一枚小小的六角盘，是星与盘之间的模样。',
+        'broad-branch': '枝干宽如刀刃，只生几道横肋，简练里自有筋骨。',
+        'twelve-branch': '两颗冰晶在半空相遇、彼此错开三十度，便长成十二只手臂。',
+        'column': '不是星，而是一根六棱的冰柱，多见于高而极冷的卷云里。',
+        'capped-column': '一根冰柱在两端各生出一片六角盘，像一只小小的冰鼓。',
+        'bullet-rosette': '几根冰柱从同一处向外簇生，锋芒各指一方，是卷云的常客。'
       },
       collectedAt: '落下的时间',
       noText: '这里只留下雪花，没有留下那句话',
@@ -220,7 +243,8 @@ export const translations: Record<Locale, TranslationDict> = {
       quote: '“Some words find their shape only after falling into snow.”',
       line1: 'Write a snow letter',
       line2: 'that blooms for one person',
-      hint: 'Touch the seal and let the words crystallize'
+      hint: 'Touch the seal and let the words crystallize',
+      bentley: 'After Wilson A. Bentley (1865-1931), who photographed over 5,000 snowflakes to prove that no two are ever alike.'
     },
     compose: {
       step: 'Write what matters',
@@ -356,7 +380,29 @@ export const translations: Record<Locale, TranslationDict> = {
         'fern-dendrite': 'Fern dendrite',
         'hex-plate': 'Hexagonal plate',
         'needle-rosette': 'Needle rosette',
-        'split-star': 'Split star'
+        'split-star': 'Split star',
+        'sectored-plate': 'Sectored plate',
+        'stellar-plate': 'Stellar plate',
+        'broad-branch': 'Broad-branch',
+        'twelve-branch': 'Twelve-branch',
+        'column': 'Column',
+        'capped-column': 'Capped column',
+        'bullet-rosette': 'Bullet rosette'
+      },
+      loreLabel: 'Field note',
+      lore: {
+        'stellar-dendrite': 'The classic six-pointed star, its arms branching into fronds, born in humid air near -15°C.',
+        'fern-dendrite': 'Branches upon branches, intricate as fern; only the coldest, wettest clouds grow them this fine.',
+        'hex-plate': 'A plain hexagonal plate, formed in colder, drier heights: simple, and perfectly symmetrical.',
+        'needle-rosette': 'A cluster of slender ice needles, set near -5°C; brief, sharp, quick to bloom.',
+        'split-star': 'Six arms that split and gather as they grow, like a star hesitating into flower.',
+        'sectored-plate': 'A broad fan split by fine ridges into sectors, like an ice fan carved with patient care.',
+        'stellar-plate': 'Six short, thick arms, each lifting a little hexagon plate, caught between star and disc.',
+        'broad-branch': 'Branches wide as blades with only a few cross-ribs, spare but sinewy.',
+        'twelve-branch': 'Two crystals meeting mid-air, offset by thirty degrees, growing a single twelve-armed star.',
+        'column': 'Not a star but a six-sided ice pillar, most at home in high, bitterly cold cirrus.',
+        'capped-column': 'An ice column that grew a hexagon plate at each end, like a tiny frozen drum.',
+        'bullet-rosette': 'Several ice columns sprouting from one nucleus, each point aimed its own way, common in cirrus.'
       },
       collectedAt: 'When it fell',
       noText: 'Only the snowflake remains here, not the words',
