@@ -180,41 +180,51 @@ class SoundManager {
         return;
       }
       this.lastTapAt = nowMs;
-      this.playTone(760, 620, 0.12, 0.008, 'triangle', now);
+      // Light glass tap
+      this.playChime(1200, 0.4, 0.015, now);
       return;
     }
 
     if (cue === 'switch') {
-      this.playTone(460, 620, 0.2, 0.01, 'sine', now);
+      // Soft metallic chime
+      this.playChime(900, 0.5, 0.02, now);
       return;
     }
 
     if (cue === 'crystallize') {
-      this.playTone(420, 880, 1.1, 0.022, 'sine', now);
-      this.playTone(520, 760, 0.7, 0.014, 'triangle', now + 0.08);
+      // Shimmering ice growth
+      this.playChime(1800, 1.5, 0.025, now);
+      this.playChime(2400, 1.2, 0.015, now + 0.08);
+      this.playNoise(1.5, 0.01, now, 'shatter');
       return;
     }
 
     if (cue === 'sealed') {
-      this.playTone(660, 1040, 0.54, 0.015, 'triangle', now);
-      this.playTone(880, 1320, 0.7, 0.012, 'sine', now + 0.08);
+      // High-pitched crystal strike + crack
+      this.playChime(1500, 2.2, 0.03, now);
+      this.playChime(2200, 1.8, 0.02, now + 0.1);
+      this.playNoise(0.4, 0.02, now, 'shatter');
       return;
     }
 
     if (cue === 'share') {
-      this.playTone(620, 980, 0.42, 0.016, 'triangle', now);
+      // Pleasant resonant bell
+      this.playChime(1400, 1.2, 0.02, now);
       return;
     }
 
     if (cue === 'export') {
-      this.playTone(320, 660, 0.82, 0.018, 'sine', now);
-      this.playTone(540, 820, 0.52, 0.012, 'triangle', now + 0.1);
+      // Double strike chime
+      this.playChime(1000, 1.2, 0.02, now);
+      this.playChime(1600, 1.0, 0.015, now + 0.12);
       return;
     }
 
     if (cue === 'melt') {
-      this.playTone(760, 120, 4.6, 0.023, 'sine', now);
-      this.playTone(520, 170, 3.8, 0.014, 'triangle', now + 0.08);
+      // Long hiss/watery fade out
+      this.playNoise(5.0, 0.08, now, 'melt');
+      // Subtle background chime melting down
+      this.playChime(800, 4.0, 0.015, now);
     }
   }
 
@@ -309,34 +319,91 @@ class SoundManager {
     this.bgmFadeRaf = window.requestAnimationFrame(tick);
   }
 
-  private playTone(
-    startFreq: number,
-    endFreq: number,
+  private playChime(
+    baseFreq: number,
     durationSec: number,
     peakGain: number,
-    type: OscillatorType,
     startAt: number
   ): void {
     const graph = this.graph;
-    if (!graph) {
-      return;
+    if (!graph) return;
+
+    // Inharmonic ratios for glass/metal timbre
+    const ratios = [1, 2.76, 5.4, 8.9];
+    const volumes = [1, 0.6, 0.4, 0.2];
+
+    ratios.forEach((ratio, i) => {
+      const osc = graph.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(baseFreq * ratio, startAt);
+      
+      const gain = graph.ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, startAt);
+      
+      // Fast attack
+      const attackEnd = startAt + 0.015;
+      gain.gain.exponentialRampToValueAtTime(Math.max(peakGain * volumes[i], 0.0002), attackEnd);
+      
+      // Long exponential decay (higher partials decay faster)
+      const decayDuration = durationSec * (1 - i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.0001, attackEnd + decayDuration);
+
+      osc.connect(gain);
+      gain.connect(graph.cueBus);
+
+      osc.start(startAt);
+      osc.stop(attackEnd + decayDuration + 0.1);
+    });
+  }
+
+  private playNoise(
+    durationSec: number,
+    peakGain: number,
+    startAt: number,
+    type: 'melt' | 'shatter'
+  ): void {
+    const graph = this.graph;
+    if (!graph) return;
+
+    // Generate white noise buffer
+    const bufferSize = Math.max(Math.floor(graph.ctx.sampleRate * durationSec), 1);
+    const buffer = graph.ctx.createBuffer(1, bufferSize, graph.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
     }
 
-    const osc = graph.ctx.createOscillator();
-    osc.type = type;
-    osc.frequency.setValueAtTime(startFreq, startAt);
-    osc.frequency.exponentialRampToValueAtTime(Math.max(endFreq, 1), startAt + durationSec);
+    const noise = graph.ctx.createBufferSource();
+    noise.buffer = buffer;
 
+    const filter = graph.ctx.createBiquadFilter();
     const gain = graph.ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, startAt);
-    gain.gain.exponentialRampToValueAtTime(peakGain, startAt + Math.min(0.24, durationSec * 0.35));
-    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + durationSec);
 
-    osc.connect(gain);
+    if (type === 'shatter') {
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(4000, startAt);
+      filter.frequency.exponentialRampToValueAtTime(8000, startAt + durationSec);
+      
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.exponentialRampToValueAtTime(Math.max(peakGain, 0.0002), startAt + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + durationSec);
+    } else {
+      // melt: lowpass sweeping down to simulate water/hiss fading
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(3000, startAt);
+      filter.frequency.exponentialRampToValueAtTime(150, startAt + durationSec);
+      
+      gain.gain.setValueAtTime(0.0001, startAt);
+      gain.gain.exponentialRampToValueAtTime(Math.max(peakGain, 0.0002), startAt + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + durationSec);
+    }
+
+    noise.connect(filter);
+    filter.connect(gain);
     gain.connect(graph.cueBus);
 
-    osc.start(startAt);
-    osc.stop(startAt + durationSec + 0.05);
+    noise.start(startAt);
+    noise.stop(startAt + durationSec + 0.1);
   }
 }
 
