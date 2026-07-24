@@ -178,8 +178,8 @@ const AfterglowView: React.FC<Props> = ({
       const snowflakeSize = Math.min(width, height) * (selectedCanvas === 'mobile' ? 0.58 : 0.52);
       const snowflakeX = (width - snowflakeSize) / 2;
       const snowflakeY = selectedCanvas === 'mobile'
-        ? height * 0.18
-        : (height - snowflakeSize) / 2 - height * 0.06;
+        ? height * 0.15
+        : (height - snowflakeSize) / 2 - height * 0.08;
 
       ctx.save();
       ctx.shadowColor = 'rgba(184, 210, 235, 0.34)';
@@ -187,34 +187,34 @@ const AfterglowView: React.FC<Props> = ({
       ctx.drawImage(image, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
       ctx.restore();
 
+      const textCenterY = selectedCanvas === 'mobile' ? height * 0.8 : height * 0.85;
+      const spacing = height * 0.025;
+      
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = `600 ${Math.max(16, width * 0.012)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.0025)}px`;
-      ctx.fillStyle = 'rgba(226, 242, 249, 0.76)';
-      ctx.fillText(
-        snowflakeId,
-        width / 2,
-        selectedCanvas === 'mobile' ? height * 0.70 : height * 0.78
-      );
+      
+      ctx.fillStyle = 'rgba(203, 223, 242, 0.3)';
+      ctx.fillRect(width / 2 - width * 0.02, textCenterY - spacing * 3, width * 0.04, 1);
 
-      ctx.font = `600 ${Math.max(14, width * 0.011)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.0018)}px`;
-      ctx.fillStyle = 'rgba(203, 223, 242, 0.58)';
-      ctx.fillText(t('common.appSubtitle'), width / 2, height * 0.055);
+      ctx.font = `400 ${Math.max(13, width * 0.012)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.003)}px`;
+      ctx.fillStyle = 'rgba(203, 223, 242, 0.85)';
+      ctx.fillText(t('landing.phase'), width / 2, textCenterY - spacing * 1);
 
-      ctx.font = `400 ${Math.max(12, width * 0.009)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(0.5, width * 0.001)}px`;
-      ctx.fillStyle = 'rgba(226, 242, 249, 0.38)';
-      ctx.fillText(`${t('afterglow.stampPrefix')} ${capturedLabel}`, width / 2, height * 0.94);
+      ctx.font = `600 ${Math.max(11, width * 0.01)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.004)}px`;
+      ctx.fillStyle = 'rgba(203, 223, 242, 0.45)';
+      ctx.fillText(t('common.appSubtitle').toUpperCase(), width / 2, textCenterY + spacing * 1);
+      
+      ctx.font = `600 ${Math.max(12, width * 0.011)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.002)}px`;
+      ctx.fillStyle = 'rgba(203, 223, 242, 0.6)';
+      ctx.fillText(snowflakeId, width / 2, textCenterY + spacing * 2.5);
 
-      ctx.textAlign = 'left';
-      ctx.font = `500 ${Math.max(10, width * 0.0075)}px system-ui, sans-serif`;
-      ctx.fillStyle = 'rgba(226, 242, 249, 0.22)';
-      ctx.fillText(t('afterglow.footerEngine'), width * 0.05, height * 0.972);
-
-      ctx.textAlign = 'right';
-      ctx.fillText(`${t('afterglow.footerRender')}: ${width} x ${height}`, width * 0.95, height * 0.972);
+      ctx.font = `400 ${Math.max(10, width * 0.008)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      ctx.letterSpacing = `${Math.max(0.5, width * 0.0015)}px`;
+      ctx.fillStyle = 'rgba(203, 223, 242, 0.35)';
+      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, width / 2, textCenterY + spacing * 4);
 
       const blob = await canvasToBlob(canvas);
       const url = URL.createObjectURL(blob);
@@ -269,15 +269,13 @@ const AfterglowView: React.FC<Props> = ({
             <div className="afterglow-art-stars" aria-hidden="true" />
             <img className="afterglow-snowflake" src={snowflakeURL} alt="" />
 
-            <figcaption className="afterglow-art-meta">
-              <span>{t('afterglow.capturedAt')} {capturedLabel}</span>
-              <strong>{snowflakeId}</strong>
+            <figcaption className="afterglow-poetic-meta">
+              <div className="afterglow-poetic-line" aria-hidden="true" />
+              <p className="afterglow-poetic-quote">{t('landing.phase')}</p>
+              <p className="afterglow-poetic-subtitle">{t('common.appSubtitle').toUpperCase()}</p>
+              <p className="afterglow-poetic-id">{snowflakeId}</p>
+              <p className="afterglow-poetic-date">{t('afterglow.capturedAt')} {capturedLabel}</p>
             </figcaption>
-
-            <div className="afterglow-privacy-mark">
-              <Icon name="shield" size={15} />
-              <span>{t('afterglow.secureNoText')}</span>
-            </div>
           </figure>
         </section>
 
