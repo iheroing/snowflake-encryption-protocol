@@ -741,14 +741,14 @@ button {
   max-width: 560px;
   margin: 0 auto;
   padding-bottom: 0.4rem;
-  color: rgba(214, 229, 243, 0.18);
+  color: rgba(214, 229, 243, 0.35);
   text-align: left;
   transition: color 240ms ease;
 }
 
 @media (hover: hover) {
   .landing-homage:hover {
-    color: rgba(214, 229, 243, 0.45);
+    color: rgba(214, 229, 243, 0.85);
   }
 }
 
@@ -766,7 +766,7 @@ button {
   line-height: 1.65;
 }
 
-@media (max-height: 760px) {
+@media (max-height: 550px) {
   .landing-homage {
     display: none;
   }
