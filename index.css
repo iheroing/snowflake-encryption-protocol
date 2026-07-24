@@ -2616,6 +2616,8 @@ button {
   aspect-ratio: 1;
   object-fit: contain;
   filter: drop-shadow(0 0 44px rgba(202, 222, 240, 0.24));
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .specimen-dialog-copy {
