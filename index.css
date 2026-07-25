@@ -779,7 +779,7 @@ button {
 
 .landing-homage.is-expanded .landing-homage-content {
   opacity: 1;
-  max-height: 80px;
+  max-height: 120px;
 }
 
 .landing-homage-content p {

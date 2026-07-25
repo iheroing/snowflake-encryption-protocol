@@ -118,13 +118,13 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
                 (Wikipedia)
               </a>
             </p>
-          </div>
-          <div 
-            className="mt-6 text-[8px] tracking-[0.3em] font-mono uppercase opacity-30 select-none pointer-events-none transition-opacity duration-1000"
-            style={{ opacity: isHomageExpanded ? 0.3 : 0 }}
-            aria-hidden="true"
-          >
-            128-bit Seed · Procedural Geometry · 12 Crystal Families
+            <div 
+              className="mt-6 text-[8px] tracking-[0.3em] font-mono uppercase opacity-30 select-none pointer-events-none transition-opacity duration-1000"
+              style={{ opacity: isHomageExpanded ? 0.3 : 0 }}
+              aria-hidden="true"
+            >
+              128-bit Seed · Procedural Geometry · 12 Crystal Families
+            </div>
           </div>
         </footer>
       </div>
