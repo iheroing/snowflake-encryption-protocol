@@ -255,29 +255,31 @@
 }
 
 .afterglow-poetic-subtitle {
-  color: rgba(203, 223, 242, 0.45);
+  color: rgba(203, 223, 242, 0.25);
   font-family: "Noto Serif SC Variable", "Source Han Serif SC", serif;
-  font-size: clamp(0.6rem, 1vw, 0.75rem);
-  letter-spacing: 0.25em;
-  font-weight: 600;
+  font-size: clamp(0.55rem, 0.8vw, 0.65rem);
+  letter-spacing: 0.35em;
+  font-weight: 400;
   margin-bottom: 1.25rem;
   margin-top: 0;
 }
 
 .afterglow-poetic-id {
-  color: rgba(203, 223, 242, 0.6);
+  color: rgba(203, 223, 242, 0.3);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
-  letter-spacing: 0.08em;
+  font-size: clamp(0.45rem, 0.65vw, 0.55rem);
+  letter-spacing: 0.15em;
+  font-weight: 400;
   margin-bottom: 0.5rem;
   margin-top: 0;
 }
 
 .afterglow-poetic-date {
-  color: rgba(203, 223, 242, 0.35);
+  color: rgba(203, 223, 242, 0.15);
   font-family: "Noto Serif SC Variable", "Source Han Serif SC", serif;
-  font-size: clamp(0.55rem, 1vw, 0.7rem);
+  font-size: clamp(0.5rem, 0.7vw, 0.6rem);
   letter-spacing: 0.1em;
+  font-weight: 400;
   margin: 0;
 }
 

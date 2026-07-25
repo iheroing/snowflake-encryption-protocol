@@ -204,23 +204,23 @@ const AfterglowView: React.FC<Props> = ({
       ctx.fillText(t('landing.phase'), Math.round(width / 2), Math.round(textCenterY - spacing * 1));
       
       // Subtitle
-      ctx.fillStyle = 'rgba(214, 233, 252, 0.6)';
-      ctx.font = `600 ${Math.round(height * 0.016)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.25em';
-      ctx.fillText(t('common.appSubtitle').toUpperCase(), Math.round(width / 2), Math.round(textCenterY + spacing * 1));
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.3)';
+      ctx.font = `400 ${Math.round(height * 0.012)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.35em';
+      ctx.fillText(t('common.appSubtitle').toUpperCase(), Math.round(width / 2), Math.round(textCenterY + spacing * 1.1));
       
       // Snowflake ID & Meta
-      ctx.fillStyle = 'rgba(214, 233, 252, 0.55)';
-      ctx.font = `500 ${Math.round(height * 0.014)}px "Inter", sans-serif`;
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.35)';
+      ctx.font = `400 ${Math.round(height * 0.009)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
       if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.18em';
-      const metaText = `${snowflakeId} // TYPE: ${params.family.replace('-', ' ').toUpperCase()} // SEED: ${params.seedKey.slice(0, 6).toUpperCase()}`;
-      ctx.fillText(metaText, Math.round(width / 2), Math.round(textCenterY + spacing * 2.5));
+      const metaText = `${snowflakeId}   //   TYPE: ${params.family.replace('-', ' ').toUpperCase()}   //   SEED: ${params.seedKey.slice(0, 6).toUpperCase()}`;
+      ctx.fillText(metaText, Math.round(width / 2), Math.round(textCenterY + spacing * 2.7));
 
       // Date
-      ctx.fillStyle = 'rgba(214, 233, 252, 0.35)';
-      ctx.font = `500 ${Math.round(height * 0.014)}px "Inter", sans-serif`;
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.2)';
+      ctx.font = `400 ${Math.round(height * 0.0095)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.1em';
-      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, Math.round(width / 2), Math.round(textCenterY + spacing * 4.2));
+      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, Math.round(width / 2), Math.round(textCenterY + spacing * 4.4));
 
       const blob = await canvasToBlob(canvas);
       const url = URL.createObjectURL(blob);
