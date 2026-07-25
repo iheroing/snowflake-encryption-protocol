@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useI18n } from '../contexts/I18nContext';
 import { useSound } from '../contexts/SoundContext';
-import { generateSnowflakeDataURL, hashString } from '../utils/snowflakeGenerator';
+import { generateSnowflakeDataURL, hashString, generateSnowflakeParams } from '../utils/snowflakeGenerator';
 import { getSnowflakeId } from '../utils/signature';
 import Icon from './Icon';
 import LanguageToggleButton from './LanguageToggleButton';
@@ -111,6 +111,7 @@ const AfterglowView: React.FC<Props> = ({
     [message, signature]
   );
   const snowflakeId = useMemo(() => getSnowflakeId(signature), [signature]);
+  const params = useMemo(() => generateSnowflakeParams(message, signature), [message, signature]);
   const selectedOption = CANVAS_OPTIONS.find((option) => option.id === selectedCanvas) ?? CANVAS_OPTIONS[0];
 
   const capturedLabel = useMemo(
