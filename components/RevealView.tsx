@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { playHaptic } from '../utils/haptics';
 import { generateSnowflakeDataURL, generateSnowflakeParams } from '../utils/snowflakeGenerator';
 import { getSnowflakeId } from '../utils/signature';
+import { useI18n } from '../contexts/I18nContext';
 import { useSound } from '../contexts/SoundContext';
 import Icon from './Icon';
 import LanguageToggleButton from './LanguageToggleButton';
