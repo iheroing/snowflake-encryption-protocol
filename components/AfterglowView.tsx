@@ -188,34 +188,37 @@ const AfterglowView: React.FC<Props> = ({
       ctx.drawImage(image, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
       ctx.restore();
 
-      const textCenterY = selectedCanvas === 'mobile' ? height * 0.8 : height * 0.85;
-      const spacing = height * 0.025;
+      const textCenterY = Math.round(selectedCanvas === 'mobile' ? height * 0.8 : height * 0.85);
+      const spacing = Math.round(height * 0.025);
       
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
-      ctx.fillStyle = 'rgba(203, 223, 242, 0.3)';
-      ctx.fillRect(width / 2 - width * 0.02, textCenterY - spacing * 3, width * 0.04, 1);
-
-      ctx.font = `300 ${Math.max(12, width * 0.011)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.003)}px`;
-      ctx.fillStyle = 'rgba(203, 223, 242, 0.85)';
-      ctx.fillText(t('landing.phase'), width / 2, textCenterY - spacing * 1);
-
-      ctx.font = `400 ${Math.max(10, width * 0.0085)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.005)}px`;
-      ctx.fillStyle = 'rgba(203, 223, 242, 0.45)';
-      ctx.fillText(t('common.appSubtitle').toUpperCase(), width / 2, textCenterY + spacing * 1);
+      // Phase quote
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.95)';
+      ctx.font = `${Math.round(height * 0.026)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.12em';
       
-      ctx.font = `400 ${Math.max(11, width * 0.01)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.003)}px`;
-      ctx.fillStyle = 'rgba(203, 223, 242, 0.6)';
-      ctx.fillText(snowflakeId, width / 2, textCenterY + spacing * 2.5);
+      ctx.fillRect(Math.round(width / 2 - width * 0.02), Math.round(textCenterY - spacing * 3), Math.round(width * 0.04), 1);
+      ctx.fillText(t('landing.phase'), Math.round(width / 2), Math.round(textCenterY - spacing * 1));
+      
+      // Subtitle
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.6)';
+      ctx.font = `600 ${Math.round(height * 0.016)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.25em';
+      ctx.fillText(t('common.appSubtitle').toUpperCase(), Math.round(width / 2), Math.round(textCenterY + spacing * 1));
+      
+      // Snowflake ID
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.6)';
+      ctx.font = `500 ${Math.round(height * 0.018)}px "Inter", sans-serif`;
+      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.15em';
+      ctx.fillText(snowflakeId, Math.round(width / 2), Math.round(textCenterY + spacing * 2.5));
 
-      ctx.font = `300 ${Math.max(9, width * 0.0075)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(0.5, width * 0.0015)}px`;
-      ctx.fillStyle = 'rgba(203, 223, 242, 0.35)';
-      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, width / 2, textCenterY + spacing * 4.2);
+      // Date
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.35)';
+      ctx.font = `500 ${Math.round(height * 0.014)}px "Inter", sans-serif`;
+      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.1em';
+      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, Math.round(width / 2), Math.round(textCenterY + spacing * 4.2));
 
       const blob = await canvasToBlob(canvas);
       const url = URL.createObjectURL(blob);
