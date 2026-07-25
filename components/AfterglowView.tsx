@@ -182,9 +182,16 @@ const AfterglowView: React.FC<Props> = ({
         : (height - snowflakeSize) / 2 - height * 0.08;
 
       ctx.save();
+      
+      const cx = snowflakeX + snowflakeSize / 2;
+      const cy = snowflakeY + snowflakeSize / 2;
+      ctx.translate(cx, cy);
+      if (selectedCanvas === 'desktop') ctx.rotate(60 * Math.PI / 180);
+      else if (selectedCanvas === 'mobile') ctx.rotate(120 * Math.PI / 180);
+      
       ctx.shadowColor = 'rgba(184, 210, 235, 0.34)';
       ctx.shadowBlur = Math.min(width, height) * 0.045;
-      ctx.drawImage(image, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
+      ctx.drawImage(image, -snowflakeSize / 2, -snowflakeSize / 2, snowflakeSize, snowflakeSize);
       ctx.restore();
 
       const textCenterY = selectedCanvas === 'mobile' ? height * 0.8 : height * 0.85;
@@ -196,25 +203,25 @@ const AfterglowView: React.FC<Props> = ({
       ctx.fillStyle = 'rgba(203, 223, 242, 0.3)';
       ctx.fillRect(width / 2 - width * 0.02, textCenterY - spacing * 3, width * 0.04, 1);
 
-      ctx.font = `400 ${Math.max(13, width * 0.012)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      ctx.font = `300 ${Math.max(12, width * 0.011)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       ctx.letterSpacing = `${Math.max(1, width * 0.003)}px`;
       ctx.fillStyle = 'rgba(203, 223, 242, 0.85)';
       ctx.fillText(t('landing.phase'), width / 2, textCenterY - spacing * 1);
 
-      ctx.font = `600 ${Math.max(11, width * 0.01)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.004)}px`;
+      ctx.font = `400 ${Math.max(10, width * 0.0085)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.005)}px`;
       ctx.fillStyle = 'rgba(203, 223, 242, 0.45)';
       ctx.fillText(t('common.appSubtitle').toUpperCase(), width / 2, textCenterY + spacing * 1);
       
-      ctx.font = `600 ${Math.max(12, width * 0.011)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
-      ctx.letterSpacing = `${Math.max(1, width * 0.002)}px`;
+      ctx.font = `400 ${Math.max(11, width * 0.01)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      ctx.letterSpacing = `${Math.max(1, width * 0.003)}px`;
       ctx.fillStyle = 'rgba(203, 223, 242, 0.6)';
       ctx.fillText(snowflakeId, width / 2, textCenterY + spacing * 2.5);
 
-      ctx.font = `400 ${Math.max(10, width * 0.008)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
+      ctx.font = `300 ${Math.max(9, width * 0.0075)}px "Noto Serif SC Variable", "Source Han Serif SC", serif`;
       ctx.letterSpacing = `${Math.max(0.5, width * 0.0015)}px`;
       ctx.fillStyle = 'rgba(203, 223, 242, 0.35)';
-      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, width / 2, textCenterY + spacing * 4);
+      ctx.fillText(`${t('afterglow.capturedAt')} ${capturedLabel}`, width / 2, textCenterY + spacing * 4.2);
 
       const blob = await canvasToBlob(canvas);
       const url = URL.createObjectURL(blob);
@@ -267,7 +274,14 @@ const AfterglowView: React.FC<Props> = ({
         <section className="afterglow-preview-region" aria-label={t('afterglow.title')}>
           <figure className="afterglow-art" data-canvas={selectedCanvas}>
             <div className="afterglow-art-stars" aria-hidden="true" />
-            <img className="afterglow-snowflake" src={snowflakeURL} alt="" />
+            <img 
+              className="afterglow-snowflake" 
+              src={snowflakeURL} 
+              alt="" 
+              style={{
+                transform: `rotate(${selectedCanvas === 'desktop' ? 60 : selectedCanvas === 'mobile' ? 120 : 0}deg)`
+              }}
+            />
 
             <figcaption className="afterglow-poetic-meta">
               <div className="afterglow-poetic-line" aria-hidden="true" />
