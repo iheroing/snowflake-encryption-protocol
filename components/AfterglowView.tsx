@@ -183,15 +183,9 @@ const AfterglowView: React.FC<Props> = ({
 
       ctx.save();
       
-      const cx = snowflakeX + snowflakeSize / 2;
-      const cy = snowflakeY + snowflakeSize / 2;
-      ctx.translate(cx, cy);
-      if (selectedCanvas === 'desktop') ctx.rotate(60 * Math.PI / 180);
-      else if (selectedCanvas === 'mobile') ctx.rotate(120 * Math.PI / 180);
-      
       ctx.shadowColor = 'rgba(184, 210, 235, 0.34)';
       ctx.shadowBlur = Math.min(width, height) * 0.045;
-      ctx.drawImage(image, -snowflakeSize / 2, -snowflakeSize / 2, snowflakeSize, snowflakeSize);
+      ctx.drawImage(image, snowflakeX, snowflakeY, snowflakeSize, snowflakeSize);
       ctx.restore();
 
       const textCenterY = selectedCanvas === 'mobile' ? height * 0.8 : height * 0.85;
