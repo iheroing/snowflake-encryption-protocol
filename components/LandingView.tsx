@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
 import LanguageToggleButton from './LanguageToggleButton';
-import AlgorithmModal from './AlgorithmModal';
 import { useI18n } from '../contexts/I18nContext';
 import Icon from './Icon';
 import { createSnowflakeSignature } from '../utils/signature';
@@ -17,7 +16,6 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
   const { play } = useSound();
   const { t } = useI18n();
   const [isHomageExpanded, setIsHomageExpanded] = useState(false);
-  const [showAlgo, setShowAlgo] = useState(false);
 
   // 每次到访都落下一片新的雪：临时签名只用于门面标本，不参与任何信件。
   const specimen = useMemo(() => {
@@ -52,15 +50,6 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
           </div>
 
           <div className="landing-tools flex shrink-0 items-center gap-2">
-            <button 
-              type="button" 
-              className="algo-orb" 
-              onClick={() => setShowAlgo(true)}
-              aria-label={t('algo.title')}
-              title={t('algo.title')}
-            >
-              <Icon name="info" size={16} />
-            </button>
             <button type="button" className="cine-btn-ghost landing-gallery-link" onClick={onOpenGallery}>
               <Icon name="snowflake" size={16} />
               <span>{t('landing.museum')}</span>
@@ -123,16 +112,22 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
                 href="https://en.wikipedia.org/wiki/Wilson_Bentley" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="landing-homage-link"
+                className="hover:text-white/80 transition-colors inline-flex items-center gap-1 border-b border-white/20 border-dashed pb-0.5 ml-1"
+                onClick={e => e.stopPropagation()}
               >
                 (Wikipedia)
               </a>
             </p>
           </div>
+          <div 
+            className="mt-6 text-[8px] tracking-[0.3em] font-mono uppercase opacity-30 select-none pointer-events-none transition-opacity duration-1000"
+            style={{ opacity: isHomageExpanded ? 0.3 : 0 }}
+            aria-hidden="true"
+          >
+            128-bit Seed · Procedural Geometry · 12 Crystal Families
+          </div>
         </footer>
       </div>
-      
-      {showAlgo && <AlgorithmModal onClose={() => setShowAlgo(false)} />}
     </main>
   );
 };

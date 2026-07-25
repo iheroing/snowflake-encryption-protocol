@@ -217,17 +217,6 @@ export const translations: Record<Locale, TranslationDict> = {
       footerRender: '画布',
       footerComplexity: '纹理',
       stampPrefix: '凝结于'
-    },
-    algo: {
-      title: '造雪算法',
-      subtitle: 'The Generator Algorithm',
-      p1: '这不是固定的图形，也没有无尽的分形。为了让你写下的每一段密语，都能凝结成独一无二、又符合物理规律的雪花，系统运行着一套精密的程序化生成引擎。',
-      p2: '128-bit 灵魂种子。',
-      p2Desc: '你输入的文字连同隐秘签名，会被哈希压缩成一个 128 位的数字种子。差之毫厘，雪花便会有着天壤之别。',
-      p3: '12 大自然晶族。',
-      p3Desc: '基于大自然中真实的冰晶形态，算法框定了 12 个基础族系（如星状枝蔓、六边形盘、针状簇结）。种子首先决定它的家族，为其生长划定物理学的比例边界。',
-      p4: '无限的微观几何。',
-      p4Desc: '在族系的物理边界内，种子驱动随机数发生器，精细地长出每一片枝桠的位置、长度与偏角。最后经过大自然秩序般的 6 轴镜像对称，完美凝结。每一片雪，真的都只为你落下了这一次。'
     }
   },
   en: {
@@ -439,18 +428,7 @@ export const translations: Record<Locale, TranslationDict> = {
       footerEngine: 'Snowflake texture ready',
       footerRender: 'Canvas',
       footerComplexity: 'Texture',
-      stampPrefix: 'Captured '
-    },
-    algo: {
-      title: 'The Algorithm',
-      subtitle: 'The Generator Algorithm',
-      p1: 'These are not fixed images, nor are they infinite fractals. To ensure that every message you write crystallizes into a unique snowflake that obeys the laws of physics, a procedural generation engine runs quietly underneath.',
-      p2: '128-bit Soul Seed.',
-      p2Desc: 'Your text and a hidden signature are hashed into a 128-bit numerical seed. A single character difference completely changes the outcome.',
-      p3: '12 Natural Crystal Families.',
-      p3Desc: 'Based on actual ice crystal morphology, the algorithm defines 12 core families (e.g., stellar dendrites, hex plates, needle rosettes). The seed decides the family, establishing the physical boundaries for its growth.',
-      p4: 'Infinite Micro-geometry.',
-      p4Desc: 'Within its family boundaries, the seed drives a procedural sequence, delicately shaping the position, length, and angles of every branch. Finally, mimicking nature\'s order, it aligns into perfect 6-fold symmetry. Every snowflake truly falls only once.'
+      stampPrefix: 'Crystallized at'
     }
   }
 };

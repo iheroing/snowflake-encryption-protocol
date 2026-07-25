@@ -208,11 +208,12 @@ const AfterglowView: React.FC<Props> = ({
       if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.25em';
       ctx.fillText(t('common.appSubtitle').toUpperCase(), Math.round(width / 2), Math.round(textCenterY + spacing * 1));
       
-      // Snowflake ID
-      ctx.fillStyle = 'rgba(214, 233, 252, 0.6)';
-      ctx.font = `500 ${Math.round(height * 0.018)}px "Inter", sans-serif`;
-      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.15em';
-      ctx.fillText(snowflakeId, Math.round(width / 2), Math.round(textCenterY + spacing * 2.5));
+      // Snowflake ID & Meta
+      ctx.fillStyle = 'rgba(214, 233, 252, 0.55)';
+      ctx.font = `500 ${Math.round(height * 0.014)}px "Inter", sans-serif`;
+      if ('letterSpacing' in ctx) (ctx as any).letterSpacing = '0.18em';
+      const metaText = `${snowflakeId} // TYPE: ${params.family.replace('-', ' ').toUpperCase()} // SEED: ${params.seedKey.slice(0, 6).toUpperCase()}`;
+      ctx.fillText(metaText, Math.round(width / 2), Math.round(textCenterY + spacing * 2.5));
 
       // Date
       ctx.fillStyle = 'rgba(214, 233, 252, 0.35)';
@@ -284,7 +285,9 @@ const AfterglowView: React.FC<Props> = ({
               <div className="afterglow-poetic-line" aria-hidden="true" />
               <p className="afterglow-poetic-quote">{t('landing.phase')}</p>
               <p className="afterglow-poetic-subtitle">{t('common.appSubtitle').toUpperCase()}</p>
-              <p className="afterglow-poetic-id">{snowflakeId}</p>
+              <p className="afterglow-poetic-id" style={{ fontSize: '0.6rem', opacity: 0.7 }}>
+                {snowflakeId} &nbsp;//&nbsp; TYPE: {params.family.replace('-', ' ').toUpperCase()} &nbsp;//&nbsp; SEED: {params.seedKey.slice(0, 6).toUpperCase()}
+              </p>
               <p className="afterglow-poetic-date">{t('afterglow.capturedAt')} {capturedLabel}</p>
             </figcaption>
           </figure>
