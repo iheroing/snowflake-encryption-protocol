@@ -279,8 +279,8 @@ const AfterglowView: React.FC<Props> = ({
               src={snowflakeURL} 
               alt="" 
               style={{
-                transform: `rotate(${selectedCanvas === 'desktop' ? 60 : selectedCanvas === 'mobile' ? 120 : 0}deg)`
-              }}
+                '--snowflake-rotation': `${selectedCanvas === 'desktop' ? 60 : selectedCanvas === 'mobile' ? 120 : 0}deg`
+              } as React.CSSProperties}
             />
 
             <figcaption className="afterglow-poetic-meta">

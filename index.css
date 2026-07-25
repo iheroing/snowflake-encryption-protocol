@@ -735,35 +735,74 @@ button {
 /* A quiet homage in the corner: the man who proved no two snowflakes match. */
 .landing-homage {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   max-width: 560px;
   margin: 0 auto;
   padding-bottom: 0.4rem;
   color: rgba(214, 229, 243, 0.35);
-  text-align: left;
-  transition: color 240ms ease;
-}
-
-@media (hover: hover) {
-  .landing-homage:hover {
-    color: rgba(214, 229, 243, 0.85);
-  }
+  text-align: center;
 }
 
 .landing-homage-mark {
-  margin-top: 1px;
-  color: inherit;
-  font-size: 11px;
-  line-height: 1.5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(214, 229, 243, 0.25);
+  font-size: 16px;
+  line-height: 1;
+  padding: 8px;
+  transition: all 400ms ease;
+  transform: rotate(0deg);
 }
 
-.landing-homage p {
+@media (hover: hover) {
+  .landing-homage-mark:hover {
+    color: rgba(214, 229, 243, 0.65);
+    transform: rotate(90deg);
+  }
+}
+
+.landing-homage.is-expanded .landing-homage-mark {
+  color: rgba(214, 229, 243, 0.85);
+  transform: rotate(180deg);
+}
+
+.landing-homage-content {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.landing-homage.is-expanded .landing-homage-content {
+  opacity: 1;
+  max-height: 80px;
+}
+
+.landing-homage-content p {
   font-size: 10px;
   font-weight: 400;
   letter-spacing: 0.03em;
   line-height: 1.65;
+  margin: 0;
+}
+
+.landing-homage-link {
+  color: rgba(152, 228, 251, 0.5);
+  text-decoration: none;
+  margin-left: 6px;
+  border-bottom: 1px dashed rgba(152, 228, 251, 0.2);
+  transition: all 200ms ease;
+}
+
+@media (hover: hover) {
+  .landing-homage-link:hover {
+    color: rgba(152, 228, 251, 1);
+    border-bottom-color: rgba(152, 228, 251, 0.8);
+  }
 }
 
 @media (max-height: 550px) {

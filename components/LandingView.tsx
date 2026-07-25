@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSound } from '../contexts/SoundContext';
 import SoundToggleButton from './SoundToggleButton';
 import LanguageToggleButton from './LanguageToggleButton';
@@ -15,6 +15,7 @@ interface Props {
 const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
   const { play } = useSound();
   const { t } = useI18n();
+  const [isHomageExpanded, setIsHomageExpanded] = useState(false);
 
   // 每次到访都落下一片新的雪：临时签名只用于门面标本，不参与任何信件。
   const specimen = useMemo(() => {
@@ -95,9 +96,28 @@ const LandingView: React.FC<Props> = ({ onCrystallize, onOpenGallery }) => {
           </p>
         </section>
 
-        <footer className="landing-homage">
-          <span className="landing-homage-mark" aria-hidden="true">❋</span>
-          <p>{t('landing.bentley')}</p>
+        <footer className={`landing-homage ${isHomageExpanded ? 'is-expanded' : ''}`}>
+          <button 
+            type="button" 
+            className="landing-homage-mark" 
+            onClick={() => setIsHomageExpanded(prev => !prev)}
+            aria-label={isHomageExpanded ? '收起介绍' : '了解 Bentley'}
+          >
+            ❋
+          </button>
+          <div className="landing-homage-content">
+            <p>
+              {t('landing.bentley')}
+              <a 
+                href="https://en.wikipedia.org/wiki/Wilson_Bentley" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="landing-homage-link"
+              >
+                (Wikipedia)
+              </a>
+            </p>
+          </div>
         </footer>
       </div>
     </main>
