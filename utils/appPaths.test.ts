@@ -6,6 +6,7 @@ describe('mounted application paths', () => {
     expect(APP_BASE_PATH).toBe('/snowflake');
     expect(withAppBase()).toBe('/snowflake/');
     expect(withAppBase('/api/snow/create')).toBe('/snowflake/api/snow/create');
+    expect(withAppBase('/ambience.mp3')).toBe('/snowflake/ambience.mp3');
     expect(withAppBase('s/example')).toBe('/snowflake/s/example');
   });
 

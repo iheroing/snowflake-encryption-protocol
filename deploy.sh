@@ -5,9 +5,10 @@ project_dir="$(cd "$(dirname "$0")" && pwd)"
 cd "$project_dir"
 
 echo "Snowflake Whisper release gate"
-echo "Running locked install, tests, protocol vector, build, and dependency audit..."
+echo "Running locked install, unit/component/browser tests, protocol vector, build, and dependency audit..."
 
 npm ci
+npx playwright install chromium
 npm run check:release
 
 echo

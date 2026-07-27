@@ -30,11 +30,11 @@ Vite 开发服务器内置了仅用于本地测试的内存 API，重启后数�
 发布前执行：
 
 ```bash
-npm run type-check
-npm test
-npm run build
-npm audit
+npx playwright install chromium
+npm run check:release
 ```
+
+`check:release` 会连续执行类型检查、Vitest 单元/组件测试、协议向量校验、生产构建、桌面与 390×844 移动端 Playwright 回归，以及高危依赖审计。CI 会自动安装 Chromium。
 
 ## 协议概要
 
@@ -65,6 +65,8 @@ utils/oneTimeWhisper.ts     前端 API 客户端
 utils/keepsakeGallery.ts    无明文的本机雪花收藏
 api/snow/                   Vercel Functions 路由
 api/_lib/                   验证、服务和 Redis 适配器
+e2e/                        键盘、挂载资源、移动端与减弱动效回归
+docs/archive/               历史原型说明与旧版本记录
 ```
 
-`components/EncryptView.tsx`、旧 `GalleryView.tsx` 等组件仅作为历史原型保留，不在生产主链路中加载；生产入口使用不读取正文的 `SnowflakeGalleryView.tsx`。仓库中较早的中文说明文档记录原型演进，不代表当前产品承诺。
+根目录保留当前权威文档：`README.md`、`SPEC.md`、`SECURITY.md`、`PRODUCT_SPEC.md`、`DEPLOYMENT.md` 与 `PROJECT_STRUCTURE.md`。历史原型文档已归档到 `docs/archive/`，记录早期明文画廊、预设心语和部署草稿等演进过程，不代表当前产品承诺。

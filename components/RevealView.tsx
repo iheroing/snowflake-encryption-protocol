@@ -32,7 +32,14 @@ const RevealView: React.FC<Props> = ({
   const [remainingMs, setRemainingMs] = useState(displaySeconds * 1000);
   const [isMelting, setIsMelting] = useState(false);
   const [meltProgress, setMeltProgress] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => (
+    typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ));
   const meltRafRef = useRef<number | null>(null);
+  const reducedMotionCloseRef = useRef<number | null>(null);
+  const isMeltingRef = useRef(false);
   const deadlineRef = useRef(Date.now() + displaySeconds * 1000);
   const didCloseRef = useRef(false);
   const meltEase = useMemo(() => 1 - Math.pow(1 - Math.min(1, meltProgress), 3), [meltProgress]);
@@ -48,11 +55,32 @@ const RevealView: React.FC<Props> = ({
     return 'bloom';
   }, [message, signature]);
 
+  const closeOnce = useCallback(() => {
+    if (didCloseRef.current) return;
+    didCloseRef.current = true;
+    if (meltRafRef.current !== null) {
+      window.cancelAnimationFrame(meltRafRef.current);
+      meltRafRef.current = null;
+    }
+    if (reducedMotionCloseRef.current !== null) {
+      window.clearTimeout(reducedMotionCloseRef.current);
+      reducedMotionCloseRef.current = null;
+    }
+    onClose();
+  }, [onClose]);
+
   const startMelting = useCallback(() => {
-    if (didCloseRef.current || isMelting) return;
+    if (didCloseRef.current || isMeltingRef.current) return;
+    isMeltingRef.current = true;
     setIsMelting(true);
     setMeltProgress(0);
     play('melt');
+
+    if (prefersReducedMotion) {
+      setMeltProgress(1);
+      reducedMotionCloseRef.current = window.setTimeout(closeOnce, 0);
+      return;
+    }
     
     const startAt = performance.now();
     const meltDuration = 5000;
@@ -63,43 +91,47 @@ const RevealView: React.FC<Props> = ({
       if (progress < 1) {
         meltRafRef.current = window.requestAnimationFrame(tick);
       } else {
-        didCloseRef.current = true;
-        onClose();
+        meltRafRef.current = null;
+        closeOnce();
       }
     };
     meltRafRef.current = window.requestAnimationFrame(tick);
-  }, [isMelting, onClose, play]);
+  }, [closeOnce, play, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (event: MediaQueryListEvent) => setPrefersReducedMotion(event.matches);
+    setPrefersReducedMotion(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     playHaptic('reveal');
-    const closeImmediately = () => {
-      if (didCloseRef.current) return;
-      if (meltRafRef.current !== null) cancelAnimationFrame(meltRafRef.current);
-      didCloseRef.current = true;
-      onClose();
-    };
     const tick = () => {
-      if (isMelting) return;
+      if (isMeltingRef.current) return;
       const next = Math.max(0, deadlineRef.current - Date.now());
       setRemainingMs(next);
       if (next === 0) startMelting();
     };
     const handleVisibility = () => {
-      if (document.hidden) closeImmediately();
+      if (document.hidden) closeOnce();
     };
     const timer = window.setInterval(tick, 250);
     const deadline = window.setTimeout(startMelting, displaySeconds * 1000);
-    window.addEventListener('pagehide', closeImmediately);
+    window.addEventListener('pagehide', closeOnce);
     document.addEventListener('visibilitychange', handleVisibility);
     tick();
     return () => {
       window.clearInterval(timer);
       window.clearTimeout(deadline);
       if (meltRafRef.current !== null) cancelAnimationFrame(meltRafRef.current);
-      window.removeEventListener('pagehide', closeImmediately);
+      if (reducedMotionCloseRef.current !== null) window.clearTimeout(reducedMotionCloseRef.current);
+      window.removeEventListener('pagehide', closeOnce);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [displaySeconds, onClose, startMelting, isMelting]);
+  }, [closeOnce, displaySeconds, startMelting]);
 
   const remainingSeconds = Math.ceil(remainingMs / 1000);
   const progress = Math.max(0, Math.min(1, remainingMs / (displaySeconds * 1000)));
@@ -108,7 +140,7 @@ const RevealView: React.FC<Props> = ({
     <main className="cine-page reveal-page px-4 md:px-8">
       <div className="cine-stage reveal-stage">
         <header className="product-header">
-          <button type="button" onClick={onClose} className="icon-button" aria-label={t('common.close')}>
+          <button type="button" onClick={closeOnce} className="icon-button" aria-label={t('common.close')}>
             <Icon name="close" />
           </button>
           <div className="product-header-title">
@@ -184,7 +216,7 @@ const RevealView: React.FC<Props> = ({
                 <Icon name="download" size={18} />
                 {t('reveal.saveArt')}
               </button>
-              <button type="button" className="quiet-action" onClick={onClose}>
+              <button type="button" className="quiet-action" onClick={closeOnce}>
                 {t('reveal.closeNow')}
               </button>
             </div>

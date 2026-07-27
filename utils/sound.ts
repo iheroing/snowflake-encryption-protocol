@@ -1,8 +1,10 @@
+import { withAppBase } from './appPaths';
+
 export type SoundScene = 'landing' | 'encrypt' | 'decrypt' | 'gallery' | 'afterglow' | 'idle';
 export type SoundCue = 'tap' | 'crystallize' | 'sealed' | 'share' | 'melt' | 'export' | 'switch';
 
 const STORAGE_KEY = 'snowflake:audio-enabled';
-const BGM_PATH = '/ambience.mp3';
+const BGM_PATH = withAppBase('/ambience.mp3');
 
 type EnabledListener = (enabled: boolean) => void;
 

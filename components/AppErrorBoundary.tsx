@@ -1,4 +1,5 @@
 import React from 'react';
+import { withAppBase } from '../utils/appPaths';
 
 interface State {
   hasError: boolean;
@@ -24,7 +25,7 @@ export default class AppErrorBoundary extends React.Component<React.PropsWithChi
         <p lang="en">The page could not be rendered. Reload it or return home safely.</p>
         <div className="app-failure-actions">
           <button type="button" onClick={() => window.location.reload()}>重新载入</button>
-          <a href="/">返回首页</a>
+          <a href={withAppBase()}>返回首页</a>
         </div>
       </main>
     );
